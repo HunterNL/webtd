@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Env loader 1`] = `
+Object {
+  "tracks": Array [],
+  "trains": Array [],
+}
+`;

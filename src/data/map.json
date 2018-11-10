@@ -1,0 +1,18 @@
+{
+    "entities" : [
+        {
+            "type": "end",
+            "id": 0
+        },
+        {
+            "type" : "end",
+            "id": 1
+        },
+        {
+            "type" : "track",
+            "id": 2,
+            "length" : 500,
+            "ends" : [0,1]
+        }
+    ]
+}
