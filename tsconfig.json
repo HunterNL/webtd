@@ -13,8 +13,9 @@
         ],
         "resolveJsonModule": true,
         "outDir": "dist",
-        "sourceMap": true,
-        "rootDir": "src"
+        // "sourceMap": true,
+        "rootDir": "src",
+        "inlineSourceMap": true,
     },
     "exclude": [
         "node_modules",
