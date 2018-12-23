@@ -1,18 +1,76 @@
 {
     "entities" : [
         {
-            "type": "end",
-            "id": 0
+            "type": "buffer",
+            "id": 10
         },
         {
-            "type" : "end",
-            "id": 1
+            "type" : "buffer",
+            "id": 11
+        },
+        {
+            "type": "buffer",
+            "id": 12
+        },
+        {
+            "type": "switch",
+            "id": 21,
+            "junction": {
+                "straightConnections": [[0,1]],
+                "sideConnections": [[0,3]]
+            }
+        },
+        {
+            "type": "switch",
+            "id": 22,
+            "junction": {
+                "straightConnections": [[3,4]],
+                "sideConnections": [[3,5]]
+            }
+        },
+        {
+            "type": "switch",
+            "id": 23,
+            "junction": {
+                "straightConnections": [[1,2]],
+                "sideConnections": [[2,5]]
+            }
+        },
+        {
+            "type" : "track",
+            "id": 0,
+            "length" : 500,
+            "ends" : [10,21]
+        },
+        {
+            "type" : "track",
+            "id": 1,
+            "length" : 500,
+            "ends" : [21,23]
         },
         {
             "type" : "track",
             "id": 2,
             "length" : 500,
-            "ends" : [0,1]
+            "ends" : [23,12]
+        },
+        {
+            "type" : "track",
+            "id": 3,
+            "length" : 500,
+            "ends" : [21,22]
+        },
+        {
+            "type" : "track",
+            "id": 4,
+            "length" : 500,
+            "ends" : [22,11]
+        },
+        {
+            "type" : "track",
+            "id": 5,
+            "length" : 500,
+            "ends" : [22,23]
         }
     ]
 }

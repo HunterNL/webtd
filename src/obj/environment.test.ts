@@ -1,6 +1,7 @@
-import map from "../data/map.json";
-import { loadEnvironment } from "./environment";
+import map from "./data/map.json";
+import { loadEnvironment, verifyConnections } from "./environment";
 
 test("Env loader",function() {
-    expect(loadEnvironment(map)).toMatchSnapshot();
+    const env = loadEnvironment(map);
+    expect(() => verifyConnections(env)).not.toThrow();
 })

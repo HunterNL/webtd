@@ -1,0 +1,46 @@
+{
+    "renderMap" : [
+        {
+            "type": "track",
+            "entId": 0,
+            "start" : [100,100],
+            "end" : [200,100],
+            "label" : "0"
+        },
+        {
+            "type": "track",
+            "entId": 1,
+            "start" : [200,100],
+            "end" : [600,100],
+            "label": "1"
+        },
+        {
+            "type": "track",
+            "entId": 2,
+            "start" : [600,100],
+            "end" : [700,100],
+            "label": "2"
+        },
+        {
+            "type": "track",
+            "entId": 3,
+            "start" : [200,100],
+            "end" : [400,50],
+            "label": "3"
+        },
+        {
+            "type": "track",
+            "entId": 4,
+            "start" : [400,50],
+            "end" : [700,50],
+            "label" : "4"
+        },
+        {
+            "type": "track",
+            "entId": 5,
+            "start":[400,50],
+            "end":[600,100],
+            "label":"5"
+        }
+    ]
+}
