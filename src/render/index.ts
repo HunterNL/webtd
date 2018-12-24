@@ -42,20 +42,19 @@ export type RenderMap = RenderMapping[]
 export function renderEnv(env: Environment,map: RenderMap,renderElement: SVGElement) {
     renderElement.childNodes.forEach(child => renderElement.removeChild(child));
 
+    console.log(env);
+
     
 
     map.forEach((renderMap,index) => {
         const ent = getEntityById(env.entities, renderMap.entId, isEntity);
-
-        trackIsOccupied(ent as Track, env.rides);
-
 
         const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
         line.setAttribute("x1", ""+ renderMap.start[0])
         line.setAttribute("y1", ""+ renderMap.start[1])
         line.setAttribute("x2", ""+ renderMap.end[0])
         line.setAttribute("y2", ""+ renderMap.end[1])
-        line.setAttribute("stroke", getColorForOccupationStatus(false))
+        line.setAttribute("stroke", getColorForOccupationStatus(trackIsOccupied(ent as Track, env.rides)))
         line.setAttribute("id", "" + index);
 
 

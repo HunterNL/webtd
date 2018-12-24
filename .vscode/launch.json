@@ -20,6 +20,13 @@
                 "${workspaceFolder}/dist/**/*.js"
             ],
             "protocol": "inspector"
+        },
+        {
+            "type": "chrome",
+            "request": "attach",
+            "name": "Attach to Chrome",
+            "port": 9222,
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }

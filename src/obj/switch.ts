@@ -1,9 +1,9 @@
-import { Entity } from "../interfaces/entity";
+import { Entity, getEntityById } from "../interfaces/entity";
 import { Identifier, isIdentifier, isIdentifiable } from "../interfaces/id";
 import { Junction, isJunction } from "./junction";
 import { Buffer, isBuffer } from "./buffer";
 import equals from "ramda/es/equals";
-import { Track } from "./track";
+import { Track, isTrack } from "./track";
 
 const SWITCH_ACTUATION_TIME = 3; //seconds
 
@@ -23,7 +23,11 @@ export enum SwitchState {
     Faulty
 }
 
-export type Switch = Entity & {
+export function isTrackBoundry(any: Entity): any is TrackBoundry {
+    return any.type === "switch" || any.type === "end";
+}
+
+export interface Switch extends Entity {
     type: "switch",
     targetState: SwitchState.Straight | SwitchState.Side,
     currentState: SwitchState,
@@ -75,7 +79,7 @@ export function getPathTroughSwitch(swi: Switch, trackId: Identifier): Identifie
 
 }
 
-export function resolveBoundry(track: Track, boundry: TrackBoundry) {
+export function resolveBoundry(track: Track, boundry: TrackBoundry): number | undefined {
     if(isBuffer(boundry)) return;
 
     return getPathTroughSwitch(boundry, track.id);

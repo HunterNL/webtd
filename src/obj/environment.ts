@@ -1,11 +1,11 @@
-import { Track, isTrack, trackGetStart } from "./track";
+import { Track, isTrack, trackGetStart, trackLoad, isTrackSave } from "./track";
 import { Train, isTrain } from "./train";
 import { isObject } from "../util/isObject";
 import { Identifiable, isIdentifiable, getId, Identifier } from "../interfaces/id";
 import { Entity, getEntityById, isEntity } from "../interfaces/entity";
 import { Switch, isSwitch, loadSwitch } from "./switch";
 import { Buffer, isBuffer } from "./buffer";
-import { Ride, isRide } from "./ride";
+import { Ride, isRide, loadRide, isRideSave } from "./ride";
 
 
 export type EnvironmentSave = {
@@ -29,13 +29,25 @@ export function loadEnvironment(map: unknown): Environment {
         throw new Error("Invalid save");
     }
 
-    const {entities} = map;
+    const {entities: entitiesSaves} = map;
+
+    console.log(entitiesSaves)
     
-    const tracks = entities.filter(isTrack);
-    const rides = entities.filter(isRide);
-    const switches : Switch[] = entities.filter(isSwitch).map(loadSwitch);
-    const buffers : Buffer[] = entities.filter(isBuffer);
-    
+    const buffers : Buffer[] = entitiesSaves.filter(isBuffer);
+    const switches : Switch[] = entitiesSaves.filter(isSwitch).map(loadSwitch);
+    const trains:  Train[] = entitiesSaves.filter(isTrain);
+
+    const trackBoundries = ([] as Entity[]).concat(buffers,switches);
+
+    const tracks: Track[] = entitiesSaves.filter(isTrackSave).map(trackSave => trackLoad(trackBoundries, trackSave));
+
+    const tracksAndTrains = ([] as Entity[]).concat(tracks,trains);
+
+    const rides: Ride[] = entitiesSaves.filter(isRideSave).map(rideSave => loadRide(tracksAndTrains, rideSave));    
+
+    console.log(4,rides)
+
+    const entities: Entity[] = ([] as any[]).concat(tracks,rides,switches,buffers);
 
     return {
         tracks,

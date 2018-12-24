@@ -13,6 +13,7 @@
   "author": "",
   "devDependencies": {
     "@types/jest": "^23.3.9",
+    "@types/lodash": "^4.14.119",
     "@types/ramda": "^0.26.0",
     "jest": "^23.6.0",
     "ts-jest": "^23.10.4",
@@ -25,6 +26,7 @@
   },
   "dependencies": {
     "gl-matrix": "^2.8.1",
+    "lodash": "^4.17.11",
     "ramda": "^0.25.0"
   }
 }
