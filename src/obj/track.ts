@@ -50,6 +50,21 @@ export function trackGetEnd(track: Track): TrackBoundry {
     return track.boundries[1];
 }
 
+export function trackGetOtherEnd(track: Track, boundryId: number): TrackBoundry {
+    const start = trackGetStart(track);
+    const end = trackGetEnd(track);
+
+    if(boundryId !== start.id && boundryId !== end.id) {
+        throw new Error("Given endId is not a boundry of this track");
+    }
+
+    if(boundryId === start.id) {
+        return end;
+    }
+
+    return start;
+}
+
 export function trackGetNext(entities: Entity[], track: Track) : Track | undefined {
     const boundry = trackGetEnd(track)
     const nextId = resolveBoundry(track, boundry);
@@ -66,11 +81,22 @@ export function isTrack(obj: any): obj is Track {
         isIdentifiable(obj);
 }
 
-export function trackIsOccupied(track: Track, rides: Ride[]): boolean {
-    return rides.map(t => t.situation).some(situation => situationIsOnTrack(track, situation))
+export function trackIsOccupied(tracks: Track[], track: Track, rides: Ride[]): boolean {
+    return rides.map(t => t.situation).some(situation => situationIsOnTrack(tracks, track, situation))
 }
 
 
-export function situationIsOnTrack(track: Track, position: Situation) {
+export function situationIsOnTrack(entities: Entity[], track: Track, position: Situation) {
     return position.track.id === track.id;
+}
+
+/**
+ * Gets remaining track length towards a given trackboundry
+ */
+export function getRemainingTrackLength(track: Track,remaining: number,directionId: number) {
+    const length = track.length;
+    if(directionId === trackGetStart(track).id) {
+        return 
+    }
+
 }

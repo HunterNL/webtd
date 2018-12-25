@@ -77,7 +77,8 @@
             "trainId": 7,
             "situation": {
                 "trackId": 0,
-                "position": 0
+                "remainingTrack": 200,
+                "direction": 21
             },
             "speed": 0
         },{

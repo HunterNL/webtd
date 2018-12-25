@@ -1,12 +1,13 @@
 import { Identifier } from "../interfaces/id";
-import { Track, trackGetNext } from "./track";
+import { Track, trackGetNext, trackGetOtherEnd } from "./track";
 import { isNumber } from "lodash";
 import { Switch } from "./switch";
 import { Entity } from "../interfaces/entity";
 
 export type Situation = {
     track: Track,
-    position: number,
+    remainingTrack: number,
+    direction: number
 }
 
 export type SituationSave = {
@@ -17,17 +18,18 @@ export type SituationSave = {
 export function advanceSituation(entities: Entity[], situation: Situation, movement: number) {
     const currentTrack = situation.track;
 
-    const fitsInsideCurrentTrack = (situation.position + movement) < currentTrack.length
+    const fitsInsideCurrentTrack = (situation.remainingTrack > movement);
 
     if(fitsInsideCurrentTrack) {
-        situation.position = situation.position + movement;
+        situation.remainingTrack = situation.remainingTrack - movement;
         return;
     }
+    //Else we're advancing onto another track
 
-    const roomLeftOnCurrentTrack = currentTrack.length - situation.position;
-    const overFlowRoom = movement - roomLeftOnCurrentTrack;
+    // TODO Handle very short pieces of track
+    const overFlowRoom = movement - situation.remainingTrack;
 
-    //Else' we're advancing onto another track
+    
     const nextTrack = trackGetNext(entities, currentTrack);
 
     if(!nextTrack) {
@@ -37,31 +39,35 @@ export function advanceSituation(entities: Entity[], situation: Situation, movem
     }
 
     situation.track = nextTrack;
-    situation.position = overFlowRoom
+    situation.direction = trackGetOtherEnd(nextTrack, situation.direction).id;
+    situation.remainingTrack = nextTrack.length - overFlowRoom;
 }
 
-export function createSituation(track: Track, position: number): Situation {
+export function createSituation(track: Track, remainingTrack: number, direction: number): Situation {
     return {
-        position,  track
+        remainingTrack,  track, direction
     }
 }
 
+export function situationRoomBehind(situation: Situation) {
+    return situation.track.length - situation.remainingTrack;
+}
 export function isSituationSave(any: any): any is SituationSave {
-    return isNumber(any.trackId) && isNumber(any.position);
+    return isNumber(any.trackId) && isNumber(any.remainingTrack);
 }
 
-export function situationIsValidForLength(situation: Situation, length: number): boolean {
-    const track = situation.track;
-    const position = situation.position;
-    const trackLength = track.length;
+// export function situationIsValidForLength(situation: Situation, length: number): boolean {
+//     const track = situation.track;
+//     const position = situation.position;
+//     const trackLength = track.length;
 
-    if(position>trackLength) {
-        return false; // Train front exceeds track length
-    }
+//     if(position>trackLength) {
+//         return false; // Train front exceeds track length
+//     }
 
-    if(position-length<0) {
-        return false; // Train escapes end
-    }
+//     if(position-length<0) {
+//         return false; // Train escapes end
+//     }
 
-    return true;
-}
+//     return true;
+// }

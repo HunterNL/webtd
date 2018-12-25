@@ -21,8 +21,8 @@ export function isTrain(any: any): any is Train {
     return isIdentifiable(any) && isLengthable(any) && Array.isArray((<any>any).carsets) &&(<any>any).carsets.every(isCarSet);
 }
 
-export  function trainGetLength(train: Train) {
-    return 70 //m
+export function trainGetLength(train: Train) {
+    return 200 //m
 }
 
 export function trainGetTopSpeed(train: Train) {

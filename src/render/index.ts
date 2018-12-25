@@ -2,6 +2,9 @@ import { Environment } from "../obj/environment";
 import { getEntityById, isEntity } from "../interfaces/entity";
 import { vec2 } from "gl-matrix";
 import { Track, situationIsOnTrack, trackIsOccupied } from "../obj/track";
+import { getSpanningTracks } from "../obj/ride";
+import { flatten } from "lodash";
+import { getId } from "../interfaces/id";
 
 const LABEL_OFFSET = 10;
 
@@ -42,8 +45,12 @@ export type RenderMap = RenderMapping[]
 export function renderEnv(env: Environment,map: RenderMap,renderElement: SVGElement) {
     renderElement.childNodes.forEach(child => renderElement.removeChild(child));
 
-    console.log(env);
+    const occupiedTracksArray = env.rides.map(ride => getSpanningTracks(env.entities,ride));
+    const occupiedTracksIds = flatten(occupiedTracksArray).map(getId);
 
+    function isTrackOccupied(trackId: number) {
+        return occupiedTracksIds.includes(trackId);
+    }
     
 
     map.forEach((renderMap,index) => {
@@ -54,7 +61,7 @@ export function renderEnv(env: Environment,map: RenderMap,renderElement: SVGElem
         line.setAttribute("y1", ""+ renderMap.start[1])
         line.setAttribute("x2", ""+ renderMap.end[0])
         line.setAttribute("y2", ""+ renderMap.end[1])
-        line.setAttribute("stroke", getColorForOccupationStatus(trackIsOccupied(ent as Track, env.rides)))
+        line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(ent.id)))
         line.setAttribute("id", "" + index);
 
 
