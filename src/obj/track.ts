@@ -5,13 +5,59 @@ import { TrackBoundry, resolveBoundry, isTrackBoundry } from "./switch";
 import { Situation } from "./situation";
 import { Ride } from "./ride";
 
+export type Segment = {
+    start: number,
+    end: number
+}
+
 export type Track = Identifiable & Lengthable & Entity & {
     boundries: [TrackBoundry,TrackBoundry],
     length: number
+    segments: Segment[]
 }
 
 export interface TrackSave extends Identifiable, Lengthable, Entity {
     boundries: [number, number]
+}
+
+const IDEAL_SEGMENT_SPACING = 100;
+export function generateSegments(length: number): Segment[] {
+    const midPoint = length/2;
+
+    if(length<10) {
+        return [{
+            start:0,
+            end: midPoint
+        },{
+            start:midPoint,
+            end: length
+        }]
+    }
+
+    // Two short segments at the start and end
+    const endSegments = [
+        {
+            start: 0,
+            end: 5
+        },{
+            start: length-5,
+            end: length
+        }
+    ]
+
+    const segmentCount = Math.floor((length-10)/IDEAL_SEGMENT_SPACING);
+    const segmentSize = (length-10)/segmentCount;
+
+    const midSegments = [];
+
+    for (let index = 0; index < segmentCount; index++) {
+        midSegments.push({
+            start: index+5,
+            end: index*segmentSize+5
+        })
+    }
+
+    return endSegments.concat(midSegments);
 }
 
 export function isTrackSave(any: any): any is TrackSave {
@@ -35,11 +81,12 @@ export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
         boundries: resolveBoundries(entities, trackSave.boundries),
         length: trackSave.length,
         type: "track",
+        segments: generateSegments(trackSave.length)
     }
 }
 
 export function createTrack(id: Identifier, boundries: [TrackBoundry,TrackBoundry],length:number): Track {
-    return {id,boundries,length, type : "track"}
+    return {id,boundries,length, type : "track",segments: generateSegments(length)}
 }
 
 export function trackGetStart(track: Track): TrackBoundry {

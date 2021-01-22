@@ -1,7 +1,7 @@
 import { Environment } from "../obj/environment";
 import { getEntityById, isEntity } from "../interfaces/entity";
 import { vec2 } from "gl-matrix";
-import { Track, situationIsOnTrack, trackIsOccupied } from "../obj/track";
+import { Track, situationIsOnTrack, trackIsOccupied, isTrack } from "../obj/track";
 import { getSpanningTracks } from "../obj/ride";
 import { flatten } from "lodash";
 import { getId } from "../interfaces/id";
@@ -10,6 +10,21 @@ const LABEL_OFFSET = 10;
 
 const COLOR_UNOCCUPIED="#aaa";
 const COLOR_OCCUPIED="#f5ff44"
+
+
+function getLineNormal(veca:vec2,vecb:vec2): vec2 {
+    const diff = vec2.subtract(vec2.create(),vecb,veca);
+    vec2.normalize(diff,diff);
+
+    return vec2.rotate(diff,diff,[0,0],-.5*Math.PI);   
+}
+
+function getLineAngle(veca:vec2,vecb:vec2): number {
+    const diff = vec2.subtract(vec2.create(),vecb,veca);
+    vec2.normalize(diff,diff);
+
+    return Math.atan2(diff[1], diff[0]);
+}
 
 function calculateLabelPostion(veca: vec2 ,vecb: vec2) {
     const basePosition = vec2.lerp(vec2.create(), veca, vecb, 0.5);// Base 
@@ -63,6 +78,30 @@ export function renderEnv(env: Environment,map: RenderMap,renderElement: SVGElem
         line.setAttribute("y2", ""+ renderMap.end[1])
         line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(ent.id)))
         line.setAttribute("id", "" + index);
+
+        if(isTrack(ent) && ent.segments.length > 0) {
+            ent.segments.forEach(segment => {
+                [segment.end,segment.end].forEach(segmentPoint => {
+                    const pos = segmentPoint/ent.length;
+
+                    const basePos = vec2.lerp(vec2.create(),renderMap.start,renderMap.end,pos);
+                    const normal = getLineNormal(renderMap.start,renderMap.end);
+
+                    const posA = vec2.scaleAndAdd(vec2.create(),basePos,normal,10)
+                    const posB = vec2.scaleAndAdd(vec2.create(),basePos,normal,-10)
+
+
+                    const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
+                    line.setAttribute("x1", ""+ posA[0])
+                    line.setAttribute("y1", ""+ posA[1])
+                    line.setAttribute("x2", ""+ posB[0])
+                    line.setAttribute("y2", ""+ posB[1])
+                    line.setAttribute("stroke", "#faa"),
+                    line.setAttribute("id", "" + index);
+                    renderElement.appendChild(line);
+                })
+            })
+        }
 
 
         if(renderMap.label) {

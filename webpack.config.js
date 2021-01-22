@@ -16,7 +16,8 @@ module.exports = {
         overlay: true,
         host:"127.0.0.1",
         public: "127.0.0.1",
-        disableHostCheck: true
+        disableHostCheck: true,
+        port: 8080
 
     },
     resolve: {
