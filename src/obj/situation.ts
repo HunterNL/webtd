@@ -33,7 +33,7 @@ export function advanceSituation(entities: Entity[], situation: Situation, movem
     const nextTrack = trackGetNext(entities, currentTrack);
 
     if(!nextTrack) {
-        alert("Train crashed!");
+        console.log("Train crashed");
         return;
         // TODO Handle nicer
     }

@@ -10,14 +10,24 @@ export type Segment = {
     end: number
 }
 
+
+// A track is the full lenght of track between two of either a switch or endpoint
 export type Track = Identifiable & Lengthable & Entity & {
     boundries: [TrackBoundry,TrackBoundry],
     length: number
-    segments: Segment[]
+    detectionDeviders: number[]
+    segments: Segment[],
+    renderData: {
+        start: [number,number],
+        end: [number, number]
+    }
+    
 }
 
 export interface TrackSave extends Identifiable, Lengthable, Entity {
-    boundries: [number, number]
+    detectionDeviders: number[];
+    boundries: [number, number],
+    renderData: any,
 }
 
 const IDEAL_SEGMENT_SPACING = 100;
@@ -81,13 +91,15 @@ export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
         boundries: resolveBoundries(entities, trackSave.boundries),
         length: trackSave.length,
         type: "track",
-        segments: generateSegments(trackSave.length)
+        segments: generateSegments(trackSave.length),
+        detectionDeviders: trackSave.detectionDeviders,
+        renderData: trackSave.renderData
     }
 }
 
-export function createTrack(id: Identifier, boundries: [TrackBoundry,TrackBoundry],length:number): Track {
-    return {id,boundries,length, type : "track",segments: generateSegments(length)}
-}
+// export function createTrack(id: Identifier, boundries: [TrackBoundry,TrackBoundry],length:number): Track {
+//     return {id,boundries,length, type : "track",segments: generateSegments(length)}
+// }
 
 export function trackGetStart(track: Track): TrackBoundry {
     return track.boundries[0];

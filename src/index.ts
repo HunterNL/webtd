@@ -19,7 +19,7 @@ function onDomReady() {
     }
 
     const {start, stop } = createGameLoop(env.entities, 1000, () => {
-        renderEnv(env,renderMap.renderMap as any,renderElement as any);
+        renderEnv(env ,renderElement as any);
     })
 
     start();

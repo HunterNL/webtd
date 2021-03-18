@@ -57,7 +57,7 @@ export type RenderMapping = {
 }
 export type RenderMap = RenderMapping[]
 
-export function renderEnv(env: Environment,map: RenderMap,renderElement: SVGElement) {
+export function renderEnv(env: Environment,renderElement: SVGElement) {
     renderElement.childNodes.forEach(child => renderElement.removeChild(child));
 
     const occupiedTracksArray = env.rides.map(ride => getSpanningTracks(env.entities,ride));
@@ -68,24 +68,23 @@ export function renderEnv(env: Environment,map: RenderMap,renderElement: SVGElem
     }
     
 
-    map.forEach((renderMap,index) => {
-        const ent = getEntityById(env.entities, renderMap.entId, isEntity);
+    env.tracks.forEach((track: Track ,index) => {
 
         const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
-        line.setAttribute("x1", ""+ renderMap.start[0])
-        line.setAttribute("y1", ""+ renderMap.start[1])
-        line.setAttribute("x2", ""+ renderMap.end[0])
-        line.setAttribute("y2", ""+ renderMap.end[1])
-        line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(ent.id)))
+        line.setAttribute("x1", ""+ track.renderData.start[0])
+        line.setAttribute("y1", ""+ track.renderData.start[1])
+        line.setAttribute("x2", ""+ track.renderData.end[0])
+        line.setAttribute("y2", ""+ track.renderData.end[1])
+        line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(track.id)))
         line.setAttribute("id", "" + index);
 
-        if(isTrack(ent) && ent.segments.length > 0) {
-            ent.segments.forEach(segment => {
+        // if(isTrack(ent) && ent.segments.length > 0) {
+            track.segments.forEach(segment => {
                 [segment.end,segment.end].forEach(segmentPoint => {
-                    const pos = segmentPoint/ent.length;
+                    const pos = segmentPoint/track.length;
 
-                    const basePos = vec2.lerp(vec2.create(),renderMap.start,renderMap.end,pos);
-                    const normal = getLineNormal(renderMap.start,renderMap.end);
+                    const basePos = vec2.lerp(vec2.create(),track.renderData.start,track.renderData.end,pos);
+                    const normal = getLineNormal(track.renderData.start,track.renderData.end);
 
                     const posA = vec2.scaleAndAdd(vec2.create(),basePos,normal,10)
                     const posB = vec2.scaleAndAdd(vec2.create(),basePos,normal,-10)
@@ -101,38 +100,38 @@ export function renderEnv(env: Environment,map: RenderMap,renderElement: SVGElem
                     renderElement.appendChild(line);
                 })
             })
-        }
+        // }
 
 
-        if(renderMap.label) {
-            const text = document.createElementNS("http://www.w3.org/2000/svg","text");
-            // const textPath = document.createElementNS("https://www.w3.org/2000/svg", "textPath");
+        // if(renderMap.label) {
+        //     const text = document.createElementNS("http://www.w3.org/2000/svg","text");
+        //     // const textPath = document.createElementNS("https://www.w3.org/2000/svg", "textPath");
 
-            text.innerHTML = renderMap.label
+        //     text.innerHTML = renderMap.label
 
-            const {start,end } = renderMap
+        //     const {start,end } = renderMap
 
-            const {pos,angle} = calculateLabelPostion(start,end);
+        //     const {pos,angle} = calculateLabelPostion(start,end);
 
-            const angleDegrees = angle !== 0 ? (Math.PI / angle) : 0
+        //     const angleDegrees = angle !== 0 ? (Math.PI / angle) : 0
 
-            text.setAttribute("x", pos[0])
-            text.setAttribute("y", pos[1])
+        //     text.setAttribute("x", pos[0])
+        //     text.setAttribute("y", pos[1])
 
-            text.setAttribute("transform", `rotate(${angleDegrees} ${pos[0]} ${pos[1]})`)
-            // text.setAttribute("rotate","30");
+        //     text.setAttribute("transform", `rotate(${angleDegrees} ${pos[0]} ${pos[1]})`)
+        //     // text.setAttribute("rotate","30");
             
-            // textPath.setAttribute("href", "#" + index);
+        //     // textPath.setAttribute("href", "#" + index);
 
 
 
 
-            // textPath.innerHTML="LABEL"
+        //     // textPath.innerHTML="LABEL"
 
-            // text.appendChild(textPath);
+        //     // text.appendChild(textPath);
 
-            renderElement.appendChild(text)
-        }
+        //     renderElement.appendChild(text)
+        // }
 
         renderElement.appendChild(line)
     })
