@@ -75,7 +75,7 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
     }
 
     const nextTrack = getEntityById(entities, nextTrackId, isTrack);
-    const newOffset = getOffsetFromBoundryDistance(nextTrack, nextBoundry,remainingDistance)
+    const newOffset = getOffsetFromBoundryDistance(nextTrack, nextBoundry,Math.abs(remainingDistance))
 
     situation.track = nextTrack;
     situation.offset = newOffset

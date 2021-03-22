@@ -19,73 +19,155 @@ function createTestBuffer() {
     return {id: getNewId(), type: "end"} as Buffer;
 }
 
-const [startBuffer, endBuffer] = [createTestBuffer(),createTestBuffer()]
-const simpleTrack = createTestTrack([startBuffer,endBuffer], 10);
 
-const trackSwitch : TrackSwitch = {
-    currentState : SwitchState.Straight,
-    id: getNewId(),
-    type: "switch"
-} as any;
+describe("Single track piece", function() {
+    /*
+    ┌─────────────────────────────────────────────┐
+    │                                             │
+    │  B──────────────────────────────────────B   │
+    │  0                                     10   │
+    │                                             │
+    └─────────────────────────────────────────────┘
+    */
 
-/*
-┌─────────────────────────────────────────────┐
-│                                             │
-│                          SideTrack          │
-│                       ┌─────────────────B   │
-│                       │                     │
-│                       │                     │
-│    EntryTrack         │  StraightTrack      │
-│  B────────────────────S─────────────────B   │
-│                                             │
-│                                             │
-└─────────────────────────────────────────────┘
- */
+    const [startBuffer, endBuffer] = [createTestBuffer(),createTestBuffer()]
+    const simpleTrack = createTestTrack([startBuffer,endBuffer], 10);
 
-const [entryBuffer,straightBuffer,sideBufffer] = [createTestBuffer(),createTestBuffer(),createTestBuffer()];
-// const [entryTrack,straightTrack,sideTrack] = [createTestTrack([], 10),createTestTrack([], 10),createTestTrack([], 10)]
-
-const entryTrack = createTestTrack([entryBuffer,trackSwitch], 10)
-const straightTrack = createTestTrack([trackSwitch,straightBuffer], 10)
-const sideTrack = createTestTrack([trackSwitch,sideBufffer], 10)
-
-trackSwitch.junction = {
-    straightConnections: [[entryTrack.id,straightTrack.id]],
-    sideConnections: [[entryTrack.id,sideTrack.id]]
-}
-
-const allEntities = [entryTrack,straightTrack,sideTrack,entryBuffer,straightBuffer,sideBufffer,trackSwitch];
-
-test("TrackPostion can advance forward",function() {
-    const position : TrackPosition = {offset:0,track:simpleTrack}
-
-    advanceAlongTrack([simpleTrack], position, 1)
-
-    expect(position.offset).toBe(1);
+    test("TrackPostion can advance forward",function() {
+        const position : TrackPosition = {offset:0,track:simpleTrack}
+    
+        advanceAlongTrack([simpleTrack], position, 1)
+    
+        expect(position.offset).toBe(1);
+    })
+    
+    test("TrackPostion can advance backward",function() {
+        const position : TrackPosition = {offset:1,track:simpleTrack}
+    
+        advanceAlongTrack([simpleTrack], position, -1)
+    
+        expect(position.offset).toBe(0);
+    })
+    
+    
+    test("TrackPostion can advance into a buffer and crash",function() {
+        const position : TrackPosition = {offset:1,track:simpleTrack}
+    
+        expect(() => {
+            advanceAlongTrack([simpleTrack], position, 10)
+        }).toThrowError("Buffer overrun, derailed!")
+    })
 })
 
-test("TrackPostion can advance backward",function() {
-    const position : TrackPosition = {offset:1,track:simpleTrack}
+describe("Simple switch layout", function () {
+    /*
+    ┌─────────────────────────────────────────────┐
+    │                                             │
+    │                          SideTrack          │
+    │                       ┌─────────────────B   │
+    │                       │                10   │
+    │                       │                     │
+    │    EntryTrack         │0  StraightTrack     │
+    │  B────────────────────S─────────────────B   │
+    │  0                  10|0               10   │
+    │                                             │
+    └─────────────────────────────────────────────┘
+    */
 
-    advanceAlongTrack([simpleTrack], position, -1)
 
-    expect(position.offset).toBe(0);
+    const trackSwitch : TrackSwitch = {
+        currentState : SwitchState.Straight,
+        id: getNewId(),
+        type: "switch"
+    } as any;
+
+    const [entryBuffer,straightBuffer,sideBufffer] = [createTestBuffer(),createTestBuffer(),createTestBuffer()];
+    // const [entryTrack,straightTrack,sideTrack] = [createTestTrack([], 10),createTestTrack([], 10),createTestTrack([], 10)]
+
+    const entryTrack = createTestTrack([entryBuffer,trackSwitch], 10)
+    const straightTrack = createTestTrack([trackSwitch,straightBuffer], 10)
+    const sideTrack = createTestTrack([trackSwitch,sideBufffer], 10)
+
+    trackSwitch.junction = {
+        straightConnections: [[entryTrack.id,straightTrack.id]],
+        sideConnections: [[entryTrack.id,sideTrack.id]]
+    }
+
+    const allEntities = [entryTrack,straightTrack,sideTrack,entryBuffer,straightBuffer,sideBufffer,trackSwitch];
+    
+    test("TrackPosition can advance along switches", function() {
+        const position : TrackPosition = {offset:8,track:entryTrack}
+    
+        advanceAlongTrack(allEntities,position,4);
+    
+        expect(position.offset).toBe(2);
+        expect(position.track).toBe(straightTrack);
+    })
+    
+    test("TrackPosition can reverse along switches", function() {
+        const position : TrackPosition = {offset:3,track:straightTrack}
+    
+        advanceAlongTrack(allEntities,position,-5);
+    
+        expect(position.offset).toBe(8);
+        expect(position.track).toBe(entryTrack);
+    })
+    
+    
 })
 
 
-test("TrackPostion can advance into a buffer and crash",function() {
-    const position : TrackPosition = {offset:1,track:simpleTrack}
+describe("Reverse exit track", function() {
+        /*
+    ┌─────────────────────────────────────────────┐
+    │                                             │
+    │                          SideTrack          │
+    │                       ┌─────────────────B   │
+    │                       │                10   │
+    │                       │                     │
+    │    EntryTrack         │0  StraightTrack     │
+    │  B────────────────────S─────────────────B   │
+    │  0                  10|10               0   │
+    │                                             │
+    └─────────────────────────────────────────────┘
+    */
 
-    expect(() => {
-        advanceAlongTrack([simpleTrack], position, 10)
-    }).toThrowError("Buffer overrun, derailed!")
-})
+    const trackSwitch : TrackSwitch = {
+        currentState : SwitchState.Straight,
+        id: getNewId(),
+        type: "switch"
+    } as any;
 
-test("TrackPosition can advance along switches", function() {
-    const position : TrackPosition = {offset:8,track:entryTrack}
+    const [entryBuffer,straightBuffer,sideBufffer] = [createTestBuffer(),createTestBuffer(),createTestBuffer()];
+    // const [entryTrack,straightTrack,sideTrack] = [createTestTrack([], 10),createTestTrack([], 10),createTestTrack([], 10)]
 
-    advanceAlongTrack(allEntities,position,4);
+    const entryTrack = createTestTrack([entryBuffer,trackSwitch], 10)
+    const straightTrack = createTestTrack([straightBuffer,trackSwitch], 10) // Gets reversed here
+    const sideTrack = createTestTrack([trackSwitch,sideBufffer], 10)
 
-    expect(position.offset).toBe(2);
-    expect(position.track).toBe(straightTrack);
+    trackSwitch.junction = {
+        straightConnections: [[entryTrack.id,straightTrack.id]],
+        sideConnections: [[entryTrack.id,sideTrack.id]]
+    }
+
+    const allEntities = [entryTrack,straightTrack,sideTrack,entryBuffer,straightBuffer,sideBufffer,trackSwitch];
+
+    test("TrackPosition can advance along switches", function() {
+        const position : TrackPosition = {offset:8,track:entryTrack}
+    
+        advanceAlongTrack(allEntities,position,4);
+    
+        expect(position.offset).toBe(8);
+        expect(position.track).toBe(straightTrack);
+    })
+
+    test("TrackPosition can reverse along switches", function() {
+        const position : TrackPosition = {offset:9,track:straightTrack}
+    
+        advanceAlongTrack(allEntities,position,2);
+    
+        expect(position.offset).toBe(9);
+        expect(position.track).toBe(entryTrack);
+    })
+    
 })
