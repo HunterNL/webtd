@@ -1,5 +1,5 @@
 import { Entity, getEntityById } from "../interfaces/entity";
-import { Identifier, isIdentifier, isIdentifiable } from "../interfaces/id";
+import { Identifier, isIdentifier, isIdentifiable, Identifiable } from "../interfaces/id";
 import { Junction, isJunction } from "./junction";
 import { Buffer, isBuffer } from "./buffer";
 import equals from "ramda/es/equals";
@@ -13,7 +13,7 @@ export function eq<T>(a: T) {
     }
 }
 
-export type TrackBoundry = Switch | Buffer;
+export type TrackBoundry = TrackSwitch | Buffer;
 
 export enum SwitchState {
     Straight,
@@ -27,7 +27,7 @@ export function isTrackBoundry(any: Entity): any is TrackBoundry {
     return any.type === "switch" || any.type === "end";
 }
 
-export interface Switch extends Entity {
+export interface TrackSwitch extends Entity {
     type: "switch",
     targetState: SwitchState.Straight | SwitchState.Side,
     currentState: SwitchState,
@@ -35,14 +35,14 @@ export interface Switch extends Entity {
     junction: Junction
 }
 
-export function loadSwitch({id,junction} : {id:any,junction:any}): Switch {
+export function loadSwitch({id,junction} : {id:any,junction:any}): TrackSwitch {
     if(!isIdentifier(id)) throw new Error();
     if(!isJunction(junction)) throw new Error();
 
     return createSwitch(id, junction);
 }
 
-export function createSwitch(id: Identifier, junction: Junction): Switch {
+export function createSwitch(id: Identifier, junction: Junction): TrackSwitch {
     return {
         id,
         type: "switch",
@@ -53,12 +53,12 @@ export function createSwitch(id: Identifier, junction: Junction): Switch {
     }
 }
 
-export function isSwitch(a: any): a is Switch  {
+export function isSwitch(a: any): a is TrackSwitch  {
     return isIdentifiable(a) &&
         (a as any).type === "switch";
 }
 
-export function switchGetActivePaths(swi: Switch): Array<[Identifier,Identifier]> {
+export function switchGetActivePaths(swi: TrackSwitch): Array<[Identifier,Identifier]> {
     if(swi.currentState === SwitchState.Straight) {
         return swi.junction.straightConnections
     }
@@ -67,10 +67,10 @@ export function switchGetActivePaths(swi: Switch): Array<[Identifier,Identifier]
         return swi.junction.sideConnections
     }
 
-    return [];
+    throw new Error("Unknown switch state");
 }   
 
-export function getPathTroughSwitch(swi: Switch, trackId: Identifier): Identifier | undefined {
+export function getPathTroughSwitch(swi: TrackSwitch, trackId: Identifier): Identifier | undefined {
     const paths = switchGetActivePaths(swi);
     const pathForTrack = paths.find(set => set.includes(trackId));
     if(!pathForTrack) return;

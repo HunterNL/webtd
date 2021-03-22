@@ -2,7 +2,7 @@ import { Identifiable, Identifier, isIdentifiable, isIdentifier } from "../inter
 import { Lengthable, isLengthable } from "../interfaces/lengthable";
 import { Entity, getEntityById } from "../interfaces/entity";
 import { TrackBoundry, resolveBoundry, isTrackBoundry } from "./switch";
-import { Situation } from "./situation";
+import { DIRECTION, DIRECTION_FORWARD, TrackPosition } from "./situation";
 import { Ride } from "./ride";
 
 export type Segment = {
@@ -124,6 +124,10 @@ export function trackGetOtherEnd(track: Track, boundryId: number): TrackBoundry 
     return start;
 }
 
+export function getNextBoundry(track: Track, direction: DIRECTION): TrackBoundry {
+    return (direction === DIRECTION_FORWARD ? track.boundries[1] : track.boundries[0]); //Forward = towards the last/second boundry
+}
+
 export function trackGetNext(entities: Entity[], track: Track) : Track | undefined {
     const boundry = trackGetEnd(track)
     const nextId = resolveBoundry(track, boundry);
@@ -145,7 +149,7 @@ export function trackIsOccupied(tracks: Track[], track: Track, rides: Ride[]): b
 }
 
 
-export function situationIsOnTrack(entities: Entity[], track: Track, position: Situation) {
+export function situationIsOnTrack(entities: Entity[], track: Track, position: TrackPosition) {
     return position.track.id === track.id;
 }
 
@@ -158,4 +162,15 @@ export function getRemainingTrackLength(track: Track,remaining: number,direction
         return 
     }
 
+}
+
+// TODO Handle very short pieces of track
+export function getOffsetFromBoundryDistance(track: Track, boundry: TrackBoundry, distance: number): number {
+    if(boundry.id === track.boundries[0].id) {
+        // Entering from the "front", offset is distance
+        return distance
+    } else {
+        //Entering from the "rear", offset is length - distance
+        return track.length - distance
+    }
 }

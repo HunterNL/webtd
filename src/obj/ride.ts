@@ -1,5 +1,5 @@
 import { Train, isTrain, trainGetLength } from "./train";
-import { Situation, SituationSave, isSituationSave, advanceSituation, situationRoomBehind } from "./situation";
+import { TrackPosition, SituationSave, advanceAlongTrack, DirectionalTrackPosition, isSituationSave, situationRoomBehind, DIRECTION_FORWARD, DIRECTION_BACKWARD } from "./situation";
 import { Track, isTrack, trackGetOtherEnd } from "./track";
 import { Entity, getEntityById } from "../interfaces/entity";
 import { isNumber, noop } from "lodash";
@@ -7,7 +7,7 @@ import { resolveBoundry } from "./switch";
 
 export interface Ride extends Entity {
     train: Train,
-    situation: Situation,
+    situation: DirectionalTrackPosition,
     speed: number,
 }
 
@@ -18,10 +18,10 @@ export type RideSave = Entity & {
 }
 
 export function updateRide(entities: Entity[],ride: Ride,dt:number) {
-    advanceSituation(entities, ride.situation, 100)
+    advanceAlongTrack(entities, ride.situation, 100)
 }
 
-export function rideCreate(train: Train,initialSituation: Situation, speed: number,id: number): Ride {
+export function rideCreate(train: Train,initialSituation: DirectionalTrackPosition, speed: number,id: number): Ride {
     return {
         id,
         type: "ride",
@@ -37,13 +37,13 @@ export function isRideSave(ridesave: any): ridesave is RideSave {
 
 export function loadRide(entities: Entity[], rideSave: any): Ride {
 
-    console.log("LAODRIDE")
+    console.log("Loading ride")
     return {
         id: rideSave.id,
         situation: {
-            remainingTrack: rideSave.situation.remainingTrack,
+            offset: rideSave.situation.offset,
             track: getEntityById(entities, rideSave.situation.trackId, isTrack),
-            direction: rideSave.situation.direction
+            facingForward: rideSave.situation.facingFoward
         },
         speed: rideSave.speed,
         train: getEntityById(entities, rideSave.trainId, isTrain),
@@ -65,8 +65,8 @@ export function getSpanningTracks(entities: Entity[], ride: Ride): Track[] {
     const trainLength = trainGetLength(ride.train);
 
     let currentTrack = ride.situation.track;
-    let currentForwardDirection = ride.situation.direction;
-    let currentBackDirection = trackGetOtherEnd(currentTrack, currentForwardDirection)
+    let facingForward = ride.situation.facingForward;
+    let currentBackDirection = trackGetOtherEnd(currentTrack, (facingForward ? DIRECTION_FORWARD : DIRECTION_BACKWARD));
     let trackBehind = situationRoomBehind(ride.situation)
     let underFlow = trackBehind - trainLength;
     let tempTrackId : number | undefined;

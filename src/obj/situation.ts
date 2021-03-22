@@ -1,13 +1,15 @@
-import { Identifier } from "../interfaces/id";
-import { Track, trackGetNext, trackGetOtherEnd } from "./track";
+import { getNextBoundry, getOffsetFromBoundryDistance, isTrack, Track } from "./track";
 import { isNumber } from "lodash";
-import { Switch } from "./switch";
-import { Entity } from "../interfaces/entity";
+import { resolveBoundry } from "./switch";
+import { Entity, getEntityById } from "../interfaces/entity";
 
-export type Situation = {
+export type TrackPosition = {
     track: Track,
-    remainingTrack: number,
-    direction: number
+    offset: number,
+}
+
+export type DirectionalTrackPosition = TrackPosition & {
+    facingForward: boolean;
 }
 
 export type SituationSave = {
@@ -15,45 +17,100 @@ export type SituationSave = {
     position: number
 }
 
-export function advanceSituation(entities: Entity[], situation: Situation, movement: number) {
+export type DirectionalSitationSave = SituationSave & {
+    facingFoward: boolean
+}
+
+export const DIRECTION_FORWARD = 1;
+export const DIRECTION_BACKWARD = -1;
+export type DIRECTION = typeof DIRECTION_FORWARD | typeof DIRECTION_BACKWARD;
+
+export function getDirectionForMovement(movement: number): DIRECTION {
+    if(movement > 0) {
+        return DIRECTION_FORWARD
+    }
+    if(movement < 0) {
+        return DIRECTION_BACKWARD
+    }
+    throw new Error("Movement is 0 or an invalid number");
+}
+
+export function getRemainingTrackInDirection(postition: TrackPosition, direction: DIRECTION) {
+    if(direction === DIRECTION_FORWARD) {
+        return postition.track.length - postition.offset;
+    }
+    if(direction === DIRECTION_BACKWARD) {
+        return postition.offset
+    }
+
+    throw new Error("Unkown direction");
+}
+
+export function movementFitsInsideTrack(position: TrackPosition, movement: number) {
+    const newOffset = position.offset + movement;
+
+    return newOffset >= 0 && newOffset <= position.track.length;
+}
+
+export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, movement: number) {
     const currentTrack = situation.track;
+    const remainingTrack = currentTrack.length - situation.offset + movement;
 
-    const fitsInsideCurrentTrack = (situation.remainingTrack > movement);
-
-    if(fitsInsideCurrentTrack) {
-        situation.remainingTrack = situation.remainingTrack - movement;
+    // Simple case, no switch crossing
+    if(movementFitsInsideTrack(situation, movement)) {
+        situation.offset = situation.offset + movement;
         return;
     }
-    //Else we're advancing onto another track
 
-    // TODO Handle very short pieces of track
-    const overFlowRoom = movement - situation.remainingTrack;
+    // Else we're advancing over a switch... or running a buffer
 
-    
-    const nextTrack = trackGetNext(entities, currentTrack);
+    const direction = getDirectionForMovement(movement);
+    const nextBoundry = getNextBoundry(currentTrack, direction)
+    const nextTrackId = resolveBoundry(currentTrack, nextBoundry);
+    const remainingDistance = (situation.offset + movement) % currentTrack.length;
 
-    if(!nextTrack) {
-        console.log("Train crashed");
-        return;
-        // TODO Handle nicer
+    if(!nextTrackId) {
+        // Oops
+        throw new Error("Buffer overrun, derailed!");
     }
+
+    const nextTrack = getEntityById(entities, nextTrackId, isTrack);
+    const newOffset = getOffsetFromBoundryDistance(nextTrack, nextBoundry,remainingDistance)
 
     situation.track = nextTrack;
-    situation.direction = trackGetOtherEnd(nextTrack, situation.direction).id;
-    situation.remainingTrack = nextTrack.length - overFlowRoom;
+    situation.offset = newOffset
+
+
+
+
+    // TODO Handle very short pieces of track
+    // const overFlowRoom = movement - situation.remainingTrack;
+
+    
+    // const nextTrack = trackGetNext(entities, currentTrack);
+
+    // if(!nextTrack) {
+    //     console.log("Train crashed");
+    //     return;
+    //     // TODO Handle nicer
+    // }
+
+    // situation.track = nextTrack;
+    // situation.direction = trackGetOtherEnd(nextTrack, situation.direction).id;
+    // situation.remainingTrack = nextTrack.length - overFlowRoom;
 }
 
-export function createSituation(track: Track, remainingTrack: number, direction: number): Situation {
-    return {
-        remainingTrack,  track, direction
-    }
-}
+// export function createSituation(track: Track, remainingTrack: number, direction: number): TrackPosition {
+//     return {
+//         remainingTrack,  track, direction
+//     }
+// }
 
-export function situationRoomBehind(situation: Situation) {
-    return situation.track.length - situation.remainingTrack;
+export function situationRoomBehind(situation: TrackPosition) {
+    return getRemainingTrackInDirection(situation,DIRECTION_BACKWARD)
 }
 export function isSituationSave(any: any): any is SituationSave {
-    return isNumber(any.trackId) && isNumber(any.remainingTrack);
+    return isNumber(any.trackId) && isNumber(any.offset);
 }
 
 // export function situationIsValidForLength(situation: Situation, length: number): boolean {

@@ -3,7 +3,7 @@ import { Train, isTrain } from "./train";
 import { isObject } from "../util/isObject";
 import { Identifiable, isIdentifiable, getId, Identifier } from "../interfaces/id";
 import { Entity, getEntityById, isEntity } from "../interfaces/entity";
-import { Switch, isSwitch, loadSwitch } from "./switch";
+import { TrackSwitch, isSwitch, loadSwitch } from "./switch";
 import { Buffer, isBuffer } from "./buffer";
 import { Ride, isRide, loadRide, isRideSave } from "./ride";
 
@@ -20,7 +20,7 @@ export type Environment=  {
     tracks: Track[],
     rides: Ride[],
     entities: Entity[],
-    switches: Switch[],
+    switches: TrackSwitch[],
     buffers: Buffer[],
 }
 
@@ -34,7 +34,7 @@ export function loadEnvironment(map: unknown): Environment {
     console.log(entitiesSaves)
     
     const buffers : Buffer[] = entitiesSaves.filter(isBuffer);
-    const switches : Switch[] = entitiesSaves.filter(isSwitch).map(loadSwitch);
+    const switches : TrackSwitch[] = entitiesSaves.filter(isSwitch).map(loadSwitch);
     const trains:  Train[] = entitiesSaves.filter(isTrain);
 
     const trackBoundries = ([] as Entity[]).concat(buffers,switches);
