@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "test": "jest ./src --config ./jest.json",
-    "test-debug" : "jest ./src --runInBand --config ./jest.json",
+    "test-debug": "jest ./src --runInBand --config ./jest.json",
     "build": "webpack --config webpack.config.js",
     "build-watch": "webpack --config webpack.config.js --watch",
     "serve": "webpack-dev-server --config webpack.config.js"
@@ -17,17 +17,17 @@
     "@types/lodash": "^4.14.119",
     "@types/ramda": "^0.26.0",
     "jest": "^23.6.0",
-    "ts-jest": "^23.10.4",
-    "ts-loader": "^5.3.2",
-    "tslint": "^5.11.0",
-    "typescript": "^3.2.2",
-    "webpack": "^4.28.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.12"
+    "ts-jest": "^23.10.5",
+    "ts-loader": "^5.4.5",
+    "tslint": "^5.20.1",
+    "typescript": "^3.9.9",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
     "gl-matrix": "^2.8.1",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "ramda": "^0.25.0"
   }
 }

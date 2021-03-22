@@ -3,13 +3,13 @@ var path = require("path");
 module.exports = {
     mode: "development",
     entry: './src/index.ts',
-    devtool: 'inline-source-map',
+    devtool: 'evel-source-map',
     module: {
-    rules: [{
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/
-    }]
+        rules: [{
+            test: /\.tsx?$/,
+            use: 'ts-loader',
+            exclude: /node_modules/
+        }]
     },
     devServer: {
         contentBase: './bundle',

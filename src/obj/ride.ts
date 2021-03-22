@@ -60,27 +60,52 @@ export function isRide(any: any): any is Ride {
     return (isTrain(any.train) && typeof any.speed === "number");
 }
 
+// Todo: Proper support for spanning multiple tracks
 export function getSpanningTracks(entities: Entity[], ride: Ride): Track[] {
-    const returnTracks = [];
+    
+
+    const currentPosition = ride.situation
+    const currentTrack = currentPosition.track;
     const trainLength = trainGetLength(ride.train);
 
-    let currentTrack = ride.situation.track;
-    let facingForward = ride.situation.facingForward;
-    let currentBackDirection = trackGetOtherEnd(currentTrack, (facingForward ? DIRECTION_FORWARD : DIRECTION_BACKWARD));
-    let trackBehind = situationRoomBehind(ride.situation)
-    let underFlow = trackBehind - trainLength;
-    let tempTrackId : number | undefined;
-    returnTracks.push(currentTrack);
+    const returnTracks = [currentTrack]
 
-
-    if(underFlow < 0) {
-        const trackBehindId = resolveBoundry(currentTrack,currentBackDirection);
-        if(typeof trackBehindId === "undefined") {
-            throw new Error("Train crashed");
-        }
-        const behindTrack = getEntityById(entities,trackBehindId,isTrack);
-        returnTracks.push(behindTrack);
+    const seeker : TrackPosition = {
+        offset: currentPosition.offset,
+        track: currentPosition.track
     }
+
+    advanceAlongTrack(entities,seeker, currentPosition.facingForward ? -trainLength : trainLength);
+
+    const tailTrack = seeker.track;
+
+    if(tailTrack.id !== currentTrack.id) {
+        returnTracks.push(tailTrack);
+    }
+
+
+    return returnTracks;
+    
+    // let currentTrack = ride.situation.track;
+    // let facingForward = ride.situation.facingForward;
+
+    // let boundryBehind = (facingForward ? currentTrack.boundries[0] : currentTrack.boundries[1]);
+
+    // let currentBackDirection = trackGetOtherEnd(currentTrack, (facingForward ? DIRECTION_FORWARD : DIRECTION_BACKWARD));
+    // let trackBehind = situationRoomBehind(ride.situation)
+    // let underFlow = trackBehind - trainLength;
+    // let tempTrackId : number | undefined;
+    // returnTracks.push(currentTrack);
+
+
+    // if(underFlow < 0) {
+    //     const trackBehindId = resolveBoundry(currentTrack,currentBackDirection);
+    //     if(typeof trackBehindId === "undefined") {
+    //         throw new Error("Train crashed");
+    //     }
+    //     const behindTrack = getEntityById(entities,trackBehindId,isTrack);
+    //     returnTracks.push(behindTrack);
+    // }
 
     // while(underFlow > 0) {
     //     currentBackDirection = trackGetOtherEnd(currentTrack, currentForwardDirection);

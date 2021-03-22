@@ -101,8 +101,8 @@
             "trainId": 7,
             "situation": {
                 "trackId": 0,
-                "remainingTrack": 200,
-                "direction": 21
+                "offset": 300,
+                "direction": 1
             },
             "speed": 0
         },{

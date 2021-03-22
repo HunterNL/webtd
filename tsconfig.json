@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "ES2020",
         "target": "es2016",
         "strict": true,
         "noImplicitAny": true,
@@ -11,11 +11,11 @@
             "es2018",
             "dom"
         ],
-        "resolveJsonModule": true,
+        // "resolveJsonModule": true,
         "outDir": "dist",
-        // "sourceMap": true,
+        "sourceMap": true,
         "rootDir": "src",
-        "inlineSourceMap": true,
+        // "inlineSourceMap": true,
     },
     "exclude": [
         "node_modules",

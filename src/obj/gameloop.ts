@@ -9,9 +9,8 @@ export function createGameLoop(entities: Entity[],updateInterval:number,postUpda
 
 
     function loop(dt: number) {
-        console.log("LOOP START")
+        console.log("Loop start")
         entities.filter(isRide).forEach(ride => updateRide(entities,ride,dt))
-        console.log("LOOP END")
     }
 
     function loopWrapper() {
