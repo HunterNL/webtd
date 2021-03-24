@@ -1,15 +1,17 @@
 import { Environment } from "../obj/environment";
-import { getEntityById, isEntity } from "../interfaces/entity";
-import { vec2 } from "gl-matrix";
-import { Track, situationIsOnTrack, trackIsOccupied, isTrack } from "../obj/track";
+import { Entity, getEntityById, isEntity } from "../interfaces/entity";
+import { Track, situationIsOnTrack, trackIsOccupied, isTrack, resolveBoundries } from "../obj/track";
 import { getSpanningTracks } from "../obj/ride";
 import { flatten } from "lodash";
 import { getId } from "../interfaces/id";
+import { vec2 } from "gl-matrix";
 
 const LABEL_OFFSET = 10;
 
 const COLOR_UNOCCUPIED="#aaa";
 const COLOR_OCCUPIED="#f5ff44"
+
+
 
 
 function getLineNormal(veca:vec2,vecb:vec2): vec2 {
@@ -57,25 +59,62 @@ export type RenderMapping = {
 }
 export type RenderMap = RenderMapping[]
 
-export function renderEnv(env: Environment,renderElement: SVGElement) {
-    renderElement.childNodes.forEach(child => renderElement.removeChild(child));
+function isTrackOccupied(trackId: number, occupiedTracksIds: number[]) {
+    return occupiedTracksIds.includes(trackId);
+}
 
-    const occupiedTracksArray = env.rides.map(ride => getSpanningTracks(env.entities,ride));
-    const occupiedTracksIds = flatten(occupiedTracksArray).map(getId);
+function renderDebugIds(entities: Entity[], containingElement: SVGGElement) {
+    entities.forEach(ent => {
+        if(!ent.renderData) return;
 
-    function isTrackOccupied(trackId: number) {
-        return occupiedTracksIds.includes(trackId);
-    }
-    
+        const position = vec2.create();
+        
+        if(ent.renderData.start && ent.renderData.end) {
+            vec2.lerp(position,ent.renderData.start,ent.renderData.end,0.5);
+        } else if (ent.renderData.position) {
+            vec2.copy(position, ent.renderData.position);
+        } else {
+            return;
+        }
 
-    env.tracks.forEach((track: Track ,index) => {
+        if(typeof ent.id === "undefined") {
+            return;
+        }
+
+        const svgText = document.createElementNS("http://www.w3.org/2000/svg", "text")
+        svgText.innerHTML = ent.id + "",
+        svgText.setAttribute("x", position[0] + "");
+        svgText.setAttribute("y", position[1] - 10 + "");
+        svgText.setAttribute("text-anchor", "middle"); //Centering horizontally
+
+        containingElement.appendChild(svgText);
+    })
+}
+
+function renderTracks(tracks: Track[],occupiedTrackIds: number[], containingElement: SVGElement) {
+
+    tracks.forEach((track: Track ,index) => {
+        const [startBoundry, endBoundry] = track.boundries;
+
+        if(!startBoundry.renderData || !endBoundry.renderData) {
+            throw new Error("Boundry lacks renderData");
+        }
+
+
+        if(!startBoundry.renderData.position || !endBoundry.renderData.position) {
+            throw new Error("Boundry lacks proper renderData");
+        }
+
+        const startPos = startBoundry.renderData.position;
+        const endPos = endBoundry.renderData.position;
+
 
         const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
-        line.setAttribute("x1", ""+ track.renderData.start[0])
-        line.setAttribute("y1", ""+ track.renderData.start[1])
-        line.setAttribute("x2", ""+ track.renderData.end[0])
-        line.setAttribute("y2", ""+ track.renderData.end[1])
-        line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(track.id)))
+        line.setAttribute("x1", ""+ startPos[0])
+        line.setAttribute("y1", ""+ startPos[1])
+        line.setAttribute("x2", ""+ endPos[0])
+        line.setAttribute("y2", ""+ endPos[1])
+        line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(track.id, occupiedTrackIds)))
         line.setAttribute("id", "" + index);
 
         // if(isTrack(ent) && ent.segments.length > 0) {
@@ -83,11 +122,13 @@ export function renderEnv(env: Environment,renderElement: SVGElement) {
                 [segment.end,segment.end].forEach(segmentPoint => {
                     const pos = segmentPoint/track.length;
 
-                    const basePos = vec2.lerp(vec2.create(),track.renderData.start,track.renderData.end,pos);
-                    const normal = getLineNormal(track.renderData.start,track.renderData.end);
+                    const DIVIDER_LENGTH = 8;
 
-                    const posA = vec2.scaleAndAdd(vec2.create(),basePos,normal,10)
-                    const posB = vec2.scaleAndAdd(vec2.create(),basePos,normal,-10)
+                    const basePos = vec2.lerp(vec2.create(),startPos,endPos,pos);
+                    const normal = getLineNormal(startPos,endPos);
+
+                    const posA = vec2.scaleAndAdd(vec2.create(),basePos,normal,DIVIDER_LENGTH)
+                    const posB = vec2.scaleAndAdd(vec2.create(),basePos,normal,-DIVIDER_LENGTH)
 
 
                     const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
@@ -95,45 +136,32 @@ export function renderEnv(env: Environment,renderElement: SVGElement) {
                     line.setAttribute("y1", ""+ posA[1])
                     line.setAttribute("x2", ""+ posB[0])
                     line.setAttribute("y2", ""+ posB[1])
-                    line.setAttribute("stroke", "#faa"),
+                    line.setAttribute("stroke", COLOR_UNOCCUPIED),
+                    line.setAttribute("stroke-width", "1.5"),
+
                     line.setAttribute("id", "" + index);
-                    renderElement.appendChild(line);
+                    containingElement.appendChild(line);
                 })
             })
-        // }
 
-
-        // if(renderMap.label) {
-        //     const text = document.createElementNS("http://www.w3.org/2000/svg","text");
-        //     // const textPath = document.createElementNS("https://www.w3.org/2000/svg", "textPath");
-
-        //     text.innerHTML = renderMap.label
-
-        //     const {start,end } = renderMap
-
-        //     const {pos,angle} = calculateLabelPostion(start,end);
-
-        //     const angleDegrees = angle !== 0 ? (Math.PI / angle) : 0
-
-        //     text.setAttribute("x", pos[0])
-        //     text.setAttribute("y", pos[1])
-
-        //     text.setAttribute("transform", `rotate(${angleDegrees} ${pos[0]} ${pos[1]})`)
-        //     // text.setAttribute("rotate","30");
-            
-        //     // textPath.setAttribute("href", "#" + index);
-
-
-
-
-        //     // textPath.innerHTML="LABEL"
-
-        //     // text.appendChild(textPath);
-
-        //     renderElement.appendChild(text)
-        // }
-
-        renderElement.appendChild(line)
+            containingElement.appendChild(line);
     })
+}
+
+export function renderEnv(env: Environment,renderElement: SVGElement) {
+    renderElement.childNodes.forEach(child => renderElement.removeChild(child));
+
+    const trackGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const textGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+    const occupiedTracksArray = env.rides.map(ride => getSpanningTracks(env.entities,ride));
+    const occupiedTracksIds = flatten(occupiedTracksArray).map(getId);
+
+
+    renderDebugIds(env.entities, textGroup)
+    renderTracks(env.tracks, occupiedTracksIds, trackGroup)
+
+    renderElement.appendChild(trackGroup);
+    renderElement.appendChild(textGroup);
 
 }

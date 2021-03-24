@@ -6,7 +6,8 @@ import { isObject } from "../util/isObject";
 export type EntityType = "train" | "track" | "end" | "switch" | "ride";
 
 export type Entity = Identifiable & {
-    type: EntityType
+    type: EntityType;
+    renderData?: any
 }
 
 export function isEntity(a: any): a is Entity {

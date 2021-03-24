@@ -35,14 +35,14 @@ export interface TrackSwitch extends Entity {
     junction: Junction
 }
 
-export function loadSwitch({id,junction} : {id:any,junction:any}): TrackSwitch {
+export function loadSwitch({id,junction, renderData} : {id:any,junction:any, renderData?: any}): TrackSwitch {
     if(!isIdentifier(id)) throw new Error();
     if(!isJunction(junction)) throw new Error();
 
-    return createSwitch(id, junction);
+    return createSwitch(id, junction, renderData);
 }
 
-export function createSwitch(id: Identifier, junction: Junction): TrackSwitch {
+export function createSwitch(id: Identifier, junction: Junction, renderData: any): TrackSwitch {
     return {
         id,
         type: "switch",
@@ -50,6 +50,7 @@ export function createSwitch(id: Identifier, junction: Junction): TrackSwitch {
         currentState: SwitchState.Straight,
         actuationStartTime: new Date(),
         junction,
+        renderData
     }
 }
 

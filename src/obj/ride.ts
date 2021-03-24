@@ -18,7 +18,7 @@ export type RideSave = Entity & {
 }
 
 export function updateRide(entities: Entity[],ride: Ride,dt:number) {
-    advanceAlongTrack(entities, ride.situation, 100)
+    advanceAlongTrack(entities, ride.situation, 0)
 }
 
 export function rideCreate(train: Train,initialSituation: DirectionalTrackPosition, speed: number,id: number): Ride {

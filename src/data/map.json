@@ -2,98 +2,99 @@
     "entities" : [
         {
             "type": "end",
-            "id": 10
+            "comment": "start",
+            "id": 10,
+            "renderData": {
+                "position": [100,100]
+            }
         },
         {
             "type" : "end",
-            "id": 11
+            "comment": "upper end",
+            "id": 11,
+            "renderData": {
+                "position": [700,50]
+            }
         },
         {
             "type": "end",
-            "id": 12
+            "id": 12,
+            "comment": "lower end",
+            "renderData": {
+                "position": [700,100]
+            }
         },
         {
             "type": "switch",
             "id": 21,
+            "comment": "initial switch",
             "junction": {
                 "straightConnections": [[0,1]],
                 "sideConnections": [[0,3]]
+            },
+            "renderData": {
+                "position": [200,100]
             }
         },
         {
             "type": "switch",
+            "comment": "top switch",
             "id": 22,
             "junction": {
                 "straightConnections": [[3,4]],
                 "sideConnections": [[3,5]]
+            },
+            "renderData": {
+                "position": [400,50]
             }
         },
         {
             "type": "switch",
+            "comment": "rejoin switch",
             "id": 23,
             "junction": {
                 "straightConnections": [[1,2]],
                 "sideConnections": [[2,5]]
+            },
+            "renderData": {
+                "position": [600,100]
             }
+            
         },
         {
             "type" : "track",
             "id": 0,
             "length" : 500,
-            "renderData": {
-                "start" : [100,100],
-                "end" : [200,100]
-            },
             "boundries" : [10,21]
         },
         {
             "type" : "track",
             "id": 1,
             "length" : 500,
-            "renderData": {
-                "start" : [200,100],
-                "end" : [600,100]
-            },
             "boundries" : [21,23]
         },
         {
             "type" : "track",
             "id": 2,
             "length" : 500,
-            "renderData": {
-                "start" : [600,100],
-                "end" : [700,100]
-            },
             "boundries" : [23,12]
         },
         {
             "type" : "track",
             "id": 3,
             "length" : 500,
-            "renderData": {
-                "start" : [200,100],
-                "end" : [400,50]
-            },
             "boundries" : [21,22]
         },
         {
             "type" : "track",
             "id": 4,
             "length" : 500,
-            "renderData": {
-                "start" : [400,50],
-                "end" : [700,50]
-            },
             "boundries" : [22,11]
         },
         {
             "type" : "track",
             "id": 5,
             "length" : 500,
-            "renderData": {
-                "start":[400,50],
-                "end":[600,100]
-            },
             "boundries" : [22,23]
         },{
             "type": "ride",

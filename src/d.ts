@@ -3,10 +3,10 @@ declare module "*.json" {
     export default value;
 }
 
-declare module "gl-matrix";
+// declare module "gl-matrix";
 
-type vec2 = [number,number]
+// type vec2 = [number,number]
 
-// interface Array<T> {
-//     filter<U extends T>(pred: (a: T) => a is U): U[];
-// }
+// // interface Array<T> {
+// //     filter<U extends T>(pred: (a: T) => a is U): U[];
+// // }
