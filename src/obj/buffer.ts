@@ -5,8 +5,11 @@ export interface Buffer extends Entity {
     type: "end";
 };
 
-export function createEnd(id:number) {
-    return 
+export function createBuffer(id:number): Buffer {
+    return {
+        id,
+        type: "end",
+    }
 }
 
 export function isBuffer(any: any): any is Buffer {

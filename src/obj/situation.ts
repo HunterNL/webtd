@@ -2,6 +2,8 @@ import { getNextBoundry, getOffsetFromBoundryDistance, isTrack, Track } from "./
 import { isNumber } from "lodash";
 import { resolveBoundry } from "./switch";
 import { Entity, getEntityById } from "../interfaces/entity";
+import { TrackSpan } from "./trackSpan";
+import { createSegment, TrackSegment } from "./trackSegment";
 
 export type TrackPosition = {
     track: Track,
@@ -52,14 +54,25 @@ export function movementFitsInsideTrack(position: TrackPosition, movement: numbe
     return newOffset >= 0 && newOffset <= position.track.length;
 }
 
-export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, movement: number) {
+/***   
+ * Moves the given situation object by the given object, taking switch positions into account
+ */
+export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, movement: number): TrackSpan {
+    const startPosition = situation;
+
+
     const currentTrack = situation.track;
-    const remainingTrack = currentTrack.length - situation.offset + movement;
 
     // Simple case, no switch crossing
     if(movementFitsInsideTrack(situation, movement)) {
-        situation.offset = situation.offset + movement;
-        return;
+        return {
+            startPosition: situation,
+            endPosition: {
+                offset: situation.offset + movement,
+                track: situation.track,
+            },
+            segments: []
+        }
     }
 
     // Else we're advancing over a switch... or running a buffer
@@ -79,6 +92,17 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
 
     situation.track = nextTrack;
     situation.offset = newOffset
+
+    const endPosition: TrackPosition = {
+        offset: newOffset,
+        track: nextTrack
+    }
+
+    return {
+        startPosition,
+        endPosition,
+        segments: []
+    }
 
 
 

@@ -5,6 +5,7 @@ import { getSpanningTracks } from "../obj/ride";
 import { flatten } from "lodash";
 import { getId } from "../interfaces/id";
 import { vec2 } from "gl-matrix";
+import { throwSwitch, TrackSwitch } from "../obj/switch";
 
 const LABEL_OFFSET = 10;
 
@@ -148,20 +149,46 @@ function renderTracks(tracks: Track[],occupiedTrackIds: number[], containingElem
     })
 }
 
+function createSVGElement<K extends keyof SVGElementTagNameMap>(elementName: K): SVGElementTagNameMap[K] {
+    return document.createElementNS("http://www.w3.org/2000/svg", elementName);
+}
+
 export function renderEnv(env: Environment,renderElement: SVGElement) {
     renderElement.childNodes.forEach(child => renderElement.removeChild(child));
 
-    const trackGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    const textGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const trackGroup = createSVGElement("g")
+    const textGroup = createSVGElement("g");
+    const interactableGroup = createSVGElement("g");
 
     const occupiedTracksArray = env.rides.map(ride => getSpanningTracks(env.entities,ride));
     const occupiedTracksIds = flatten(occupiedTracksArray).map(getId);
 
-
     renderDebugIds(env.entities, textGroup)
     renderTracks(env.tracks, occupiedTracksIds, trackGroup)
+    renderSwitchInteractables(env.switches, interactableGroup);
+
 
     renderElement.appendChild(trackGroup);
     renderElement.appendChild(textGroup);
+    renderElement.appendChild(interactableGroup)
 
+}
+
+function renderSwitchInteractables(switches: TrackSwitch[], interactableGroup: SVGGElement) {
+    switches.forEach(trackSwitch => {
+        const circle = createSVGElement("circle");
+        circle.setAttribute("cx", trackSwitch.renderData.position[0]);
+        circle.setAttribute("cy", trackSwitch.renderData.position[1]);
+        circle.setAttribute("r", "10");
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke-width", "1");
+        circle.setAttribute("stroke", COLOR_UNOCCUPIED)
+
+        circle.addEventListener("click", () => {
+            throwSwitch(trackSwitch);
+        })
+
+
+        interactableGroup.appendChild(circle);
+    })
 }

@@ -18,7 +18,8 @@ export type RideSave = Entity & {
 }
 
 export function updateRide(entities: Entity[],ride: Ride,dt:number) {
-    advanceAlongTrack(entities, ride.situation, 0)
+    advanceAlongTrack(entities, ride.situation, 1)
+    console.log(ride.situation.track.id,ride.situation.offset)
 }
 
 export function rideCreate(train: Train,initialSituation: DirectionalTrackPosition, speed: number,id: number): Ride {
@@ -37,7 +38,6 @@ export function isRideSave(ridesave: any): ridesave is RideSave {
 
 export function loadRide(entities: Entity[], rideSave: any): Ride {
 
-    console.log("Loading ride")
     return {
         id: rideSave.id,
         situation: {

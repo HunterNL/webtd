@@ -4,11 +4,8 @@ import { Entity, getEntityById } from "../interfaces/entity";
 import { TrackBoundry, resolveBoundry, isTrackBoundry } from "./switch";
 import { DIRECTION, DIRECTION_FORWARD, TrackPosition } from "./situation";
 import { Ride } from "./ride";
+import { TrackSegment } from "./trackSegment";
 
-export type Segment = {
-    start: number,
-    end: number
-}
 
 
 // A track is the full lenght of track between two of either a switch or endpoint
@@ -16,12 +13,24 @@ export type Track = Identifiable & Lengthable & Entity & {
     boundries: [TrackBoundry,TrackBoundry],
     length: number
     detectionDeviders: number[]
-    segments: Segment[],
-    renderData: {
+    segments: TrackSegment[],
+    renderData?: {
         start: [number,number],
         end: [number, number]
-    }
+    },
+    type: "track"
     
+}
+
+export function createTrack(id: number, startBoundry: TrackBoundry, endBoundry: TrackBoundry, length: number): Track {
+    return {
+        boundries: [startBoundry,endBoundry],
+        detectionDeviders: [],
+        id,
+        length,
+        segments: [],
+        type: "track"
+    }
 }
 
 export interface TrackSave extends Identifiable, Lengthable, Entity {
@@ -31,39 +40,45 @@ export interface TrackSave extends Identifiable, Lengthable, Entity {
 }
 
 const IDEAL_SEGMENT_SPACING = 100;
-export function generateSegments(length: number): Segment[] {
+export function generateSegments(length: number, trackId: number): TrackSegment[] {
     const midPoint = length/2;
 
     if(length<10) {
         return [{
+            trackId,
             start:0,
             end: midPoint
         },{
+            trackId,
             start:midPoint,
             end: length
         }]
     }
 
     // Two short segments at the start and end
-    const endSegments = [
+    const endSegments : TrackSegment []= [
         {
             start: 0,
-            end: 5
+            end: 5,
+            trackId
+
         },{
             start: length-5,
-            end: length
+            end: length,
+            trackId
         }
     ]
 
     const segmentCount = Math.floor((length-10)/IDEAL_SEGMENT_SPACING);
     const segmentSize = (length-10)/segmentCount;
 
-    const midSegments = [];
+    const midSegments : TrackSegment[] = [];
 
     for (let index = 0; index < segmentCount; index++) {
         midSegments.push({
             start: index+5,
-            end: index*segmentSize+5
+            end: index*segmentSize+5,
+            trackId
         })
     }
 
@@ -91,7 +106,7 @@ export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
         boundries: resolveBoundries(entities, trackSave.boundries),
         length: trackSave.length,
         type: "track",
-        segments: generateSegments(trackSave.length),
+        segments: generateSegments(trackSave.length, trackSave.id),
         detectionDeviders: trackSave.detectionDeviders,
         renderData: trackSave.renderData
     }

@@ -29,9 +29,9 @@ export function isTrackBoundry(any: Entity): any is TrackBoundry {
 
 export interface TrackSwitch extends Entity {
     type: "switch",
-    targetState: SwitchState.Straight | SwitchState.Side,
+    //targetState: SwitchState.Straight | SwitchState.Side,
     currentState: SwitchState,
-    actuationStartTime: Date,
+    //actuationStartTime: Date,
     junction: Junction
 }
 
@@ -46,9 +46,9 @@ export function createSwitch(id: Identifier, junction: Junction, renderData: any
     return {
         id,
         type: "switch",
-        targetState: SwitchState.Straight,
+        // targetState: SwitchState.Straight,
         currentState: SwitchState.Straight,
-        actuationStartTime: new Date(),
+        // actuationStartTime: new Date(),
         junction,
         renderData
     }
@@ -70,6 +70,18 @@ export function switchGetActivePaths(swi: TrackSwitch): Array<[Identifier,Identi
 
     throw new Error("Unknown switch state");
 }   
+
+export function throwSwitch(trackSwitch: TrackSwitch) {
+    if(trackSwitch.currentState === SwitchState.Straight) {
+        trackSwitch.currentState = SwitchState.Side
+    }
+
+    if(trackSwitch.currentState == SwitchState.Side) {
+        trackSwitch.currentState = SwitchState.Straight
+    }
+
+    throw new Error("Tried to throw switch in unknown state");
+}
 
 export function getPathTroughSwitch(swi: TrackSwitch, trackId: Identifier): Identifier | undefined {
     const paths = switchGetActivePaths(swi);

@@ -30,8 +30,6 @@ export function loadEnvironment(map: unknown): Environment {
     }
 
     const {entities: entitiesSaves} = map;
-
-    console.log(entitiesSaves)
     
     const buffers : Buffer[] = entitiesSaves.filter(isBuffer);
     const switches : TrackSwitch[] = entitiesSaves.filter(isSwitch).map(loadSwitch);
@@ -44,8 +42,6 @@ export function loadEnvironment(map: unknown): Environment {
     const tracksAndTrains = ([] as Entity[]).concat(tracks,trains);
 
     const rides: Ride[] = entitiesSaves.filter(isRideSave).map(rideSave => loadRide(tracksAndTrains, rideSave));    
-
-    console.log(4,rides)
 
     const entities: Entity[] = ([] as any[]).concat(tracks,rides,switches,buffers);
 
