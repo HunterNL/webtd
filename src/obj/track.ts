@@ -1,4 +1,4 @@
-import { Identifiable, Identifier, isIdentifiable, isIdentifier } from "../interfaces/id";
+import { getId, Identifiable, Identifier, isIdentifiable, isIdentifier } from "../interfaces/id";
 import { Lengthable, isLengthable } from "../interfaces/lengthable";
 import { Entity, getEntityById } from "../interfaces/entity";
 import { TrackBoundry, resolveBoundry, isTrackBoundry } from "./switch";
@@ -31,6 +31,20 @@ export function createTrack(id: number, startBoundry: TrackBoundry, endBoundry: 
         segments: [],
         type: "track"
     }
+}
+
+export function getBoundryPosition(track: Track, boundryId: number): number {
+    const [entryBoundryId,exitBoundryId] = track.boundries.map(getId);
+
+    if(boundryId === entryBoundryId) {
+        return 0
+    }
+
+    if(boundryId === exitBoundryId) {
+        return track.length;
+    }
+
+    throw new Error("Unknown boundryId");
 }
 
 export interface TrackSave extends Identifiable, Lengthable, Entity {

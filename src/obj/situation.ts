@@ -1,4 +1,4 @@
-import { getNextBoundry, getOffsetFromBoundryDistance, isTrack, Track } from "./track";
+import { getBoundryPosition, getNextBoundry, getOffsetFromBoundryDistance, isTrack, Track } from "./track";
 import { isNumber } from "lodash";
 import { resolveBoundry } from "./switch";
 import { Entity, getEntityById } from "../interfaces/entity";
@@ -54,55 +54,103 @@ export function movementFitsInsideTrack(position: TrackPosition, movement: numbe
     return newOffset >= 0 && newOffset <= position.track.length;
 }
 
+/**
+ * Get absolute distance to boundry from current position
+ * @param position 
+ * @param boundryId 
+ */
+function getDistanceToBoundry(position: TrackPosition, boundryId: number): number {
+    const [entryBoundry, exitBoundry] = position.track.boundries;
+
+    if(boundryId === entryBoundry.id) {
+        return position.offset
+    } else if (boundryId === exitBoundry.id) {
+        return position.track.length - position.offset;
+    } 
+
+    throw new Error("No boundry with id " + boundryId);
+}
+
 /***   
  * Moves the given situation object by the given object, taking switch positions into account
  */
 export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, movement: number): TrackSpan {
-    const startPosition = situation;
+    const segments: TrackSegment[] = []; // For returning
 
-
-    const currentTrack = situation.track;
-
-    // Simple case, no switch crossing
-    if(movementFitsInsideTrack(situation, movement)) {
-        return {
-            startPosition: situation,
-            endPosition: {
-                offset: situation.offset + movement,
-                track: situation.track,
-            },
-            segments: []
-        }
+    /**
+     * This isn't frozen, gets updated in the loop below
+     */
+    const currentPosition : TrackPosition  = {
+        offset: situation.offset,
+        track: situation.track
     }
+    let movementLeft = movement;
+
+    while(!movementFitsInsideTrack(currentPosition, movementLeft)) {
+        // Figure out the next boundry we're gonna hit
+        const direction = getDirectionForMovement(movement);
+        const nextBoundry = getNextBoundry(currentPosition.track, direction);
+        const distanceToBoundry = getDistanceToBoundry(currentPosition, nextBoundry.id);
+        const nextTrackId = resolveBoundry(currentPosition.track,nextBoundry);
+        
+        if(!nextTrackId) {
+            // Oops
+            throw new Error("Buffer overrun, derailed!");
+        }
+
+        const nextTrack = getEntityById(entities, nextTrackId, isTrack);
+
+        // Save the segment we "traveled"
+        const segment = createSegment(currentPosition.track.id,currentPosition.offset,currentPosition.offset+distanceToBoundry)
+        segments.push(segment);
+
+        // And advance to the next track.
+        currentPosition.offset = getBoundryPosition(nextTrack, nextBoundry.id);
+        currentPosition.track = nextTrack;
+
+        console.log(distanceToBoundry, movementLeft)
+
+        // And adjust our movement
+        movementLeft = movementLeft - distanceToBoundry;
+    }
+    // At this point we're left inside a single track
+
+    // const segment = createSegment()
+
+    const segment = createSegment(currentPosition.track.id,currentPosition.offset,currentPosition.offset+movementLeft);
+
+    segments.push(segment);
+
+    currentPosition.offset = currentPosition.offset + movementLeft;
+
+    return {
+        startPosition: situation,
+        endPosition: currentPosition,
+        segments
+    }
+    
+}
+
 
     // Else we're advancing over a switch... or running a buffer
 
-    const direction = getDirectionForMovement(movement);
-    const nextBoundry = getNextBoundry(currentTrack, direction)
-    const nextTrackId = resolveBoundry(currentTrack, nextBoundry);
-    const remainingDistance = (situation.offset + movement) % currentTrack.length;
+    // const nextTrackId = resolveBoundry(currentTrack, nextBoundry);
+    // const remainingDistance = (situation.offset + movement) % currentTrack.length;
 
-    if(!nextTrackId) {
-        // Oops
-        throw new Error("Buffer overrun, derailed!");
-    }
 
-    const nextTrack = getEntityById(entities, nextTrackId, isTrack);
-    const newOffset = getOffsetFromBoundryDistance(nextTrack, nextBoundry,Math.abs(remainingDistance))
+    // const nextTrack = getEntityById(entities, nextTrackId, isTrack);
+    // const newOffset = getOffsetFromBoundryDistance(nextTrack, nextBoundry,Math.abs(remainingDistance))
 
-    situation.track = nextTrack;
-    situation.offset = newOffset
+    // const endPosition: TrackPosition = {
+    //     offset: newOffset,
+    //     track: nextTrack
+    // }
 
-    const endPosition: TrackPosition = {
-        offset: newOffset,
-        track: nextTrack
-    }
-
-    return {
-        startPosition,
-        endPosition,
-        segments: []
-    }
+    // return {
+    //     startPosition,
+    //     endPosition,
+    //     segments: []
+    // }
 
 
 
@@ -122,7 +170,7 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
     // situation.track = nextTrack;
     // situation.direction = trackGetOtherEnd(nextTrack, situation.direction).id;
     // situation.remainingTrack = nextTrack.length - overFlowRoom;
-}
+
 
 // export function createSituation(track: Track, remainingTrack: number, direction: number): TrackPosition {
 //     return {

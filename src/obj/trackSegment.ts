@@ -18,7 +18,7 @@ export type TrackSegment = {
  * @returns 
  */
 export function createSegment(trackId: number,offset1: number,offset2: number): TrackSegment {
-    const isInversed = offset2 > offset1;
+    const isInversed = offset2 < offset1;
     const min = isInversed ? offset2 : offset1;
     const max = isInversed ? offset1 : offset2;
 
