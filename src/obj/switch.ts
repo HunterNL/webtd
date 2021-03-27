@@ -73,11 +73,13 @@ export function switchGetActivePaths(swi: TrackSwitch): Array<[Identifier,Identi
 
 export function throwSwitch(trackSwitch: TrackSwitch) {
     if(trackSwitch.currentState === SwitchState.Straight) {
-        trackSwitch.currentState = SwitchState.Side
+        trackSwitch.currentState = SwitchState.Side;
+        return
     }
 
     if(trackSwitch.currentState == SwitchState.Side) {
-        trackSwitch.currentState = SwitchState.Straight
+        trackSwitch.currentState = SwitchState.Straight;
+        return
     }
 
     throw new Error("Tried to throw switch in unknown state");
