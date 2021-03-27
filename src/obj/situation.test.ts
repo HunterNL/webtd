@@ -62,11 +62,11 @@ describe("Single track piece", function() {
     })
     
     test("TrackPostion can advance backward",function() {
-        const position : TrackPosition = {offset:1,track:simpleTrack}
+        const position : TrackPosition = {offset:5,track:simpleTrack}
     
         const span = advanceAlongTrack([simpleTrack], position, -1)
     
-        expect(span.endPosition.offset).toBe(0);
+        expect(span.endPosition.offset).toBe(4);
     })
     
     
@@ -139,13 +139,24 @@ describe("Simple switch layout", function () {
         })
     })
     
-    test.skip("TrackPosition can reverse along switches", function() {
+    test("TrackPosition can reverse along switches", function() {
         const position : TrackPosition = {offset:3,track:straightTrack}
     
         const span = advanceAlongTrack(allEntities,position,-5);
     
         expect(span.endPosition.offset).toBe(8);
         expect(span.endPosition.track).toBe(entryTrack);
+        expect(span.segments).toHaveLength(2);
+
+        const [firstSegment,secondSegment] = span.segments;
+
+        expect(firstSegment.trackId).toBe(straightTrack.id);
+        expect(firstSegment.start).toBe(0);
+        expect(firstSegment.end).toBe(3);
+
+        expect(secondSegment.trackId).toBe(entryTrack.id);
+        expect(secondSegment.end).toBe(10) // Track length
+        expect(secondSegment.start).toBe(8);
     })
     
     
@@ -187,22 +198,46 @@ describe("Reverse exit track", function() {
 
     const allEntities = [entryTrack,straightTrack,sideTrack,entryBuffer,straightBuffer,sideBufffer,trackSwitch];
 
-    test.skip("TrackPosition can advance along switches", function() {
+    test("TrackPosition can advance along switches", function() {
         const position : TrackPosition = {offset:8,track:entryTrack}
     
         const span = advanceAlongTrack(allEntities,position,4);
     
         expect(span.endPosition.offset).toBe(8);
         expect(span.endPosition.track).toBe(straightTrack);
+
+        expect(span.segments).toHaveLength(2);
+
+        const [firstSegment,secondSegment] = span.segments;
+
+        expect(firstSegment.trackId).toBe(entryTrack.id);
+        expect(firstSegment.start).toBe(8);
+        expect(firstSegment.end).toBe(10);
+
+        expect(secondSegment.trackId).toBe(straightTrack.id);
+        expect(secondSegment.start).toBe(8);
+        expect(secondSegment.end).toBe(10);
     })
 
-    test.skip("TrackPosition can reverse along switches", function() {
+    test("TrackPosition can reverse along switches", function() {
         const position : TrackPosition = {offset:9,track:straightTrack}
     
         const span = advanceAlongTrack(allEntities,position,2);
     
         expect(span.endPosition.offset).toBe(9);
         expect(span.endPosition.track).toBe(entryTrack);
+
+        expect(span.segments).toHaveLength(2);
+
+        const [firstSegment,secondSegment] = span.segments;
+
+        expect(firstSegment.trackId).toBe(straightTrack.id);
+        expect(firstSegment.start).toBe(9);
+        expect(firstSegment.end).toBe(10);
+
+        expect(secondSegment.trackId).toBe(entryTrack.id);
+        expect(secondSegment.start).toBe(9);
+        expect(secondSegment.end).toBe(10);
     })
     
 })

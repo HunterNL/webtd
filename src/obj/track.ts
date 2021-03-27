@@ -2,7 +2,7 @@ import { getId, Identifiable, Identifier, isIdentifiable, isIdentifier } from ".
 import { Lengthable, isLengthable } from "../interfaces/lengthable";
 import { Entity, getEntityById } from "../interfaces/entity";
 import { TrackBoundry, resolveBoundry, isTrackBoundry } from "./switch";
-import { DIRECTION, DIRECTION_FORWARD, TrackPosition } from "./situation";
+import { Direction, DIRECTION_FORWARD, TrackPosition } from "./situation";
 import { Ride } from "./ride";
 import { TrackSegment } from "./trackSegment";
 
@@ -153,8 +153,18 @@ export function trackGetOtherEnd(track: Track, boundryId: number): TrackBoundry 
     return start;
 }
 
-export function getNextBoundry(track: Track, direction: DIRECTION): TrackBoundry {
+export function getNextBoundry(track: Track, direction: Direction): TrackBoundry {
     return (direction === DIRECTION_FORWARD ? track.boundries[1] : track.boundries[0]); //Forward = towards the last/second boundry
+}
+
+/***   
+ * If given boundry between two tracks is a point where the offset flow reverses, AKA both tracks share a "high" or "low" point there
+ */
+export function boundryReversesTrackDirection(boundry: TrackBoundry, trackA: Track, trackB: Track): boolean {
+    const sharesLowPoint = trackA.boundries[0].id === trackB.boundries[0].id;
+    const sharesHighPoint = trackB.boundries[1].id === trackB.boundries[1].id;
+
+    return sharesLowPoint || sharesHighPoint;
 }
 
 export function trackGetNext(entities: Entity[], track: Track) : Track | undefined {
@@ -202,4 +212,15 @@ export function getOffsetFromBoundryDistance(track: Track, boundry: TrackBoundry
         //Entering from the "rear", offset is length - distance
         return track.length - distance
     }
+}
+
+export function getDirectionAwayFromBoundry(track: Track, boundryId: number): Direction {
+    if(track.boundries[0].id === boundryId) {
+        return 1
+    }
+    if(track.boundries[1].id === boundryId) {
+        return -1
+    }
+
+    throw new Error("Unknown boundryId");
 }

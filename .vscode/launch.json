@@ -4,22 +4,13 @@
             "type": "node",
             "name": "vscode-jest-tests",
             "request": "launch",
-            // "program": "${workspaceFolder}/node_modules/jest/bin/jest",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest",
             "args": [
-                "--inspect-brk",
-                // "./dist/index.js"
-                "./node_modules/jest/bin/jest.js",
+                "./src",
                 "--runInBand",
-                "./dist"
+                "--config=./jest.json",
             ],
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen",
-            "preLaunchTask": "tsc-build",
-            "port": 9229,
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ],
-            "protocol": "inspector"
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "chrome",

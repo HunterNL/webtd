@@ -1,6 +1,6 @@
-import { getBoundryPosition, getNextBoundry, getOffsetFromBoundryDistance, isTrack, Track } from "./track";
+import { getBoundryPosition, getDirectionAwayFromBoundry, getNextBoundry, getOffsetFromBoundryDistance, isTrack, Track } from "./track";
 import { isNumber } from "lodash";
-import { resolveBoundry } from "./switch";
+import { isTrackBoundry, resolveBoundry, TrackBoundry } from "./switch";
 import { Entity, getEntityById } from "../interfaces/entity";
 import { TrackSpan } from "./trackSpan";
 import { createSegment, TrackSegment } from "./trackSegment";
@@ -25,9 +25,9 @@ export type DirectionalSitationSave = SituationSave & {
 
 export const DIRECTION_FORWARD = 1;
 export const DIRECTION_BACKWARD = -1;
-export type DIRECTION = typeof DIRECTION_FORWARD | typeof DIRECTION_BACKWARD;
+export type Direction = typeof DIRECTION_FORWARD | typeof DIRECTION_BACKWARD;
 
-export function getDirectionForMovement(movement: number): DIRECTION {
+export function getDirectionForMovement(movement: number): Direction {
     if(movement > 0) {
         return DIRECTION_FORWARD
     }
@@ -37,7 +37,7 @@ export function getDirectionForMovement(movement: number): DIRECTION {
     throw new Error("Movement is 0 or an invalid number");
 }
 
-export function getRemainingTrackInDirection(postition: TrackPosition, direction: DIRECTION) {
+export function getRemainingTrackInDirection(postition: TrackPosition, direction: Direction) {
     if(direction === DIRECTION_FORWARD) {
         return postition.track.length - postition.offset;
     }
@@ -88,7 +88,8 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
 
     while(!movementFitsInsideTrack(currentPosition, movementLeft)) {
         // Figure out the next boundry we're gonna hit
-        const direction = getDirectionForMovement(movement);
+
+        const direction = getDirectionForMovement(movementLeft)
         const nextBoundry = getNextBoundry(currentPosition.track, direction);
         const distanceToBoundry = getDistanceToBoundry(currentPosition, nextBoundry.id);
         const nextTrackId = resolveBoundry(currentPosition.track,nextBoundry);
@@ -101,17 +102,24 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
         const nextTrack = getEntityById(entities, nextTrackId, isTrack);
 
         // Save the segment we "traveled"
-        const segment = createSegment(currentPosition.track.id,currentPosition.offset,currentPosition.offset+distanceToBoundry)
+        const segment = createSegment(currentPosition.track.id,currentPosition.offset,currentPosition.offset+distanceToBoundry*direction)
         segments.push(segment);
 
         // And advance to the next track.
         currentPosition.offset = getBoundryPosition(nextTrack, nextBoundry.id);
         currentPosition.track = nextTrack;
 
-        console.log(distanceToBoundry, movementLeft)
+        const continueDirectionAfterBoundry = getDirectionAwayFromBoundry(nextTrack, nextBoundry.id);
 
-        // And adjust our movement
-        movementLeft = movementLeft - distanceToBoundry;
+        movementLeft = movementLeft - (distanceToBoundry * direction);
+
+        if(continueDirectionAfterBoundry !== direction) {
+            movementLeft = movementLeft * -1;
+        }        
+
+        if(Math.abs(movementLeft) > Math.abs(movement)) {
+            throw new Error("Logic error, movementleft should never exceed movement")
+        }
     }
     // At this point we're left inside a single track
 
