@@ -1,5 +1,5 @@
 import { Buffer } from "./buffer"
-import { advanceAlongTrack, TrackPosition } from "./situation"
+import { advanceAlongTrack, DIRECTION_BACKWARD, DIRECTION_FORWARD, TrackPosition } from "./situation"
 import { TrackSwitch, TrackBoundry, SwitchState } from "./switch"
 import { Track } from "./track"
 import { TrackSegment } from "./trackSegment";
@@ -67,6 +67,7 @@ describe("Single track piece", function() {
         const span = advanceAlongTrack([simpleTrack], position, -1)
     
         expect(span.endPosition.offset).toBe(4);
+        expect(span.finalDirection).toBe(DIRECTION_BACKWARD)
     })
     
     
@@ -137,6 +138,8 @@ describe("Simple switch layout", function () {
             start: 0,
             end: 2
         })
+
+        expect(span.finalDirection).toBe(DIRECTION_FORWARD)
     })
     
     test("TrackPosition can reverse along switches", function() {
@@ -157,6 +160,8 @@ describe("Simple switch layout", function () {
         expect(secondSegment.trackId).toBe(entryTrack.id);
         expect(secondSegment.end).toBe(10) // Track length
         expect(secondSegment.start).toBe(8);
+
+        expect(span.finalDirection).toBe(DIRECTION_BACKWARD);
     })
     
     
@@ -217,6 +222,8 @@ describe("Reverse exit track", function() {
         expect(secondSegment.trackId).toBe(straightTrack.id);
         expect(secondSegment.start).toBe(8);
         expect(secondSegment.end).toBe(10);
+
+        expect(span.finalDirection).toBe(DIRECTION_BACKWARD)
     })
 
     test("TrackPosition can reverse along switches", function() {
@@ -238,6 +245,8 @@ describe("Reverse exit track", function() {
         expect(secondSegment.trackId).toBe(entryTrack.id);
         expect(secondSegment.start).toBe(9);
         expect(secondSegment.end).toBe(10);
+
+        expect(span.finalDirection).toBe(DIRECTION_BACKWARD);
     })
     
 })

@@ -183,9 +183,9 @@ export function isTrack(obj: any): obj is Track {
         isIdentifiable(obj);
 }
 
-export function trackIsOccupied(tracks: Track[], track: Track, rides: Ride[]): boolean {
-    return rides.map(t => t.situation).some(situation => situationIsOnTrack(tracks, track, situation))
-}
+// export function trackIsOccupied(tracks: Track[], track: Track, rides: Ride[]): boolean {
+//     return rides.map(t => t.situation).some(situation => situationIsOnTrack(tracks, track, situation))
+// }
 
 
 export function situationIsOnTrack(entities: Entity[], track: Track, position: TrackPosition) {

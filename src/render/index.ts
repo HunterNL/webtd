@@ -1,7 +1,6 @@
 import { Environment } from "../obj/environment";
 import { Entity, getEntityById, isEntity } from "../interfaces/entity";
-import { Track, situationIsOnTrack, trackIsOccupied, isTrack, resolveBoundries } from "../obj/track";
-import { getSpanningTracks } from "../obj/ride";
+import { Track, situationIsOnTrack, isTrack, resolveBoundries } from "../obj/track";
 import { flatten } from "lodash";
 import { getId } from "../interfaces/id";
 import { vec2 } from "gl-matrix";
@@ -160,13 +159,12 @@ export function renderEnv(env: Environment,renderElement: SVGElement) {
     const textGroup = createSVGElement("g");
     const interactableGroup = createSVGElement("g");
 
-    const occupiedTracksArray = env.rides.map(ride => getSpanningTracks(env.entities,ride));
-    const occupiedTracksIds = flatten(occupiedTracksArray).map(getId);
+    // const occupiedTracksArray = env.rides.map(ride. => getSpanningTracks(env.entities,ride));
+    const occupiedTracksIds = flatten(env.rides.map(ride => ride.span.segments.map(segment => segment.trackId)))
 
     renderDebugIds(env.entities, textGroup)
     renderTracks(env.tracks, occupiedTracksIds, trackGroup)
     renderSwitchInteractables(env.switches, interactableGroup);
-
 
     renderElement.appendChild(trackGroup);
     renderElement.appendChild(textGroup);

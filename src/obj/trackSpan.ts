@@ -1,8 +1,9 @@
-import { TrackPosition } from "./situation";
+import { Direction, TrackPosition } from "./situation";
 import { TrackSegment } from "./trackSegment";
 
 export type TrackSpan = {
     startPosition: TrackPosition
-    segments: TrackSegment[],
     endPosition: TrackPosition
+    segments: TrackSegment[]
+    finalDirection: Direction
 }

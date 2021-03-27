@@ -100,11 +100,11 @@
             "type": "ride",
             "id": 6,
             "trainId": 7,
-            "situation": {
+            "position": {
                 "trackId": 0,
-                "offset": 300,
-                "direction": 1
+                "offset": 300
             },
+            "direction": 1,
             "speed": 0
         },{
             "type": "train",

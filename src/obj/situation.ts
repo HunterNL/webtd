@@ -94,7 +94,7 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
         const distanceToBoundry = getDistanceToBoundry(currentPosition, nextBoundry.id);
         const nextTrackId = resolveBoundry(currentPosition.track,nextBoundry);
         
-        if(!nextTrackId) {
+        if(typeof nextTrackId === "undefined") {
             // Oops
             throw new Error("Buffer overrun, derailed!");
         }
@@ -109,10 +109,11 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
         currentPosition.offset = getBoundryPosition(nextTrack, nextBoundry.id);
         currentPosition.track = nextTrack;
 
-        const continueDirectionAfterBoundry = getDirectionAwayFromBoundry(nextTrack, nextBoundry.id);
-
+        // Subtract movement
         movementLeft = movementLeft - (distanceToBoundry * direction);
 
+        // Reverse our movementLeft if we need to
+        const continueDirectionAfterBoundry = getDirectionAwayFromBoundry(nextTrack, nextBoundry.id);
         if(continueDirectionAfterBoundry !== direction) {
             movementLeft = movementLeft * -1;
         }        
@@ -121,10 +122,8 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
             throw new Error("Logic error, movementleft should never exceed movement")
         }
     }
+
     // At this point we're left inside a single track
-
-    // const segment = createSegment()
-
     const segment = createSegment(currentPosition.track.id,currentPosition.offset,currentPosition.offset+movementLeft);
 
     segments.push(segment);
@@ -134,7 +133,8 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
     return {
         startPosition: situation,
         endPosition: currentPosition,
-        segments
+        segments,
+        finalDirection: getDirectionForMovement(movementLeft)
     }
     
 }
