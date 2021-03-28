@@ -38,7 +38,7 @@ export function doSegmentsOverlap(segmentA: TrackSegment, segmentB: TrackSegment
     return doRangesOverlap(segmentA.start, segmentA.end, segmentB.start, segmentB.end);
 }
 
-export function doesSegmentContainSegment(parent: TrackSegment, child: TrackSegment) {
+export function doesSegmentContainSegment(parent: TrackSegment, child: TrackSegment): boolean {
     if(parent.trackId !== child.trackId) {
         throw new Error("Trying to compare tracksegments across different tracks");
     }

@@ -1,12 +1,11 @@
-import { Environment } from "../obj/environment";
-import { Entity, getEntityById, isEntity } from "../interfaces/entity";
-import { Track, situationIsOnTrack, isTrack, resolveBoundries } from "../obj/track";
-import { flatten } from "lodash";
-import { getId } from "../interfaces/id";
 import { vec2 } from "gl-matrix";
+import { flatten } from "lodash";
+import { Entity } from "../interfaces/entity";
+import { Environment } from "../obj/environment";
 import { throwSwitch, TrackSwitch } from "../obj/switch";
+import { Track } from "../obj/track";
 
-const LABEL_OFFSET = 10;
+// const LABEL_OFFSET = 10;
 
 const COLOR_UNOCCUPIED="#aaa";
 const COLOR_OCCUPIED="#f5ff44"
@@ -21,30 +20,30 @@ function getLineNormal(veca:vec2,vecb:vec2): vec2 {
     return vec2.rotate(diff,diff,[0,0],-.5*Math.PI);   
 }
 
-function getLineAngle(veca:vec2,vecb:vec2): number {
-    const diff = vec2.subtract(vec2.create(),vecb,veca);
-    vec2.normalize(diff,diff);
+// function getLineAngle(veca:vec2,vecb:vec2): number {
+//     const diff = vec2.subtract(vec2.create(),vecb,veca);
+//     vec2.normalize(diff,diff);
 
-    return Math.atan2(diff[1], diff[0]);
-}
+//     return Math.atan2(diff[1], diff[0]);
+// }
 
-function calculateLabelPostion(veca: vec2 ,vecb: vec2) {
-    const basePosition = vec2.lerp(vec2.create(), veca, vecb, 0.5);// Base 
+// function calculateLabelPostion(veca: vec2 ,vecb: vec2) {
+//     const basePosition = vec2.lerp(vec2.create(), veca, vecb, 0.5);// Base 
 
-    const diff = vec2.subtract(vec2.create(),vecb,veca);
-    vec2.normalize(diff,diff);
+//     const diff = vec2.subtract(vec2.create(),vecb,veca);
+//     vec2.normalize(diff,diff);
 
-    const angle = Math.atan2(diff[1], diff[0]);
+//     const angle = Math.atan2(diff[1], diff[0]);
 
-    vec2.rotate(diff,diff,[0,0],-.5*Math.PI);    
+//     vec2.rotate(diff,diff,[0,0],-.5*Math.PI);    
 
-    vec2.scaleAndAdd(basePosition,basePosition,diff,LABEL_OFFSET);
+//     vec2.scaleAndAdd(basePosition,basePosition,diff,LABEL_OFFSET);
 
-    return {
-        pos: basePosition,
-        angle
-    }
-}
+//     return {
+//         pos: basePosition,
+//         angle
+//     }
+// }
 
 function getColorForOccupationStatus(occupied: boolean): string {
     return occupied ? COLOR_OCCUPIED : COLOR_UNOCCUPIED;
@@ -152,7 +151,7 @@ function createSVGElement<K extends keyof SVGElementTagNameMap>(elementName: K):
     return document.createElementNS("http://www.w3.org/2000/svg", elementName);
 }
 
-export function renderEnv(env: Environment,renderElement: SVGElement) {
+export function renderEnv(env: Environment,renderElement: SVGElement): void {
     renderElement.childNodes.forEach(child => renderElement.removeChild(child));
 
     const trackGroup = createSVGElement("g")

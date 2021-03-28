@@ -1,11 +1,10 @@
-import { Entity, getEntityById } from "../interfaces/entity";
-import { Identifier, isIdentifier, isIdentifiable, Identifiable } from "../interfaces/id";
-import { Junction, isJunction } from "./junction";
+import { Entity } from "../interfaces/entity";
+import { Identifier, isIdentifiable, isIdentifier } from "../interfaces/id";
 import { Buffer, isBuffer } from "./buffer";
-import equals from "ramda/es/equals";
-import { Track, isTrack } from "./track";
+import { isJunction, Junction } from "./junction";
+import { Track } from "./track";
 
-const SWITCH_ACTUATION_TIME = 3; //seconds
+// const SWITCH_ACTUATION_TIME = 3; //seconds
 
 export function eq<T>(a: T) {
     return function(b: T): boolean {

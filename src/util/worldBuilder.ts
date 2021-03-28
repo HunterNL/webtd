@@ -58,7 +58,7 @@ export class WorldBuilder {
         return trackSwitch
     }
 
-    setJunction(switchId: number, junction: Junction) {
+    setJunction(switchId: number, junction: Junction): void {
         this.requireValidSwitchReferences(junction);
 
         const trackSwitch = this.entities.find(ent => getId(ent) === switchId);
@@ -74,11 +74,11 @@ export class WorldBuilder {
         trackSwitch.junction = junction;
     }
 
-    getEntities() {
+    getEntities(): Entity[] {
         return this.entities;
     }
 
-    requireValidSwitchReferences(junction: Junction) {
+    requireValidSwitchReferences(junction: Junction) : void {
         const tracksIds = this.entities.filter(isTrack).map(getId);
 
         const requireValidTrack = (trackId: number) => {

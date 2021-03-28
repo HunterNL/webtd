@@ -1,7 +1,5 @@
 import { Entity } from "../interfaces/entity";
-import { isTrain } from "./train";
 import { isRide, updateRide } from "./ride";
-import { isUpdateable } from "../interfaces/updateAble";
 
 export function createGameLoop(entities: Entity[],updateInterval:number,postUpdate: (dt:number,entities:Entity[]) => any) {
     let lastLoopTime: number

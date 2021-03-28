@@ -1,3 +1,3 @@
-export function isObject(any: any): any is object {
+export function isObject(any: unknown): any is Record<string,unknown> {
     return typeof any === "object";
 }

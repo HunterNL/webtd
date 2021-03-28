@@ -1,9 +1,8 @@
-import { getId, Identifiable, Identifier, isIdentifiable, isIdentifier } from "../interfaces/id";
-import { Lengthable, isLengthable } from "../interfaces/lengthable";
 import { Entity, getEntityById } from "../interfaces/entity";
-import { TrackBoundry, resolveBoundry, isTrackBoundry } from "./switch";
+import { getId, Identifiable, isIdentifiable } from "../interfaces/id";
+import { isLengthable, Lengthable } from "../interfaces/lengthable";
 import { Direction, DIRECTION_FORWARD, TrackPosition } from "./situation";
-import { Ride } from "./ride";
+import { isTrackBoundry, resolveBoundry, TrackBoundry } from "./switch";
 import { TrackSegment } from "./trackSegment";
 
 
@@ -188,20 +187,20 @@ export function isTrack(obj: any): obj is Track {
 // }
 
 
-export function situationIsOnTrack(entities: Entity[], track: Track, position: TrackPosition) {
+export function situationIsOnTrack(entities: Entity[], track: Track, position: TrackPosition): boolean {
     return position.track.id === track.id;
 }
 
 /**
  * Gets remaining track length towards a given trackboundry
  */
-export function getRemainingTrackLength(track: Track,remaining: number,directionId: number) {
-    const length = track.length;
-    if(directionId === trackGetStart(track).id) {
-        return 
-    }
+// export function getRemainingTrackLength(track: Track,remaining: number,directionId: number): {
+//     const length = track.length;
+//     if(directionId === trackGetStart(track).id) {
+//         return 
+//     }
 
-}
+// }
 
 // TODO Handle very short pieces of track
 export function getOffsetFromBoundryDistance(track: Track, boundry: TrackBoundry, distance: number): number {

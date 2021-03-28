@@ -1,11 +1,10 @@
-import { Track, isTrack, trackGetStart, trackLoad, isTrackSave } from "./track";
-import { Train, isTrain } from "./train";
-import { isObject } from "../util/isObject";
-import { Identifiable, isIdentifiable, getId, Identifier } from "../interfaces/id";
 import { Entity, getEntityById, isEntity } from "../interfaces/entity";
-import { TrackSwitch, isSwitch, loadSwitch } from "./switch";
+import { Identifier, isIdentifiable } from "../interfaces/id";
 import { Buffer, isBuffer } from "./buffer";
-import { Ride, isRide, loadRide, isRideSave } from "./ride";
+import { isRideSave, loadRide, Ride } from "./ride";
+import { isSwitch, loadSwitch, TrackSwitch } from "./switch";
+import { isTrack, isTrackSave, Track, trackLoad } from "./track";
+import { isTrain, Train } from "./train";
 
 
 export type EnvironmentSave = {
@@ -43,7 +42,7 @@ export function loadEnvironment(map: unknown): Environment {
 
     const rides: Ride[] = entitiesSaves.filter(isRideSave).map(rideSave => loadRide(tracksAndTrains, rideSave));    
 
-    const entities: Entity[] = ([] as any[]).concat(tracks,rides,switches,buffers);
+    const entities: Entity[] = ([] as Entity[]).concat(tracks,rides,switches,buffers);
 
     return {
         tracks,
@@ -55,21 +54,21 @@ export function loadEnvironment(map: unknown): Environment {
 }
 
 export function getNextFreeId(env: Environment): number {
-    let n = -1;
-    while(true) {
-        n = n + 1;
+    for(let n = 0; n < Number.MAX_SAFE_INTEGER; n++) {
         if(env.entities.find(ent => ent.id === n)) continue;
-        return n
+        return n;
     }
+
+    throw new Error("Something went terribly wrong finding a free number");
 }
 export function verifyConnections(env: Environment): void {
-    const trackIds = env.tracks.map(getId);
-    const bufferIds = env.buffers.map(getId);
-    const switchIds = env.switches.map(getId);
-
     const getEnt = (n: Identifier) => getEntityById(env.entities,n,isEntity);
 
     env.tracks.forEach(track => track.boundries.forEach(boundry => getEnt(boundry.id)));
+    env.switches.forEach(trackSwitch => {
+        trackSwitch.junction.straightConnections.map(connection => connection.forEach(trackId => getEntityById(env.entities, trackId, isTrack)))
+        trackSwitch.junction.sideConnections.map(connection => connection.forEach(trackId => getEntityById(env.entities, trackId, isTrack)))
+    })
     
     // env.switches.forEach(swi => swi.junction.sideConnections.f)
 }

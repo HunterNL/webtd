@@ -1,12 +1,9 @@
-import { Identifiable, Identifier } from "./id";
-import equals from "ramda/es/equals";
-import propIs from "ramda/es/propIs";
-import { isObject } from "../util/isObject";
-import { Train } from "../obj/train";
-import { TrackSegment } from "../obj/trackSegment";
-import { TrackSwitch } from "../obj/switch";
 import { Ride } from "../obj/ride";
+import { TrackSwitch } from "../obj/switch";
 import { Track } from "../obj/track";
+import { Train } from "../obj/train";
+import { isObject } from "../util/isObject";
+import { Identifiable, Identifier } from "./id";
 
 // export type EntityType = "train" | "track" | "end" | "switch" | "ride";
 

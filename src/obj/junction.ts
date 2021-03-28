@@ -1,4 +1,4 @@
-import { Identifier, isIdentifiable, isIdentifier } from "../interfaces/id";
+import { Identifier, isIdentifier } from "../interfaces/id";
 
 export type Junction = {
     straightConnections: Array<[Identifier,Identifier]>,

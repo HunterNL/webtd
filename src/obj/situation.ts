@@ -1,9 +1,9 @@
-import { getBoundryPosition, getDirectionAwayFromBoundry, getNextBoundry, getOffsetFromBoundryDistance, isTrack, Track } from "./track";
 import { isNumber } from "lodash";
-import { isTrackBoundry, resolveBoundry, TrackBoundry } from "./switch";
 import { Entity, getEntityById } from "../interfaces/entity";
-import { TrackSpan } from "./trackSpan";
+import { resolveBoundry } from "./switch";
+import { getBoundryPosition, getDirectionAwayFromBoundry, getNextBoundry, isTrack, Track } from "./track";
 import { createSegment, TrackSegment } from "./trackSegment";
+import { TrackSpan } from "./trackSpan";
 
 export type TrackPosition = {
     track: Track,
@@ -37,7 +37,7 @@ export function getDirectionForMovement(movement: number): Direction {
     throw new Error("Movement is 0 or an invalid number");
 }
 
-export function getRemainingTrackInDirection(postition: TrackPosition, direction: Direction) {
+export function getRemainingTrackInDirection(postition: TrackPosition, direction: Direction): number {
     if(direction === DIRECTION_FORWARD) {
         return postition.track.length - postition.offset;
     }
@@ -48,7 +48,7 @@ export function getRemainingTrackInDirection(postition: TrackPosition, direction
     throw new Error("Unkown direction");
 }
 
-export function movementFitsInsideTrack(position: TrackPosition, movement: number) {
+export function movementFitsInsideTrack(position: TrackPosition, movement: number): boolean {
     const newOffset = position.offset + movement;
 
     return newOffset >= 0 && newOffset <= position.track.length;

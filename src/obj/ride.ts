@@ -1,10 +1,9 @@
-import { Train, isTrain, trainGetLength } from "./train";
-import { TrackPosition, SituationSave, advanceAlongTrack, DirectionalTrackPosition, isSituationSave, situationRoomBehind, DIRECTION_FORWARD, DIRECTION_BACKWARD, Direction } from "./situation";
-import { Track, isTrack, trackGetOtherEnd } from "./track";
+import { isNumber } from "lodash";
 import { Entity, getEntityById } from "../interfaces/entity";
-import { isNumber, noop } from "lodash";
-import { resolveBoundry } from "./switch";
+import { advanceAlongTrack, Direction, isSituationSave, TrackPosition } from "./situation";
+import { isTrack } from "./track";
 import { TrackSpan } from "./trackSpan";
+import { isTrain, Train } from "./train";
 
 export interface Ride extends Entity {
     direction: number;
@@ -23,8 +22,8 @@ function createTrainSpan(entities: Entity[], forwardPosition: TrackPosition, len
     return advanceAlongTrack(entities, forwardPosition, length * forwardDirection * -1);
 }
 
-export function updateRide(entities: Entity[],ride: Ride,dt:number) {
-    const speed = 40;
+export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
+    const speed = 40 * dt;
 
     // Figure out where the front of the train ends up
     const trainMovement = advanceAlongTrack(entities, ride.position, speed * ride.direction);

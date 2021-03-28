@@ -1,4 +1,3 @@
-import { first } from "lodash";
 import { WorldBuilder } from "../util/worldBuilder";
 import { advanceAlongTrack, TrackPosition } from "./situation";
 import { TrackSpan } from "./trackSpan";
@@ -34,7 +33,7 @@ function buildWorld() {
 describe("Trackspan", () => {
 
     test.skip("It can simply travel back a single piece of track", () => {
-        const {entryTrack,centerTrack,exitTrack, entities} = buildWorld();
+        const {entryTrack, entities} = buildWorld();
 
         const position : TrackPosition = {
             track: entryTrack,

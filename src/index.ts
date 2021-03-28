@@ -1,9 +1,7 @@
 import exampleEnvironment from "./data/map.json";
-import renderMap from "./data/rendermap.json";
-import { isObject } from "./util/isObject.js";
-import { Environment, loadEnvironment } from "./obj/environment";
-import { renderEnv } from "./render/index";
+import { loadEnvironment } from "./obj/environment";
 import { createGameLoop } from "./obj/gameloop";
+import { renderEnv } from "./render/index";
 
 
 const env = loadEnvironment(exampleEnvironment);
@@ -18,7 +16,7 @@ function onDomReady() {
         throw new Error("renderElement not found!");
     }
 
-    const {start, stop } = createGameLoop(env.entities, 1000, () => {
+    const {start} = createGameLoop(env.entities, 1000, () => {
         renderEnv(env ,renderElement as any);
     })
 
