@@ -6,8 +6,6 @@ import { renderEnv } from "./render/index";
 
 const env = loadEnvironment(exampleEnvironment);
 
-console.log(5,env.rides)
-
 function onDomReady() {
     const renderElement = document.getElementById("gamecontainer");
 

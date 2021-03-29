@@ -1,14 +1,18 @@
 import { vec2 } from "gl-matrix";
 import { flatten } from "lodash";
+import { type } from "ramda";
 import { Entity } from "../interfaces/entity";
+import { isBuffer } from "../obj/buffer";
 import { Environment } from "../obj/environment";
-import { throwSwitch, TrackSwitch } from "../obj/switch";
+import { getPathTroughSwitch, throwSwitch, TrackBoundry, TrackSwitch } from "../obj/switch";
 import { Track } from "../obj/track";
 
 // const LABEL_OFFSET = 10;
 
 const COLOR_UNOCCUPIED="#aaa";
 const COLOR_OCCUPIED="#f5ff44"
+
+const SWITCH_WRONGWAY_OFFSET = 40;
 
 
 
@@ -21,11 +25,13 @@ function getLineNormal(veca:vec2,vecb:vec2): vec2 {
 }
 
 // function getLineAngle(veca:vec2,vecb:vec2): number {
-//     const diff = vec2.subtract(vec2.create(),vecb,veca);
-//     vec2.normalize(diff,diff);
-
-//     return Math.atan2(diff[1], diff[0]);
+//     return Math.atan2(getLineVector(veca, vecb));
 // }
+
+function getLineVector(veca:vec2,vecb:vec2): vec2 {
+    const diff = vec2.subtract(vec2.create(),vecb,veca);
+    return vec2.normalize(diff,diff);
+}
 
 // function calculateLabelPostion(veca: vec2 ,vecb: vec2) {
 //     const basePosition = vec2.lerp(vec2.create(), veca, vecb, 0.5);// Base 
@@ -90,6 +96,16 @@ function renderDebugIds(entities: Entity[], containingElement: SVGGElement) {
     })
 }
 
+function shouldDrawAllTheWay(track: Track, boundry: TrackBoundry) {
+    if(isBuffer(boundry)) {
+        return true;
+    }
+
+    const nextTrack = getPathTroughSwitch(boundry, track.id);
+
+    return typeof nextTrack !== 'undefined';
+}
+
 function renderTracks(tracks: Track[],occupiedTrackIds: number[], containingElement: SVGElement) {
 
     tracks.forEach((track: Track ,index) => {
@@ -107,12 +123,27 @@ function renderTracks(tracks: Track[],occupiedTrackIds: number[], containingElem
         const startPos = startBoundry.renderData.position;
         const endPos = endBoundry.renderData.position;
 
+        const lineDirection = getLineVector(startPos, endPos);
+        const lineOffset = vec2.scale(vec2.create(), lineDirection, SWITCH_WRONGWAY_OFFSET);
+
+        const startDrawPos = vec2.clone(startPos);
+        const endDrawPos = vec2.clone(endPos);
+
+
+        if(!shouldDrawAllTheWay(track, startBoundry)) {
+            vec2.add(startDrawPos,startDrawPos,lineOffset);
+        }
+
+        if(!shouldDrawAllTheWay(track, endBoundry)) {
+            vec2.subtract(endDrawPos, endDrawPos, lineOffset);
+        }
+
 
         const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
-        line.setAttribute("x1", ""+ startPos[0])
-        line.setAttribute("y1", ""+ startPos[1])
-        line.setAttribute("x2", ""+ endPos[0])
-        line.setAttribute("y2", ""+ endPos[1])
+        line.setAttribute("x1", ""+ startDrawPos[0])
+        line.setAttribute("y1", ""+ startDrawPos[1])
+        line.setAttribute("x2", ""+ endDrawPos[0])
+        line.setAttribute("y2", ""+ endDrawPos[1])
         line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(track.id, occupiedTrackIds)))
         line.setAttribute("id", "" + index);
 

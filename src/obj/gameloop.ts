@@ -15,7 +15,7 @@ export function createGameLoop(entities: Entity[],updateInterval:number,postUpda
         const currentDate = Date.now();
         const dt = currentDate - lastLoopTime;
         lastLoopTime = currentDate;
-        loop(dt);
+        loop(dt/1000) //ms -> s
         postUpdate(dt,entities);
     }
 
