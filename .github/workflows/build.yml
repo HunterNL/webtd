@@ -30,9 +30,16 @@ jobs:
     
       - run: npm install
       - run: npm run build
+        name: Webpack build
 
       - name: Upload build
         uses: actions/upload-artifact@v2
         with:
-          name: latest-master-build
+          name: master-build
           path: bundle/generated/prod
+
+      - run: npm install netlify-cli
+        name: Install Netlify CLI
+
+      - name: Deploy
+        run: npx netlify deploy --dir bundle/generated/prod --site ${{secrets.NETLIFY_SITE_ID}} --auth ${{secrets.NETLIFY_AUTH_TOKEN}}
