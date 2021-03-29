@@ -22,7 +22,7 @@ jobs:
         name: Install Netlify CLI
 
       - name: Download build
-        uses: actions/down-artifact@v2
+        uses: actions/download-artifact@v2
         with:
           name: latest-master-build
           path: build
