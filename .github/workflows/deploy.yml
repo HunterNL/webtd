@@ -1,0 +1,30 @@
+name: Deploy
+
+# Controls when the action will run. 
+on:
+    
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.1.5
+        
+      - run: npm install netlify-cli
+
+      - name: Download build
+        uses: actions/down-artifact@v2
+        with:
+          name: latest-master-build
+          path: build
+
+      - name: "Deploy"
+      - run: npx netlify deploy --dir build --site ${{ secrets.NETLIFY_SITE_ID}} --auth ${{NETLIFY_AUTH_TOKEN}}
