@@ -1,5 +1,5 @@
 import { Identifier } from "../interfaces/id";
-import { doRangesOverlap } from "../util/rangeOverlap"
+import { doRangesOverlap } from "../util/rangeOverlap";
 
 /***
  * A range within a single piece of track
@@ -32,7 +32,7 @@ export function createSegment(trackId: number,offset1: number,offset2: number): 
 
 export function doSegmentsOverlap(segmentA: TrackSegment, segmentB: TrackSegment): boolean {
     if(segmentA.trackId !== segmentB.trackId) {
-        throw new Error("Trying to compare tracksegments across different tracks");
+        return false;
     }
 
     return doRangesOverlap(segmentA.start, segmentA.end, segmentB.start, segmentB.end);
@@ -40,8 +40,33 @@ export function doSegmentsOverlap(segmentA: TrackSegment, segmentB: TrackSegment
 
 export function doesSegmentContainSegment(parent: TrackSegment, child: TrackSegment): boolean {
     if(parent.trackId !== child.trackId) {
-        throw new Error("Trying to compare tracksegments across different tracks");
+        return false;
     }
 
     return child.start >= parent.start && child.end <= parent.end;
+}
+
+export function splitTrackAtPoints(trackId: number, length: number, points: number[]): TrackSegment[] {
+    let lastPoint = 0;
+
+    const segments : TrackSegment[] = points.map(point => {
+        const segment: TrackSegment = {
+            trackId,
+            start: lastPoint,
+            end: point
+        }
+
+        lastPoint = point;
+
+        return segment;
+    })
+
+    segments.push({
+        trackId,
+        start: lastPoint,
+        end: length
+    })
+
+    return segments;
+
 }

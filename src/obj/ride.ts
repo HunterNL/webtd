@@ -23,7 +23,7 @@ function createTrainSpan(entities: Entity[], forwardPosition: TrackPosition, len
 }
 
 export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
-    const speed = 5 * dt;
+    const speed = ride.speed * dt;
 
     // Figure out where the front of the train ends up
     const trainMovement = advanceAlongTrack(entities, ride.position, speed * ride.direction);

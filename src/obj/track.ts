@@ -3,7 +3,7 @@ import { getId, Identifiable, isIdentifiable } from "../interfaces/id";
 import { isLengthable, Lengthable } from "../interfaces/lengthable";
 import { Direction, DIRECTION_FORWARD, TrackPosition } from "./situation";
 import { isTrackBoundry, resolveBoundry, TrackBoundry } from "./switch";
-import { TrackSegment } from "./trackSegment";
+import { splitTrackAtPoints, TrackSegment } from "./trackSegment";
 
 
 
@@ -12,12 +12,14 @@ export type Track = Identifiable & Lengthable & Entity & {
     boundries: [TrackBoundry,TrackBoundry],
     length: number
     detectionDeviders: number[]
-    segments: TrackSegment[],
     renderData?: {
         start: [number,number],
         end: [number, number]
     },
-    type: "track"
+    type: "track",
+    segments: {
+        detection: TrackSegment[]
+    }
     
 }
 
@@ -27,7 +29,7 @@ export function createTrack(id: number, startBoundry: TrackBoundry, endBoundry: 
         detectionDeviders: [],
         id,
         length,
-        segments: [],
+        segments: {detection:[]},
         type: "track"
     }
 }
@@ -114,12 +116,16 @@ export function resolveBoundries(entities: Entity[],ids: number[]): [TrackBoundr
 }
 
 export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
+    const trackId = trackSave.id;
+
     return {
-        id: trackSave.id,
+        id: trackId,
         boundries: resolveBoundries(entities, trackSave.boundries),
         length: trackSave.length,
         type: "track",
-        segments: generateSegments(trackSave.length, trackSave.id),
+        segments: {
+            detection: splitTrackAtPoints(trackId, trackSave.length, trackSave.detectionDeviders)
+        }, // generateSegments(trackSave.length, trackSave.id),
         detectionDeviders: trackSave.detectionDeviders,
         renderData: trackSave.renderData
     }

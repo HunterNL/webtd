@@ -1,18 +1,20 @@
 import { vec2 } from "gl-matrix";
 import { flatten } from "lodash";
-import { type } from "ramda";
 import { Entity } from "../interfaces/entity";
 import { isBuffer } from "../obj/buffer";
 import { Environment } from "../obj/environment";
 import { getPathTroughSwitch, throwSwitch, TrackBoundry, TrackSwitch } from "../obj/switch";
 import { Track } from "../obj/track";
+import { doSegmentsOverlap, TrackSegment } from "../obj/trackSegment";
 
 // const LABEL_OFFSET = 10;
 
 const COLOR_UNOCCUPIED="#aaa";
 const COLOR_OCCUPIED="#f5ff44"
 
-const SWITCH_WRONGWAY_OFFSET = 40;
+const SWITCH_WRONGWAY_OFFSET = 25;
+
+const SEGMENT_DISTANCE = 1;
 
 
 
@@ -64,8 +66,10 @@ export type RenderMapping = {
 }
 export type RenderMap = RenderMapping[]
 
-function isTrackOccupied(trackId: number, occupiedTracksIds: number[]) {
-    return occupiedTracksIds.includes(trackId);
+function isSectionOccupied(trackSegment: TrackSegment, occupiedSegments: TrackSegment[]): boolean {
+    return occupiedSegments.some(occupiedSegment => {
+        return doSegmentsOverlap(occupiedSegment, trackSegment)
+    })
 }
 
 function renderDebugIds(entities: Entity[], containingElement: SVGGElement) {
@@ -106,7 +110,37 @@ function shouldDrawAllTheWay(track: Track, boundry: TrackBoundry) {
     return typeof nextTrack !== 'undefined';
 }
 
-function renderTracks(tracks: Track[],occupiedTrackIds: number[], containingElement: SVGElement) {
+function getRenderPositionsForTrackSegment(trackRenderPositions: [vec2,vec2], switchOffset: [boolean,boolean], trackLength: number, segment: TrackSegment): [vec2,vec2] {
+    const [startPos,endPos] = trackRenderPositions;
+    const [startOffset, endOffset] = switchOffset;
+
+    const lineVector = getLineVector(startPos, endPos);
+    const drawLineLength = vec2.distance(startPos, endPos)
+
+    const startPosFraction = segment.start / trackLength;
+    const endPosFraction = segment.end / trackLength;
+
+    const startVec = vec2.scale(vec2.create(), lineVector, startPosFraction * drawLineLength);
+    const endVec = vec2.scale(vec2.create(), lineVector, endPosFraction * drawLineLength);
+
+    vec2.add(startVec, startVec, startPos);
+    vec2.add(endVec, endVec, startPos);
+
+    vec2.add(startVec,  startVec, vec2.scale(vec2.create(), lineVector, SEGMENT_DISTANCE))
+    vec2.add(endVec , endVec, vec2.scale(vec2.create(), lineVector, -SEGMENT_DISTANCE))
+
+    if(startOffset && segment.start === 0) {
+        vec2.add(startVec, startVec, vec2.scale(vec2.create(), lineVector, SWITCH_WRONGWAY_OFFSET))
+    }
+
+    if(endOffset && segment.end === trackLength) {
+        vec2.sub(endVec, endVec, vec2.scale(vec2.create(), lineVector, SWITCH_WRONGWAY_OFFSET))
+    }
+
+    return [startVec,endVec];
+}
+
+function renderTracks(tracks: Track[], occupiedSegments: TrackSegment[], containingElement: SVGElement) {
 
     tracks.forEach((track: Track ,index) => {
         const [startBoundry, endBoundry] = track.boundries;
@@ -123,58 +157,65 @@ function renderTracks(tracks: Track[],occupiedTrackIds: number[], containingElem
         const startPos = startBoundry.renderData.position;
         const endPos = endBoundry.renderData.position;
 
-        const lineDirection = getLineVector(startPos, endPos);
-        const lineOffset = vec2.scale(vec2.create(), lineDirection, SWITCH_WRONGWAY_OFFSET);
-
-        const startDrawPos = vec2.clone(startPos);
-        const endDrawPos = vec2.clone(endPos);
-
-
-        if(!shouldDrawAllTheWay(track, startBoundry)) {
-            vec2.add(startDrawPos,startDrawPos,lineOffset);
-        }
-
-        if(!shouldDrawAllTheWay(track, endBoundry)) {
-            vec2.subtract(endDrawPos, endDrawPos, lineOffset);
-        }
+        const switchOffset: [boolean,boolean] = [
+            !shouldDrawAllTheWay(track, startBoundry),
+            !shouldDrawAllTheWay(track, endBoundry)
+        ]
 
 
-        const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
-        line.setAttribute("x1", ""+ startDrawPos[0])
-        line.setAttribute("y1", ""+ startDrawPos[1])
-        line.setAttribute("x2", ""+ endDrawPos[0])
-        line.setAttribute("y2", ""+ endDrawPos[1])
-        line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(track.id, occupiedTrackIds)))
-        line.setAttribute("id", "" + index);
+        // if(!shouldDrawAllTheWay(track, startBoundry)) {
+        //     vec2.add(startDrawPos,startDrawPos,lineOffset);
+        // }
 
-        // if(isTrack(ent) && ent.segments.length > 0) {
-            track.segments.forEach(segment => {
-                [segment.end,segment.end].forEach(segmentPoint => {
-                    const pos = segmentPoint/track.length;
+        // if(!shouldDrawAllTheWay(track, endBoundry)) {
+        //     vec2.subtract(endDrawPos, endDrawPos, lineOffset);
+        // }
 
-                    const DIVIDER_LENGTH = 8;
+        const trackDetectionSegments = track.segments.detection;
 
-                    const basePos = vec2.lerp(vec2.create(),startPos,endPos,pos);
-                    const normal = getLineNormal(startPos,endPos);
+        trackDetectionSegments.forEach(trackDetectionSegment => {
+            const [segmentStart, segmentEnd] = getRenderPositionsForTrackSegment([startPos, endPos], switchOffset,track.length, trackDetectionSegment)
 
-                    const posA = vec2.scaleAndAdd(vec2.create(),basePos,normal,DIVIDER_LENGTH)
-                    const posB = vec2.scaleAndAdd(vec2.create(),basePos,normal,-DIVIDER_LENGTH)
-
-
-                    const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
-                    line.setAttribute("x1", ""+ posA[0])
-                    line.setAttribute("y1", ""+ posA[1])
-                    line.setAttribute("x2", ""+ posB[0])
-                    line.setAttribute("y2", ""+ posB[1])
-                    line.setAttribute("stroke", COLOR_UNOCCUPIED),
-                    line.setAttribute("stroke-width", "1.5"),
-
-                    line.setAttribute("id", "" + index);
-                    containingElement.appendChild(line);
-                })
-            })
+            const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
+            line.setAttribute("x1", ""+ segmentStart[0])
+            line.setAttribute("y1", ""+ segmentStart[1])
+            line.setAttribute("x2", ""+ segmentEnd[0])
+            line.setAttribute("y2", ""+ segmentEnd[1])
+            // line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(track.id, occupiedTrackIds)))
+            line.setAttribute("stroke", getColorForOccupationStatus(isSectionOccupied(trackDetectionSegment, occupiedSegments)))
+            line.setAttribute("id", "" + index);
 
             containingElement.appendChild(line);
+        })
+
+        // if(isTrack(ent) && ent.segments.length > 0) {
+            // track.segments.forEach(segment => {
+            //     [segment.end,segment.end].forEach(segmentPoint => {
+            //         const pos = segmentPoint/track.length;
+
+            //         const DIVIDER_LENGTH = 8;
+
+            //         const basePos = vec2.lerp(vec2.create(),startPos,endPos,pos);
+            //         const normal = getLineNormal(startPos,endPos);
+
+            //         const posA = vec2.scaleAndAdd(vec2.create(),basePos,normal,DIVIDER_LENGTH)
+            //         const posB = vec2.scaleAndAdd(vec2.create(),basePos,normal,-DIVIDER_LENGTH)
+
+
+            //         const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
+            //         line.setAttribute("x1", ""+ posA[0])
+            //         line.setAttribute("y1", ""+ posA[1])
+            //         line.setAttribute("x2", ""+ posB[0])
+            //         line.setAttribute("y2", ""+ posB[1])
+            //         line.setAttribute("stroke", COLOR_UNOCCUPIED),
+            //         line.setAttribute("stroke-width", "1.5"),
+
+            //         line.setAttribute("id", "" + index);
+            //         containingElement.appendChild(line);
+            //     })
+            // })
+
+            
     })
 }
 
@@ -190,10 +231,12 @@ export function renderEnv(env: Environment,renderElement: SVGElement): void {
     const interactableGroup = createSVGElement("g");
 
     // const occupiedTracksArray = env.rides.map(ride. => getSpanningTracks(env.entities,ride));
-    const occupiedTracksIds = flatten(env.rides.map(ride => ride.span.segments.map(segment => segment.trackId)))
+    // const occupiedTracksIds = flatten(env.rides.map(ride => ride.span.segments.map(segment => segment.trackId)))
+
+    const occupiedTrackSegments = flatten(env.rides.map(ride => ride.span.segments))
 
     renderDebugIds(env.entities, textGroup)
-    renderTracks(env.tracks, occupiedTracksIds, trackGroup)
+    renderTracks(env.tracks, occupiedTrackSegments, trackGroup)
     renderSwitchInteractables(env.switches, interactableGroup);
 
     renderElement.appendChild(trackGroup);
