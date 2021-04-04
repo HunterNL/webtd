@@ -2,10 +2,11 @@ import { vec2 } from "gl-matrix";
 import { flatten } from "lodash";
 import { Entity } from "../interfaces/entity";
 import { isBuffer } from "../obj/buffer";
-import { Environment } from "../obj/environment";
+import { DynamicEnvironment, Environment } from "../obj/environment";
 import { getPathTroughSwitch, throwSwitch, TrackBoundry, TrackSwitch } from "../obj/switch";
 import { Track } from "../obj/track";
 import { doSegmentsOverlap, TrackSegment } from "../obj/trackSegment";
+import { TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
 
 // const LABEL_OFFSET = 10;
 
@@ -19,12 +20,12 @@ const SEGMENT_DISTANCE = 1;
 
 
 
-function getLineNormal(veca:vec2,vecb:vec2): vec2 {
-    const diff = vec2.subtract(vec2.create(),vecb,veca);
-    vec2.normalize(diff,diff);
+// function getLineNormal(veca:vec2,vecb:vec2): vec2 {
+//     const diff = vec2.subtract(vec2.create(),vecb,veca);
+//     vec2.normalize(diff,diff);
 
-    return vec2.rotate(diff,diff,[0,0],-.5*Math.PI);   
-}
+//     return vec2.rotate(diff,diff,[0,0],-.5*Math.PI);   
+// }
 
 // function getLineAngle(veca:vec2,vecb:vec2): number {
 //     return Math.atan2(getLineVector(veca, vecb));
@@ -53,7 +54,7 @@ function getLineVector(veca:vec2,vecb:vec2): vec2 {
 //     }
 // }
 
-function getColorForOccupationStatus(occupied: boolean): string {
+export function getColorForOccupationStatus(occupied: boolean): string {
     return occupied ? COLOR_OCCUPIED : COLOR_UNOCCUPIED;
 }
 
@@ -66,11 +67,11 @@ export type RenderMapping = {
 }
 export type RenderMap = RenderMapping[]
 
-function isSectionOccupied(trackSegment: TrackSegment, occupiedSegments: TrackSegment[]): boolean {
-    return occupiedSegments.some(occupiedSegment => {
-        return doSegmentsOverlap(occupiedSegment, trackSegment)
-    })
-}
+// function isSectionOccupied(trackSegment: TrackSegment, occupiedSegments: TrackSegment[]): boolean {
+//     return occupiedSegments.some(occupiedSegment => {
+//         return doSegmentsOverlap(occupiedSegment, trackSegment)
+//     })
+// }
 
 function renderDebugIds(entities: Entity[], containingElement: SVGGElement) {
     entities.forEach(ent => {
@@ -110,7 +111,7 @@ function shouldDrawAllTheWay(track: Track, boundry: TrackBoundry) {
     return typeof nextTrack !== 'undefined';
 }
 
-function getRenderPositionsForTrackSegment(trackRenderPositions: [vec2,vec2], switchOffset: [boolean,boolean], trackLength: number, segment: TrackSegment): [vec2,vec2] {
+export function getRenderPositionsForTrackSegment(trackRenderPositions: [vec2,vec2], switchOffset: [boolean,boolean], trackLength: number, segment: TrackSegment): [vec2,vec2] {
     const [startPos,endPos] = trackRenderPositions;
     const [startOffset, endOffset] = switchOffset;
 
@@ -140,68 +141,71 @@ function getRenderPositionsForTrackSegment(trackRenderPositions: [vec2,vec2], sw
     return [startVec,endVec];
 }
 
-function renderTracks(tracks: Track[], occupiedSegments: TrackSegment[], containingElement: SVGElement) {
+function createTrackRenderers(tracks: Track[], containingElement: SVGElement): TrackSegmentSVGRender[] {
 
-    tracks.forEach((track: Track ,index) => {
-        const [startBoundry, endBoundry] = track.boundries;
+    
+    return flatten(tracks.map((track: Track, index): TrackSegmentSVGRender[] => {
+            const [startBoundry, endBoundry] = track.boundries;
 
-        if(!startBoundry.renderData || !endBoundry.renderData) {
-            throw new Error("Boundry lacks renderData");
-        }
-
-
-        if(!startBoundry.renderData.position || !endBoundry.renderData.position) {
-            throw new Error("Boundry lacks proper renderData");
-        }
-
-        const startPos = startBoundry.renderData.position;
-        const endPos = endBoundry.renderData.position;
-
-        const switchOffset: [boolean,boolean] = [
-            !shouldDrawAllTheWay(track, startBoundry),
-            !shouldDrawAllTheWay(track, endBoundry)
-        ]
+            if (!startBoundry.renderData || !endBoundry.renderData) {
+                throw new Error("Boundry lacks renderData");
+            }
 
 
-        // if(!shouldDrawAllTheWay(track, startBoundry)) {
-        //     vec2.add(startDrawPos,startDrawPos,lineOffset);
-        // }
+            if (!startBoundry.renderData.position || !endBoundry.renderData.position) {
+                throw new Error("Boundry lacks proper renderData");
+            }
 
-        // if(!shouldDrawAllTheWay(track, endBoundry)) {
-        //     vec2.subtract(endDrawPos, endDrawPos, lineOffset);
-        // }
+            const startPos = startBoundry.renderData.position;
+            const endPos = endBoundry.renderData.position;
 
-        const trackDetectionSegments = track.segments.detection;
+            const switchOffset: [boolean, boolean] = [
+                !shouldDrawAllTheWay(track, startBoundry),
+                !shouldDrawAllTheWay(track, endBoundry)
+            ];
 
-        trackDetectionSegments.forEach(trackDetectionSegment => {
-            const [segmentStart, segmentEnd] = getRenderPositionsForTrackSegment([startPos, endPos], switchOffset,track.length, trackDetectionSegment)
 
-            const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
-            line.setAttribute("x1", ""+ segmentStart[0])
-            line.setAttribute("y1", ""+ segmentStart[1])
-            line.setAttribute("x2", ""+ segmentEnd[0])
-            line.setAttribute("y2", ""+ segmentEnd[1])
-            // line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(track.id, occupiedTrackIds)))
-            line.setAttribute("stroke", getColorForOccupationStatus(isSectionOccupied(trackDetectionSegment, occupiedSegments)))
-            line.setAttribute("id", "" + index);
+            // if(!shouldDrawAllTheWay(track, startBoundry)) {
+            //     vec2.add(startDrawPos,startDrawPos,lineOffset);
+            // }
+            // if(!shouldDrawAllTheWay(track, endBoundry)) {
+            //     vec2.subtract(endDrawPos, endDrawPos, lineOffset);
+            // }
+            const trackDetectionSegments = track.segments.detection;
 
-            containingElement.appendChild(line);
-        })
+            const segments =  trackDetectionSegments.map((trackDetectionSegment) : TrackSegmentSVGRender =>  {
+                const [segmentStart, segmentEnd] = getRenderPositionsForTrackSegment([startPos, endPos], switchOffset, track.length, trackDetectionSegment);
 
-        // if(isTrack(ent) && ent.segments.length > 0) {
+                const line: SVGLineElement = document.createElementNS("http://www.w3.org/2000/svg", "line");
+
+                line.setAttribute("x1", "" + segmentStart[0]);
+                line.setAttribute("y1", "" + segmentStart[1]);
+                line.setAttribute("x2", "" + segmentEnd[0]);
+                line.setAttribute("y2", "" + segmentEnd[1]);
+                // line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(track.id, occupiedTrackIds)))
+                // line.setAttribute("stroke", getColorForOccupationStatus(isSectionOccupied(trackDetectionSegment, occupiedSegments)));
+                line.setAttribute("id", "" + index);
+
+                containingElement.appendChild(line);
+
+                return {
+                    element: line,
+                    track: track,
+                    trackSegment: trackDetectionSegment
+                }
+            })
+            
+            return segments;
+
+            // if(isTrack(ent) && ent.segments.length > 0) {
             // track.segments.forEach(segment => {
             //     [segment.end,segment.end].forEach(segmentPoint => {
             //         const pos = segmentPoint/track.length;
-
             //         const DIVIDER_LENGTH = 8;
-
             //         const basePos = vec2.lerp(vec2.create(),startPos,endPos,pos);
             //         const normal = getLineNormal(startPos,endPos);
-
             //         const posA = vec2.scaleAndAdd(vec2.create(),basePos,normal,DIVIDER_LENGTH)
             //         const posB = vec2.scaleAndAdd(vec2.create(),basePos,normal,-DIVIDER_LENGTH)
-
-
             //         const line: SVGElement = document.createElementNS("http://www.w3.org/2000/svg","line");
             //         line.setAttribute("x1", ""+ posA[0])
             //         line.setAttribute("y1", ""+ posA[1])
@@ -209,41 +213,75 @@ function renderTracks(tracks: Track[], occupiedSegments: TrackSegment[], contain
             //         line.setAttribute("y2", ""+ posB[1])
             //         line.setAttribute("stroke", COLOR_UNOCCUPIED),
             //         line.setAttribute("stroke-width", "1.5"),
-
             //         line.setAttribute("id", "" + index);
             //         containingElement.appendChild(line);
             //     })
             // })
-
-            
-    })
+        })
+    )
 }
 
-function createSVGElement<K extends keyof SVGElementTagNameMap>(elementName: K): SVGElementTagNameMap[K] {
+// function renderTrack(trackRenderer: TrackSegmentSVGRender) {
+
+// }
+
+export function createSVGElement<K extends keyof SVGElementTagNameMap>(elementName: K): SVGElementTagNameMap[K] {
     return document.createElementNS("http://www.w3.org/2000/svg", elementName);
 }
 
-export function renderEnv(env: Environment,renderElement: SVGElement): void {
-    renderElement.childNodes.forEach(child => renderElement.removeChild(child));
+export class SVGRenderer {
+    env: Environment;
+    renderElement: SVGElement;
+    trackGroup: SVGGElement;
+    textGroup: SVGGElement;
+    interactableGroup: SVGGElement;
+    trackRenderers: TrackSegmentSVGRender[];
 
-    const trackGroup = createSVGElement("g")
-    const textGroup = createSVGElement("g");
-    const interactableGroup = createSVGElement("g");
+    constructor(env: Environment, renderElement: SVGElement) {
+        this.env = env;
+        this.renderElement = renderElement
 
-    // const occupiedTracksArray = env.rides.map(ride. => getSpanningTracks(env.entities,ride));
-    // const occupiedTracksIds = flatten(env.rides.map(ride => ride.span.segments.map(segment => segment.trackId)))
+        this.trackGroup = createSVGElement("g");
+        this.textGroup = createSVGElement("g");
+        this.interactableGroup = createSVGElement("g");
+        this.trackRenderers = createTrackRenderers(env.tracks, this.trackGroup);
 
-    const occupiedTrackSegments = flatten(env.rides.map(ride => ride.span.segments))
+        renderSwitchInteractables(this.env.switches, this.interactableGroup);
+        renderDebugIds(this.env.entities, this.textGroup);
 
-    renderDebugIds(env.entities, textGroup)
-    renderTracks(env.tracks, occupiedTrackSegments, trackGroup)
-    renderSwitchInteractables(env.switches, interactableGroup);
+        renderElement.appendChild(this.trackGroup);
+        renderElement.appendChild(this.textGroup);
+        renderElement.appendChild(this.interactableGroup);
+    }
 
-    renderElement.appendChild(trackGroup);
-    renderElement.appendChild(textGroup);
-    renderElement.appendChild(interactableGroup)
-
+    render(dynamicEnvironment: DynamicEnvironment): void {
+        this.trackRenderers.forEach( trackRenderData => {
+            updateTrackRender(trackRenderData, dynamicEnvironment.occupiedTrackSegments)
+        });
+    }
 }
+
+// export function renderEnv(env: Environment,renderElement: SVGElement): void {
+//     // renderElement.childNodes.forEach(child => renderElement.removeChild(child));
+
+//     const trackGroup = createSVGElement("g")
+//     const textGroup = createSVGElement("g");
+//     const interactableGroup = createSVGElement("g");
+
+//     // const occupiedTracksArray = env.rides.map(ride. => getSpanningTracks(env.entities,ride));
+//     // const occupiedTracksIds = flatten(env.rides.map(ride => ride.span.segments.map(segment => segment.trackId)))
+
+//     const occupiedTrackSegments = flatten(env.rides.map(ride => ride.span.segments))
+
+//     renderDebugIds(env.entities, textGroup)
+//     renderTracks(env.tracks, occupiedTrackSegments, trackGroup)
+//     renderSwitchInteractables(env.switches, interactableGroup);
+
+//     renderElement.appendChild(trackGroup);
+//     renderElement.appendChild(textGroup);
+//     renderElement.appendChild(interactableGroup)
+
+// }
 
 function renderSwitchInteractables(switches: TrackSwitch[], interactableGroup: SVGGElement) {
     switches.forEach(trackSwitch => {

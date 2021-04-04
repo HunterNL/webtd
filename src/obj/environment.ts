@@ -4,6 +4,7 @@ import { Buffer, isBuffer } from "./buffer";
 import { isRideSave, loadRide, Ride } from "./ride";
 import { isSwitch, loadSwitch, TrackSwitch } from "./switch";
 import { isTrack, isTrackSave, Track, trackLoad } from "./track";
+import { TrackSegment } from "./trackSegment";
 import { isTrain, Train } from "./train";
 
 
@@ -21,6 +22,10 @@ export type Environment=  {
     entities: Entity[],
     switches: TrackSwitch[],
     buffers: Buffer[],
+}
+
+export type DynamicEnvironment = {
+    occupiedTrackSegments: TrackSegment[]
 }
 
 export function loadEnvironment(map: unknown): Environment {
