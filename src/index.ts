@@ -31,8 +31,11 @@ function onDomReady() {
 
         const occupiedTrackSegments = allSegments.filter(segmentA => rideSegments.some(segmentB => doSegmentsOverlap(segmentA, segmentB)))
 
+        const switches = env.switches
+
         renderer.render({
-            occupiedTrackSegments
+            occupiedTrackSegments,
+            switchPositions: switches
         });
         // renderEnv(env ,renderElement as any);
     })

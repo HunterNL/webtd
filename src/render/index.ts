@@ -5,8 +5,8 @@ import { isBuffer } from "../obj/buffer";
 import { DynamicEnvironment, Environment } from "../obj/environment";
 import { getPathTroughSwitch, throwSwitch, TrackBoundry, TrackSwitch } from "../obj/switch";
 import { Track } from "../obj/track";
-import { doSegmentsOverlap, TrackSegment } from "../obj/trackSegment";
-import { TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
+import { TrackSegment } from "../obj/trackSegment";
+import { createTrackRenderer, TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
 
 // const LABEL_OFFSET = 10;
 
@@ -101,7 +101,7 @@ function renderDebugIds(entities: Entity[], containingElement: SVGGElement) {
     })
 }
 
-function shouldDrawAllTheWay(track: Track, boundry: TrackBoundry) {
+export function shouldDrawAllTheWay(track: Track, boundry: TrackBoundry) {
     if(isBuffer(boundry)) {
         return true;
     }
@@ -141,61 +141,61 @@ export function getRenderPositionsForTrackSegment(trackRenderPositions: [vec2,ve
     return [startVec,endVec];
 }
 
-function createTrackRenderers(tracks: Track[], containingElement: SVGElement): TrackSegmentSVGRender[] {
+// function createTrackRenderers(tracks: Track[], containingElement: SVGElement): TrackSegmentSVGRender[] {
 
     
-    return flatten(tracks.map((track: Track, index): TrackSegmentSVGRender[] => {
-            const [startBoundry, endBoundry] = track.boundries;
+    // return flatten(tracks.map((track: Track, index): TrackSegmentSVGRender[] => {
+    //         // const [startBoundry, endBoundry] = track.boundries;
 
-            if (!startBoundry.renderData || !endBoundry.renderData) {
-                throw new Error("Boundry lacks renderData");
-            }
-
-
-            if (!startBoundry.renderData.position || !endBoundry.renderData.position) {
-                throw new Error("Boundry lacks proper renderData");
-            }
-
-            const startPos = startBoundry.renderData.position;
-            const endPos = endBoundry.renderData.position;
-
-            const switchOffset: [boolean, boolean] = [
-                !shouldDrawAllTheWay(track, startBoundry),
-                !shouldDrawAllTheWay(track, endBoundry)
-            ];
+    //         // if (!startBoundry.renderData || !endBoundry.renderData) {
+    //         //     throw new Error("Boundry lacks renderData");
+    //         // }
 
 
-            // if(!shouldDrawAllTheWay(track, startBoundry)) {
-            //     vec2.add(startDrawPos,startDrawPos,lineOffset);
-            // }
-            // if(!shouldDrawAllTheWay(track, endBoundry)) {
-            //     vec2.subtract(endDrawPos, endDrawPos, lineOffset);
-            // }
-            const trackDetectionSegments = track.segments.detection;
+    //         // if (!startBoundry.renderData.position || !endBoundry.renderData.position) {
+    //         //     throw new Error("Boundry lacks proper renderData");
+    //         // }
 
-            const segments =  trackDetectionSegments.map((trackDetectionSegment) : TrackSegmentSVGRender =>  {
-                const [segmentStart, segmentEnd] = getRenderPositionsForTrackSegment([startPos, endPos], switchOffset, track.length, trackDetectionSegment);
+    //         // const startPos = startBoundry.renderData.position;
+    //         // const endPos = endBoundry.renderData.position;
 
-                const line: SVGLineElement = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    //         const switchOffset: [boolean, boolean] = [
+    //             !shouldDrawAllTheWay(track, startBoundry),
+    //             !shouldDrawAllTheWay(track, endBoundry)
+    //         ];
 
-                line.setAttribute("x1", "" + segmentStart[0]);
-                line.setAttribute("y1", "" + segmentStart[1]);
-                line.setAttribute("x2", "" + segmentEnd[0]);
-                line.setAttribute("y2", "" + segmentEnd[1]);
-                // line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(track.id, occupiedTrackIds)))
-                // line.setAttribute("stroke", getColorForOccupationStatus(isSectionOccupied(trackDetectionSegment, occupiedSegments)));
-                line.setAttribute("id", "" + index);
 
-                containingElement.appendChild(line);
+    //         // if(!shouldDrawAllTheWay(track, startBoundry)) {
+    //         //     vec2.add(startDrawPos,startDrawPos,lineOffset);
+    //         // }
+    //         // if(!shouldDrawAllTheWay(track, endBoundry)) {
+    //         //     vec2.subtract(endDrawPos, endDrawPos, lineOffset);
+    //         // }
+    //         const trackDetectionSegments = track.segments.detection;
 
-                return {
-                    element: line,
-                    track: track,
-                    trackSegment: trackDetectionSegment
-                }
-            })
+    //         const segments =  trackDetectionSegments.map((trackDetectionSegment) : TrackSegmentSVGRender =>  {
+    //             const [segmentStart, segmentEnd] = getRenderPositionsForTrackSegment([startPos, endPos], switchOffset, track.length, trackDetectionSegment);
+
+    //             const line: SVGLineElement = document.createElementNS("http://www.w3.org/2000/svg", "line");
+
+    //             line.setAttribute("x1", "" + segmentStart[0]);
+    //             line.setAttribute("y1", "" + segmentStart[1]);
+    //             line.setAttribute("x2", "" + segmentEnd[0]);
+    //             line.setAttribute("y2", "" + segmentEnd[1]);
+    //             // line.setAttribute("stroke", getColorForOccupationStatus(isTrackOccupied(track.id, occupiedTrackIds)))
+    //             // line.setAttribute("stroke", getColorForOccupationStatus(isSectionOccupied(trackDetectionSegment, occupiedSegments)));
+    //             line.setAttribute("id", "" + index);
+
+    //             containingElement.appendChild(line);
+
+    //             return {
+    //                 element: line,
+    //                 track: track,
+    //                 trackSegment: trackDetectionSegment
+    //             }
+    //         })
             
-            return segments;
+    //         return segments;
 
             // if(isTrack(ent) && ent.segments.length > 0) {
             // track.segments.forEach(segment => {
@@ -217,9 +217,9 @@ function createTrackRenderers(tracks: Track[], containingElement: SVGElement): T
             //         containingElement.appendChild(line);
             //     })
             // })
-        })
-    )
-}
+        // })
+//     )
+// }
 
 // function renderTrack(trackRenderer: TrackSegmentSVGRender) {
 
@@ -244,7 +244,13 @@ export class SVGRenderer {
         this.trackGroup = createSVGElement("g");
         this.textGroup = createSVGElement("g");
         this.interactableGroup = createSVGElement("g");
-        this.trackRenderers = createTrackRenderers(env.tracks, this.trackGroup);
+        // this.trackRenderers = createTrackRenderers(env.tracks, this.trackGroup);
+
+        this.trackRenderers = flatten(this.env.tracks.map(track => {
+            return track.segments.detection.map(segment => {
+                return createTrackRenderer(track, segment, this.trackGroup)
+            })
+        }));
 
         renderSwitchInteractables(this.env.switches, this.interactableGroup);
         renderDebugIds(this.env.entities, this.textGroup);

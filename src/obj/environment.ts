@@ -25,7 +25,8 @@ export type Environment=  {
 }
 
 export type DynamicEnvironment = {
-    occupiedTrackSegments: TrackSegment[]
+    occupiedTrackSegments: TrackSegment[],
+    switchPositions: TrackSwitch[], // For now just the entire object
 }
 
 export function loadEnvironment(map: unknown): Environment {
