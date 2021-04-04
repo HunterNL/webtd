@@ -1,12 +1,26 @@
 import { flatten } from "lodash";
 import exampleEnvironment from "./data/map.json";
-import { loadEnvironment } from "./obj/environment";
+import { DynamicEnvironment, loadEnvironment } from "./obj/environment";
 import { createGameLoop } from "./obj/gameloop";
 import { doSegmentsOverlap } from "./obj/trackSegment";
 import { SVGRenderer } from "./render/index";
 
 
 const env = loadEnvironment(exampleEnvironment);
+const dynamicEnvironment: DynamicEnvironment = {
+    occupiedTrackSegments: [],
+    switchPositions: env.switches
+}
+
+
+function createRafFunction(renderer: SVGRenderer) {
+    const onRAF = function() {
+        renderer.render(dynamicEnvironment)
+        window.requestAnimationFrame(onRAF);
+    }
+
+    return onRAF;
+}
 
 function onDomReady() {
     const renderElement = document.getElementById("gamecontainer");
@@ -20,6 +34,12 @@ function onDomReady() {
     }
 
     const renderer = new SVGRenderer(env, renderElement)
+    renderer.render(dynamicEnvironment);
+
+    const raf = createRafFunction(renderer);
+
+    window.requestAnimationFrame(raf);
+
 
     const {start} = createGameLoop(env.entities, 1000, () => {
         const tracks = env.tracks;
@@ -29,15 +49,12 @@ function onDomReady() {
 
         const rideSegments = flatten(rides.map(ride => ride.span.segments));
 
-        const occupiedTrackSegments = allSegments.filter(segmentA => rideSegments.some(segmentB => doSegmentsOverlap(segmentA, segmentB)))
+        const newOccupiedTrackSegments = allSegments.filter(segmentA => rideSegments.some(segmentB => doSegmentsOverlap(segmentA, segmentB)))
 
-        const switches = env.switches
+        dynamicEnvironment.occupiedTrackSegments.length = 0;
+        dynamicEnvironment.occupiedTrackSegments.push(...newOccupiedTrackSegments); // TODO not this
 
-        renderer.render({
-            occupiedTrackSegments,
-            switchPositions: switches
-        });
-        // renderEnv(env ,renderElement as any);
+        renderer.render(dynamicEnvironment);
     })
 
     start();
