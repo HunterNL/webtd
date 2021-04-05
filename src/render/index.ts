@@ -6,6 +6,7 @@ import { DynamicEnvironment, Environment } from "../obj/environment";
 import { getPathTroughSwitch, throwSwitch, TrackBoundary, TrackSwitch } from "../obj/switch";
 import { Track } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
+import { createSignalRenderer, SignalSVGRenderer } from "./svg/signalRenderer";
 import { createTrackRenderer, TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
 
 // const LABEL_OFFSET = 10;
@@ -31,7 +32,7 @@ const SEGMENT_DISTANCE = 1;
 //     return Math.atan2(getLineVector(veca, vecb));
 // }
 
-function getLineVector(veca:vec2,vecb:vec2): vec2 {
+export function getLineVector(veca:vec2,vecb:vec2): vec2 {
     const diff = vec2.subtract(vec2.create(),vecb,veca);
     return vec2.normalize(diff,diff);
 }
@@ -236,6 +237,8 @@ export class SVGRenderer {
     textGroup: SVGGElement;
     interactableGroup: SVGGElement;
     trackRenderers: TrackSegmentSVGRender[];
+    signalGroup: SVGGElement;
+    signRenderers: SignalSVGRenderer[];
 
     constructor(env: Environment, renderElement: SVGElement) {
         this.env = env;
@@ -244,6 +247,12 @@ export class SVGRenderer {
         this.trackGroup = createSVGElement("g");
         this.textGroup = createSVGElement("g");
         this.interactableGroup = createSVGElement("g");
+        this.signalGroup = createSVGElement("g");
+
+        this.signRenderers = this.env.signals.map(signal => {
+            return createSignalRenderer(signal,this.signalGroup);
+        })
+
         // this.trackRenderers = createTrackRenderers(env.tracks, this.trackGroup);
 
         this.trackRenderers = flatten(this.env.tracks.map(track => {
@@ -258,6 +267,7 @@ export class SVGRenderer {
         renderElement.appendChild(this.trackGroup);
         renderElement.appendChild(this.textGroup);
         renderElement.appendChild(this.interactableGroup);
+        renderElement.appendChild(this.signalGroup);
     }
 
     render(dynamicEnvironment: DynamicEnvironment): void {

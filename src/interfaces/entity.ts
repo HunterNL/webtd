@@ -1,4 +1,5 @@
 import { Ride } from "../obj/ride";
+import { Signal } from "../obj/signal";
 import { TrackSwitch } from "../obj/switch";
 import { Track } from "../obj/track";
 import { Train } from "../obj/train";
@@ -12,7 +13,8 @@ interface EntityTypeMap {
     "track" : Track,
     "end" : Buffer,
     "switch" : TrackSwitch,
-    "ride" : Ride
+    "ride" : Ride,
+    "signal" : Signal
 }
 
 export type EntityType = keyof EntityTypeMap;

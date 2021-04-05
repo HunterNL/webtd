@@ -13,9 +13,7 @@ export type TrackSegmentSVGRender = {
     isLastSegment: boolean,
 }
 
-export function createTrackRenderer(track: Track, trackSegment: TrackSegment, parentElement: SVGElement): TrackSegmentSVGRender  {
-    const element = createSVGElement("line");
-
+export function getLinePositions(track: Track): [vec2,vec2] {
     const [startBoundary, endBoundary] = track.boundries;
 
     if (!startBoundary.renderData || !endBoundary.renderData) {
@@ -29,8 +27,15 @@ export function createTrackRenderer(track: Track, trackSegment: TrackSegment, pa
 
     const startPos = startBoundary.renderData.position;
     const endPos = endBoundary.renderData.position;
-    
 
+    return [startPos,endPos]
+}
+
+export function createTrackRenderer(track: Track, trackSegment: TrackSegment, parentElement: SVGElement): TrackSegmentSVGRender  {
+    const element = createSVGElement("line");
+
+    const [startPos,endPos] = getLinePositions(track);
+    
     // const switchOffsets : [boolean,boolean] = [false,false]; // TODO switch offsets
 
     // const [segmentStart,segmentEnd] = getRenderPositionsForTrackSegment(track.renderData.position,switchOffsets,track.length,trackSegment)

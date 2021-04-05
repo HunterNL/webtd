@@ -2,6 +2,7 @@ import { Entity, getEntityById, isEntity } from "../interfaces/entity";
 import { Identifier, isIdentifiable } from "../interfaces/id";
 import { Buffer, isBuffer } from "./buffer";
 import { isRideSave, loadRide, Ride } from "./ride";
+import { isSignalSave, loadSignal, Signal } from "./signal";
 import { isSwitch, loadSwitch, TrackSwitch } from "./switch";
 import { isTrack, isTrackSave, Track, trackLoad } from "./track";
 import { TrackSegment } from "./trackSegment";
@@ -22,6 +23,7 @@ export type Environment=  {
     entities: Entity[],
     switches: TrackSwitch[],
     buffers: Buffer[],
+    signals: Signal[],
 }
 
 export type DynamicEnvironment = {
@@ -48,6 +50,8 @@ export function loadEnvironment(map: unknown): Environment {
 
     const rides: Ride[] = entitiesSaves.filter(isRideSave).map(rideSave => loadRide(tracksAndTrains, rideSave));    
 
+    const signals: Signal[] = entitiesSaves.filter(isSignalSave).map(signalSave => loadSignal(tracks, signalSave))
+
     const entities: Entity[] = ([] as Entity[]).concat(tracks,rides,switches,buffers);
 
     return {
@@ -55,7 +59,8 @@ export function loadEnvironment(map: unknown): Environment {
         rides,
         entities,
         switches,
-        buffers
+        buffers,
+        signals
     }
 }
 

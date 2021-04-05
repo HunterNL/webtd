@@ -117,6 +117,16 @@
             "id": 7,
             "length" : 70,
             "carsets": []
+        },{
+            "type": "signal",
+            "id" : 8,
+            "renderData": {
+                "label" : "🚦"
+            },
+            "position": {
+                "trackId": 0,
+                "offset": 390
+            }
         }
     ]
 }
