@@ -53,8 +53,6 @@ function onDomReady() {
 
         dynamicEnvironment.occupiedTrackSegments.length = 0;
         dynamicEnvironment.occupiedTrackSegments.push(...newOccupiedTrackSegments); // TODO not this
-
-        renderer.render(dynamicEnvironment);
     })
 
     start();
