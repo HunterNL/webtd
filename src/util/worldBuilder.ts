@@ -2,8 +2,19 @@ import { Entity } from "../interfaces/entity";
 import { getId } from "../interfaces/id";
 import { Buffer } from "../obj/buffer";
 import { Junction } from "../obj/junction";
+import { createTrainSpan, Ride } from "../obj/ride";
+import { Direction, DIRECTION_FORWARD, TrackPosition } from "../obj/situation";
 import { isSwitch, SwitchState, TrackBoundary, TrackSwitch } from "../obj/switch";
 import { createTrack, isTrack, Track } from "../obj/track";
+import { Train } from "../obj/train";
+
+type RideArguments = {
+    train: Train;
+    position: TrackPosition;
+    direction?: Direction;
+    speed?: number;
+    targetSpeed?: number;
+};
 
 /***    
  * Utility class to manually build maps more conviniently with extra error checks
@@ -58,6 +69,35 @@ export class WorldBuilder {
         return trackSwitch
     }
 
+    addTrain(length: number): Train {
+        const train : Train = {
+            id: this.counter++,
+            length,
+            type: "train",
+        }
+
+        this.entities.push(train);
+
+        return train;
+    }
+
+    addRide({ train, position, direction = DIRECTION_FORWARD, speed = 0, targetSpeed = 0 }: RideArguments): Ride {
+        const ride : Ride = {
+            id: this.counter++,
+            position,
+            span: createTrainSpan(this.entities, position, train.length, direction),
+            speed,
+            train,
+            type: "ride",
+            direction: direction,
+            targetSpeed
+        }
+
+        this.entities.push(ride);
+
+        return ride;
+    }
+
     setJunction(switchId: number, junction: Junction): void {
         this.requireValidSwitchReferences(junction);
 
@@ -92,5 +132,3 @@ export class WorldBuilder {
     }
     
 }
-
-

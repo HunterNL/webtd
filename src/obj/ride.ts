@@ -1,9 +1,9 @@
-import { isNumber } from "lodash";
+import { clamp, isNumber } from "lodash";
 import { Entity, getEntityById } from "../interfaces/entity";
 import { advanceAlongTrack, Direction, isSituationSave, TrackPosition } from "./situation";
 import { isTrack } from "./track";
 import { TrackSpan } from "./trackSpan";
-import { isTrain, Train } from "./train";
+import { isTrain, Train, trainGetAccelleration } from "./train";
 
 export interface Ride extends Entity {
     direction: number;
@@ -11,6 +11,7 @@ export interface Ride extends Entity {
     train: Train,
     span: TrackSpan;
     speed: number,
+    targetSpeed: number
 }
 
 export type RideSave = Entity & {
@@ -18,20 +19,38 @@ export type RideSave = Entity & {
     speed: number
 }
 
-function createTrainSpan(entities: Entity[], forwardPosition: TrackPosition, length: number, forwardDirection: Direction): TrackSpan {
+export function createTrainSpan(entities: Entity[], forwardPosition: TrackPosition, length: number, forwardDirection: Direction): TrackSpan {
     return advanceAlongTrack(entities, forwardPosition, length * forwardDirection * -1);
 }
 
 export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
-    const speed = ride.speed * dt;
+    const {speed, targetSpeed} = ride;
+    const acceleration = trainGetAccelleration() * dt; // Change in speed allowed this tick
 
+    if(speed !== targetSpeed) {
+        applyRideAcceleration(targetSpeed, speed, acceleration, ride);
+    }
+
+
+    const movement = ride.speed * dt;
+
+    if(movement !== 0 ) {
+        applyRideMovement(entities, ride, movement);
+    }
+}
+
+function applyRideAcceleration(targetSpeed: number, speed: number, acceleration: number, ride: Ride) {
+    const speedDifference = clamp(targetSpeed - speed, -acceleration, acceleration);
+    ride.speed = speed + speedDifference;
+}
+
+function applyRideMovement(entities: Entity[], ride: Ride, movement: number) {
     // Figure out where the front of the train ends up
-    const trainMovement = advanceAlongTrack(entities, ride.position, speed * ride.direction);
+    const trainMovement = advanceAlongTrack(entities, ride.position, movement * ride.direction);
     const newForwardPosition = trainMovement.endPosition;
 
     // #TODO MULTI TRACK DRIFTING
     // Could figure out the postion of every bogey and do this check individualy, break connections if track differs
-
     // Run backwards from the front to figure out where the rest of the train ends up
     // const trainSpan = advanceAlongTrack(entities, newForwardPosition, ride.train.length * trainMovement.finalDirection * -1) // -1, we're looking backwards
     const trainSpan = createTrainSpan(entities, newForwardPosition, ride.train.length, trainMovement.finalDirection);
@@ -41,12 +60,9 @@ export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
     ride.position = newForwardPosition;
     ride.direction = trainMovement.finalDirection;
     ride.span = trainSpan;
-
-    console.log(ride.position);
-
 }
 
-export function rideCreate(train: Train, span: TrackSpan, speed: number,id: number, direction: Direction, position: TrackPosition): Ride {
+export function rideCreate(train: Train, span: TrackSpan, speed: number,id: number, direction: Direction, position: TrackPosition, targetSpeed: number): Ride {
     return {
         id,
         type: "ride",
@@ -55,6 +71,7 @@ export function rideCreate(train: Train, span: TrackSpan, speed: number,id: numb
         speed,
         direction,
         position,
+        targetSpeed
     }
 }
 
@@ -78,78 +95,11 @@ export function loadRide(entities: Entity[], rideSave: any): Ride {
         speed: rideSave.speed,
         train,
         type: "ride",
-        direction: rideSave.direction
+        direction: rideSave.direction,
+        targetSpeed: 11.11
     }
 }
-
-
-// export function rideOccupiesTrack(ride: Ride, track: Track): boolean {
-//     return ride.situation.track.id === track.id;
-// }
 
 export function isRide(any: any): any is Ride {
     return (isTrain(any.train) && typeof any.speed === "number");
 }
-
-// Todo: Proper support for spanning multiple tracks
-// export function getSpanningTracks(entities: Entity[], ride: Ride): Track[] {
-    
-
-//     const currentPosition = ride.situation
-//     const currentTrack = currentPosition.track;
-//     const trainLength = trainGetLength(ride.train);
-
-//     const returnTracks = [currentTrack]
-
-//     const seeker : TrackPosition = {
-//         offset: currentPosition.offset,
-//         track: currentPosition.track
-//     }
-
-//     advanceAlongTrack(entities,seeker, currentPosition.facingForward ? -trainLength : trainLength);
-
-//     const tailTrack = seeker.track;
-
-//     if(tailTrack.id !== currentTrack.id) {
-//         returnTracks.push(tailTrack);
-//     }
-
-
-//     return returnTracks;
-    
-//     // let currentTrack = ride.situation.track;
-//     // let facingForward = ride.situation.facingForward;
-
-//     // let boundaryBehind = (facingForward ? currentTrack.boundries[0] : currentTrack.boundries[1]);
-
-//     // let currentBackDirection = trackGetOtherEnd(currentTrack, (facingForward ? DIRECTION_FORWARD : DIRECTION_BACKWARD));
-//     // let trackBehind = situationRoomBehind(ride.situation)
-//     // let underFlow = trackBehind - trainLength;
-//     // let tempTrackId : number | undefined;
-//     // returnTracks.push(currentTrack);
-
-
-//     // if(underFlow < 0) {
-//     //     const trackBehindId = resolveBoundary(currentTrack,currentBackDirection);
-//     //     if(typeof trackBehindId === "undefined") {
-//     //         throw new Error("Train crashed");
-//     //     }
-//     //     const behindTrack = getEntityById(entities,trackBehindId,isTrack);
-//     //     returnTracks.push(behindTrack);
-//     // }
-
-//     // while(underFlow > 0) {
-//     //     currentBackDirection = trackGetOtherEnd(currentTrack, currentForwardDirection);
-
-//     //     tempTrackId = resolveBoundary(currentTrack, currentBackDirection);
-//     //     if(!tempTrackId) throw new Error("Train crashed");
-//     //     currentTrack = getEntityById(entities,tempTrackId,isTrack);
-//     //     currentForwardDirection = currentBackDirection.id;
-//     //     trackBehind = situationRoomBehind({direction: currentForwardDirection,remainingTrack:0,track:currentTrack})
-
-
-//     // }
-
-//     return returnTracks;
-
-// }

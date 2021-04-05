@@ -131,10 +131,6 @@ export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
     }
 }
 
-// export function createTrack(id: Identifier, boundries: [TrackBoundary,TrackBoundary],length:number): Track {
-//     return {id,boundries,length, type : "track",segments: generateSegments(length)}
-// }
-
 export function trackGetStart(track: Track): TrackBoundary {
     return track.boundries[0];
 }
@@ -188,25 +184,9 @@ export function isTrack(obj: any): obj is Track {
         isIdentifiable(obj);
 }
 
-// export function trackIsOccupied(tracks: Track[], track: Track, rides: Ride[]): boolean {
-//     return rides.map(t => t.situation).some(situation => situationIsOnTrack(tracks, track, situation))
-// }
-
-
 export function situationIsOnTrack(entities: Entity[], track: Track, position: TrackPosition): boolean {
     return position.track.id === track.id;
 }
-
-/**
- * Gets remaining track length towards a given trackboundary
- */
-// export function getRemainingTrackLength(track: Track,remaining: number,directionId: number): {
-//     const length = track.length;
-//     if(directionId === trackGetStart(track).id) {
-//         return 
-//     }
-
-// }
 
 // TODO Handle very short pieces of track
 export function getOffsetFromBoundaryDistance(track: Track, boundary: TrackBoundary, distance: number): number {

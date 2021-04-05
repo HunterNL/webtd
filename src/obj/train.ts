@@ -23,9 +23,29 @@ export function isTrain(unknown: unknown): unknown is Train {
 // export function trainGetTopSpeed(train: Train): number {
 //     return 38.8; // m/s
 // }
-// export function trainGetAccelleration(train: Train): number {
-//     return 1.0 // ms^2
-// }
+
+// Source: https://community.ns.nl/in-de-trein-11/wat-is-de-versnelling-van-een-intercity-6652
+export function trainGetAccelleration(): number {
+    // 0,46 for an NS sprinter
+    // 0,36 for high speed (to 200kmh)
+    // Intercity Direct is capped at 0,5ms/s
+
+    return 0.35 // ms^2 ///
+}
+
+/* 
+Maximum/emergency Braking force reference
+IC: 0,66 m/s2
+Sprinter: 0,8 m/s2
+Goederen: 0,31 m/s2 (goods)
+
+
+Realistic braking force
+IC: 0,5 m/s2
+Sprinter: 0,6 m/s2
+Goederen: 0,31 m/s2
+.
+*/
 
 // export function trainGetDecelleration(train: Train): number {
 //     return 0.8; //ms^2

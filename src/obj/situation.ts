@@ -139,72 +139,9 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
     
 }
 
-
-    // Else we're advancing over a switch... or running a buffer
-
-    // const nextTrackId = resolveBoundary(currentTrack, nextBoundary);
-    // const remainingDistance = (situation.offset + movement) % currentTrack.length;
-
-
-    // const nextTrack = getEntityById(entities, nextTrackId, isTrack);
-    // const newOffset = getOffsetFromBoundaryDistance(nextTrack, nextBoundary,Math.abs(remainingDistance))
-
-    // const endPosition: TrackPosition = {
-    //     offset: newOffset,
-    //     track: nextTrack
-    // }
-
-    // return {
-    //     startPosition,
-    //     endPosition,
-    //     segments: []
-    // }
-
-
-
-
-    // TODO Handle very short pieces of track
-    // const overFlowRoom = movement - situation.remainingTrack;
-
-    
-    // const nextTrack = trackGetNext(entities, currentTrack);
-
-    // if(!nextTrack) {
-    //     console.log("Train crashed");
-    //     return;
-    //     // TODO Handle nicer
-    // }
-
-    // situation.track = nextTrack;
-    // situation.direction = trackGetOtherEnd(nextTrack, situation.direction).id;
-    // situation.remainingTrack = nextTrack.length - overFlowRoom;
-
-
-// export function createSituation(track: Track, remainingTrack: number, direction: number): TrackPosition {
-//     return {
-//         remainingTrack,  track, direction
-//     }
-// }
-
 export function situationRoomBehind(situation: TrackPosition) {
     return getRemainingTrackInDirection(situation,DIRECTION_BACKWARD)
 }
 export function isSituationSave(any: any): any is SituationSave {
     return isNumber(any.trackId) && isNumber(any.offset);
 }
-
-// export function situationIsValidForLength(situation: Situation, length: number): boolean {
-//     const track = situation.track;
-//     const position = situation.position;
-//     const trackLength = track.length;
-
-//     if(position>trackLength) {
-//         return false; // Train front exceeds track length
-//     }
-
-//     if(position-length<0) {
-//         return false; // Train escapes end
-//     }
-
-//     return true;
-// }
