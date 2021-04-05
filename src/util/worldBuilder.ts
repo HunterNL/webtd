@@ -2,7 +2,7 @@ import { Entity } from "../interfaces/entity";
 import { getId } from "../interfaces/id";
 import { Buffer } from "../obj/buffer";
 import { Junction } from "../obj/junction";
-import { isSwitch, SwitchState, TrackBoundry, TrackSwitch } from "../obj/switch";
+import { isSwitch, SwitchState, TrackBoundary, TrackSwitch } from "../obj/switch";
 import { createTrack, isTrack, Track } from "../obj/track";
 
 /***    
@@ -34,11 +34,11 @@ export class WorldBuilder {
         }
     }
 
-    addTrack(startBoundry: TrackBoundry, endBoundry: TrackBoundry, length: number): Track {
-        this.requireIdPresent(startBoundry.id);
-        this.requireIdPresent(endBoundry.id);
+    addTrack(startBoundary: TrackBoundary, endBoundary: TrackBoundary, length: number): Track {
+        this.requireIdPresent(startBoundary.id);
+        this.requireIdPresent(endBoundary.id);
 
-        const track = createTrack(this.counter++, startBoundry, endBoundry, length);
+        const track = createTrack(this.counter++, startBoundary, endBoundary, length);
 
         this.entities.push(track);
 

@@ -12,7 +12,7 @@ export function eq<T>(a: T) {
     }
 }
 
-export type TrackBoundry = TrackSwitch | Buffer;
+export type TrackBoundary = TrackSwitch | Buffer;
 
 export enum SwitchState {
     Straight,
@@ -22,7 +22,7 @@ export enum SwitchState {
     Faulty
 }
 
-export function isTrackBoundry(any: Entity): any is TrackBoundry {
+export function isTrackBoundary(any: Entity): any is TrackBoundary {
     return any.type === "switch" || any.type === "end";
 }
 
@@ -93,8 +93,8 @@ export function getPathTroughSwitch(swi: TrackSwitch, trackId: Identifier): Iden
 
 }
 
-export function resolveBoundry(track: Track, boundry: TrackBoundry): number | undefined {
-    if(isBuffer(boundry)) return;
+export function resolveBoundary(track: Track, boundary: TrackBoundary): number | undefined {
+    if(isBuffer(boundary)) return;
 
-    return getPathTroughSwitch(boundry, track.id);
+    return getPathTroughSwitch(boundary, track.id);
 }

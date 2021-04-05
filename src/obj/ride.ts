@@ -120,7 +120,7 @@ export function isRide(any: any): any is Ride {
 //     // let currentTrack = ride.situation.track;
 //     // let facingForward = ride.situation.facingForward;
 
-//     // let boundryBehind = (facingForward ? currentTrack.boundries[0] : currentTrack.boundries[1]);
+//     // let boundaryBehind = (facingForward ? currentTrack.boundries[0] : currentTrack.boundries[1]);
 
 //     // let currentBackDirection = trackGetOtherEnd(currentTrack, (facingForward ? DIRECTION_FORWARD : DIRECTION_BACKWARD));
 //     // let trackBehind = situationRoomBehind(ride.situation)
@@ -130,7 +130,7 @@ export function isRide(any: any): any is Ride {
 
 
 //     // if(underFlow < 0) {
-//     //     const trackBehindId = resolveBoundry(currentTrack,currentBackDirection);
+//     //     const trackBehindId = resolveBoundary(currentTrack,currentBackDirection);
 //     //     if(typeof trackBehindId === "undefined") {
 //     //         throw new Error("Train crashed");
 //     //     }
@@ -141,7 +141,7 @@ export function isRide(any: any): any is Ride {
 //     // while(underFlow > 0) {
 //     //     currentBackDirection = trackGetOtherEnd(currentTrack, currentForwardDirection);
 
-//     //     tempTrackId = resolveBoundry(currentTrack, currentBackDirection);
+//     //     tempTrackId = resolveBoundary(currentTrack, currentBackDirection);
 //     //     if(!tempTrackId) throw new Error("Train crashed");
 //     //     currentTrack = getEntityById(entities,tempTrackId,isTrack);
 //     //     currentForwardDirection = currentBackDirection.id;

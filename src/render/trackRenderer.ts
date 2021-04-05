@@ -16,19 +16,19 @@ export type TrackSegmentSVGRender = {
 export function createTrackRenderer(track: Track, trackSegment: TrackSegment, parentElement: SVGElement): TrackSegmentSVGRender  {
     const element = createSVGElement("line");
 
-    const [startBoundry, endBoundry] = track.boundries;
+    const [startBoundary, endBoundary] = track.boundries;
 
-    if (!startBoundry.renderData || !endBoundry.renderData) {
-        throw new Error("Boundry lacks renderData");
+    if (!startBoundary.renderData || !endBoundary.renderData) {
+        throw new Error("Boundary lacks renderData");
     }
 
 
-    if (!startBoundry.renderData.position || !endBoundry.renderData.position) {
-        throw new Error("Boundry lacks proper renderData");
+    if (!startBoundary.renderData.position || !endBoundary.renderData.position) {
+        throw new Error("Boundary lacks proper renderData");
     }
 
-    const startPos = startBoundry.renderData.position;
-    const endPos = endBoundry.renderData.position;
+    const startPos = startBoundary.renderData.position;
+    const endPos = endBoundary.renderData.position;
     
 
     // const switchOffsets : [boolean,boolean] = [false,false]; // TODO switch offsets

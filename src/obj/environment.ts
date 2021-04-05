@@ -70,7 +70,7 @@ export function getNextFreeId(env: Environment): number {
 export function verifyConnections(env: Environment): void {
     const getEnt = (n: Identifier) => getEntityById(env.entities,n,isEntity);
 
-    env.tracks.forEach(track => track.boundries.forEach(boundry => getEnt(boundry.id)));
+    env.tracks.forEach(track => track.boundries.forEach(boundary => getEnt(boundary.id)));
     env.switches.forEach(trackSwitch => {
         trackSwitch.junction.straightConnections.map(connection => connection.forEach(trackId => getEntityById(env.entities, trackId, isTrack)))
         trackSwitch.junction.sideConnections.map(connection => connection.forEach(trackId => getEntityById(env.entities, trackId, isTrack)))

@@ -2,14 +2,14 @@ import { Entity, getEntityById } from "../interfaces/entity";
 import { getId, Identifiable, isIdentifiable } from "../interfaces/id";
 import { isLengthable, Lengthable } from "../interfaces/lengthable";
 import { Direction, DIRECTION_FORWARD, TrackPosition } from "./situation";
-import { isTrackBoundry, resolveBoundry, TrackBoundry } from "./switch";
+import { isTrackBoundary, resolveBoundary, TrackBoundary } from "./switch";
 import { splitTrackAtPoints, TrackSegment } from "./trackSegment";
 
 
 
 // A track is the full lenght of track between two of either a switch or endpoint
 export type Track = Identifiable & Lengthable & Entity & {
-    boundries: [TrackBoundry,TrackBoundry],
+    boundries: [TrackBoundary,TrackBoundary],
     length: number
     detectionDeviders: number[]
     renderData?: {
@@ -23,9 +23,9 @@ export type Track = Identifiable & Lengthable & Entity & {
     
 }
 
-export function createTrack(id: number, startBoundry: TrackBoundry, endBoundry: TrackBoundry, length: number): Track {
+export function createTrack(id: number, startBoundary: TrackBoundary, endBoundary: TrackBoundary, length: number): Track {
     return {
-        boundries: [startBoundry,endBoundry],
+        boundries: [startBoundary,endBoundary],
         detectionDeviders: [],
         id,
         length,
@@ -34,18 +34,18 @@ export function createTrack(id: number, startBoundry: TrackBoundry, endBoundry: 
     }
 }
 
-export function getBoundryPosition(track: Track, boundryId: number): number {
-    const [entryBoundryId,exitBoundryId] = track.boundries.map(getId);
+export function getBoundaryPosition(track: Track, boundaryId: number): number {
+    const [entryBoundaryId,exitBoundaryId] = track.boundries.map(getId);
 
-    if(boundryId === entryBoundryId) {
+    if(boundaryId === entryBoundaryId) {
         return 0
     }
 
-    if(boundryId === exitBoundryId) {
+    if(boundaryId === exitBoundaryId) {
         return track.length;
     }
 
-    throw new Error("Unknown boundryId");
+    throw new Error("Unknown boundaryId");
 }
 
 export interface TrackSave extends Identifiable, Lengthable, Entity {
@@ -104,12 +104,12 @@ export function isTrackSave(any: any): any is TrackSave {
     return any.type === "track";
 }
 
-export function resolveBoundries(entities: Entity[],ids: number[]): [TrackBoundry, TrackBoundry] {
-    const entA = getEntityById(entities,ids[0],isTrackBoundry);
-    const entB = getEntityById(entities,ids[1],isTrackBoundry);
+export function resolveBoundries(entities: Entity[],ids: number[]): [TrackBoundary, TrackBoundary] {
+    const entA = getEntityById(entities,ids[0],isTrackBoundary);
+    const entB = getEntityById(entities,ids[1],isTrackBoundary);
 
     if(!entA || !entB) {
-        throw new Error("Could not resolve boundry!");
+        throw new Error("Could not resolve boundary!");
     }
 
     return [entA, entB]
@@ -131,41 +131,41 @@ export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
     }
 }
 
-// export function createTrack(id: Identifier, boundries: [TrackBoundry,TrackBoundry],length:number): Track {
+// export function createTrack(id: Identifier, boundries: [TrackBoundary,TrackBoundary],length:number): Track {
 //     return {id,boundries,length, type : "track",segments: generateSegments(length)}
 // }
 
-export function trackGetStart(track: Track): TrackBoundry {
+export function trackGetStart(track: Track): TrackBoundary {
     return track.boundries[0];
 }
 
-export function trackGetEnd(track: Track): TrackBoundry {
+export function trackGetEnd(track: Track): TrackBoundary {
     return track.boundries[1];
 }
 
-export function trackGetOtherEnd(track: Track, boundryId: number): TrackBoundry {
+export function trackGetOtherEnd(track: Track, boundaryId: number): TrackBoundary {
     const start = trackGetStart(track);
     const end = trackGetEnd(track);
 
-    if(boundryId !== start.id && boundryId !== end.id) {
-        throw new Error("Given endId is not a boundry of this track");
+    if(boundaryId !== start.id && boundaryId !== end.id) {
+        throw new Error("Given endId is not a boundary of this track");
     }
 
-    if(boundryId === start.id) {
+    if(boundaryId === start.id) {
         return end;
     }
 
     return start;
 }
 
-export function getNextBoundry(track: Track, direction: Direction): TrackBoundry {
-    return (direction === DIRECTION_FORWARD ? track.boundries[1] : track.boundries[0]); //Forward = towards the last/second boundry
+export function getNextBoundary(track: Track, direction: Direction): TrackBoundary {
+    return (direction === DIRECTION_FORWARD ? track.boundries[1] : track.boundries[0]); //Forward = towards the last/second boundary
 }
 
 /***   
- * If given boundry between two tracks is a point where the offset flow reverses, AKA both tracks share a "high" or "low" point there
+ * If given boundary between two tracks is a point where the offset flow reverses, AKA both tracks share a "high" or "low" point there
  */
-export function boundryReversesTrackDirection(boundry: TrackBoundry, trackA: Track, trackB: Track): boolean {
+export function boundaryReversesTrackDirection(boundary: TrackBoundary, trackA: Track, trackB: Track): boolean {
     const sharesLowPoint = trackA.boundries[0].id === trackB.boundries[0].id;
     const sharesHighPoint = trackB.boundries[1].id === trackB.boundries[1].id;
 
@@ -173,8 +173,8 @@ export function boundryReversesTrackDirection(boundry: TrackBoundry, trackA: Tra
 }
 
 export function trackGetNext(entities: Entity[], track: Track) : Track | undefined {
-    const boundry = trackGetEnd(track)
-    const nextId = resolveBoundry(track, boundry);
+    const boundary = trackGetEnd(track)
+    const nextId = resolveBoundary(track, boundary);
 
     if(!nextId) return;
 
@@ -184,7 +184,7 @@ export function trackGetNext(entities: Entity[], track: Track) : Track | undefin
 export function isTrack(obj: any): obj is Track {
     return isLengthable(obj) && 
         Array.isArray((obj as Track).boundries) && 
-        (obj as Track).boundries.every(isTrackBoundry) && 
+        (obj as Track).boundries.every(isTrackBoundary) && 
         isIdentifiable(obj);
 }
 
@@ -198,7 +198,7 @@ export function situationIsOnTrack(entities: Entity[], track: Track, position: T
 }
 
 /**
- * Gets remaining track length towards a given trackboundry
+ * Gets remaining track length towards a given trackboundary
  */
 // export function getRemainingTrackLength(track: Track,remaining: number,directionId: number): {
 //     const length = track.length;
@@ -209,8 +209,8 @@ export function situationIsOnTrack(entities: Entity[], track: Track, position: T
 // }
 
 // TODO Handle very short pieces of track
-export function getOffsetFromBoundryDistance(track: Track, boundry: TrackBoundry, distance: number): number {
-    if(boundry.id === track.boundries[0].id) {
+export function getOffsetFromBoundaryDistance(track: Track, boundary: TrackBoundary, distance: number): number {
+    if(boundary.id === track.boundries[0].id) {
         // Entering from the "front", offset is distance
         return distance
     } else {
@@ -219,13 +219,13 @@ export function getOffsetFromBoundryDistance(track: Track, boundry: TrackBoundry
     }
 }
 
-export function getDirectionAwayFromBoundry(track: Track, boundryId: number): Direction {
-    if(track.boundries[0].id === boundryId) {
+export function getDirectionAwayFromBoundary(track: Track, boundaryId: number): Direction {
+    if(track.boundries[0].id === boundaryId) {
         return 1
     }
-    if(track.boundries[1].id === boundryId) {
+    if(track.boundries[1].id === boundaryId) {
         return -1
     }
 
-    throw new Error("Unknown boundryId");
+    throw new Error("Unknown boundaryId");
 }

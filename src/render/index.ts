@@ -3,7 +3,7 @@ import { flatten } from "lodash";
 import { Entity } from "../interfaces/entity";
 import { isBuffer } from "../obj/buffer";
 import { DynamicEnvironment, Environment } from "../obj/environment";
-import { getPathTroughSwitch, throwSwitch, TrackBoundry, TrackSwitch } from "../obj/switch";
+import { getPathTroughSwitch, throwSwitch, TrackBoundary, TrackSwitch } from "../obj/switch";
 import { Track } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
 import { createTrackRenderer, TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
@@ -101,12 +101,12 @@ function renderDebugIds(entities: Entity[], containingElement: SVGGElement) {
     })
 }
 
-export function shouldDrawAllTheWay(track: Track, boundry: TrackBoundry) {
-    if(isBuffer(boundry)) {
+export function shouldDrawAllTheWay(track: Track, boundary: TrackBoundary) {
+    if(isBuffer(boundary)) {
         return true;
     }
 
-    const nextTrack = getPathTroughSwitch(boundry, track.id);
+    const nextTrack = getPathTroughSwitch(boundary, track.id);
 
     return typeof nextTrack !== 'undefined';
 }
@@ -145,30 +145,30 @@ export function getRenderPositionsForTrackSegment(trackRenderPositions: [vec2,ve
 
     
     // return flatten(tracks.map((track: Track, index): TrackSegmentSVGRender[] => {
-    //         // const [startBoundry, endBoundry] = track.boundries;
+    //         // const [startBoundary, endBoundary] = track.boundries;
 
-    //         // if (!startBoundry.renderData || !endBoundry.renderData) {
-    //         //     throw new Error("Boundry lacks renderData");
+    //         // if (!startBoundary.renderData || !endBoundary.renderData) {
+    //         //     throw new Error("Boundary lacks renderData");
     //         // }
 
 
-    //         // if (!startBoundry.renderData.position || !endBoundry.renderData.position) {
-    //         //     throw new Error("Boundry lacks proper renderData");
+    //         // if (!startBoundary.renderData.position || !endBoundary.renderData.position) {
+    //         //     throw new Error("Boundary lacks proper renderData");
     //         // }
 
-    //         // const startPos = startBoundry.renderData.position;
-    //         // const endPos = endBoundry.renderData.position;
+    //         // const startPos = startBoundary.renderData.position;
+    //         // const endPos = endBoundary.renderData.position;
 
     //         const switchOffset: [boolean, boolean] = [
-    //             !shouldDrawAllTheWay(track, startBoundry),
-    //             !shouldDrawAllTheWay(track, endBoundry)
+    //             !shouldDrawAllTheWay(track, startBoundary),
+    //             !shouldDrawAllTheWay(track, endBoundary)
     //         ];
 
 
-    //         // if(!shouldDrawAllTheWay(track, startBoundry)) {
+    //         // if(!shouldDrawAllTheWay(track, startBoundary)) {
     //         //     vec2.add(startDrawPos,startDrawPos,lineOffset);
     //         // }
-    //         // if(!shouldDrawAllTheWay(track, endBoundry)) {
+    //         // if(!shouldDrawAllTheWay(track, endBoundary)) {
     //         //     vec2.subtract(endDrawPos, endDrawPos, lineOffset);
     //         // }
     //         const trackDetectionSegments = track.segments.detection;

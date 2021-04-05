@@ -1,7 +1,7 @@
 import { isNumber } from "lodash";
 import { Entity, getEntityById } from "../interfaces/entity";
-import { resolveBoundry } from "./switch";
-import { getBoundryPosition, getDirectionAwayFromBoundry, getNextBoundry, isTrack, Track } from "./track";
+import { resolveBoundary } from "./switch";
+import { getBoundaryPosition, getDirectionAwayFromBoundary, getNextBoundary, isTrack, Track } from "./track";
 import { createSegment, TrackSegment } from "./trackSegment";
 import { TrackSpan } from "./trackSpan";
 
@@ -55,20 +55,20 @@ export function movementFitsInsideTrack(position: TrackPosition, movement: numbe
 }
 
 /**
- * Get absolute distance to boundry from current position
+ * Get absolute distance to boundary from current position
  * @param position 
- * @param boundryId 
+ * @param boundaryId 
  */
-function getDistanceToBoundry(position: TrackPosition, boundryId: number): number {
-    const [entryBoundry, exitBoundry] = position.track.boundries;
+function getDistanceToBoundary(position: TrackPosition, boundaryId: number): number {
+    const [entryBoundary, exitBoundary] = position.track.boundries;
 
-    if(boundryId === entryBoundry.id) {
+    if(boundaryId === entryBoundary.id) {
         return position.offset
-    } else if (boundryId === exitBoundry.id) {
+    } else if (boundaryId === exitBoundary.id) {
         return position.track.length - position.offset;
     } 
 
-    throw new Error("No boundry with id " + boundryId);
+    throw new Error("No boundary with id " + boundaryId);
 }
 
 /***   
@@ -87,12 +87,12 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
     let movementLeft = movement;
 
     while(!movementFitsInsideTrack(currentPosition, movementLeft)) {
-        // Figure out the next boundry we're gonna hit
+        // Figure out the next boundary we're gonna hit
 
         const direction = getDirectionForMovement(movementLeft)
-        const nextBoundry = getNextBoundry(currentPosition.track, direction);
-        const distanceToBoundry = getDistanceToBoundry(currentPosition, nextBoundry.id);
-        const nextTrackId = resolveBoundry(currentPosition.track,nextBoundry);
+        const nextBoundary = getNextBoundary(currentPosition.track, direction);
+        const distanceToBoundary = getDistanceToBoundary(currentPosition, nextBoundary.id);
+        const nextTrackId = resolveBoundary(currentPosition.track,nextBoundary);
         
         if(typeof nextTrackId === "undefined") {
             // Oops
@@ -102,19 +102,19 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
         const nextTrack = getEntityById(entities, nextTrackId, isTrack);
 
         // Save the segment we "traveled"
-        const segment = createSegment(currentPosition.track.id,currentPosition.offset,currentPosition.offset+distanceToBoundry*direction)
+        const segment = createSegment(currentPosition.track.id,currentPosition.offset,currentPosition.offset+distanceToBoundary*direction)
         segments.push(segment);
 
         // And advance to the next track.
-        currentPosition.offset = getBoundryPosition(nextTrack, nextBoundry.id);
+        currentPosition.offset = getBoundaryPosition(nextTrack, nextBoundary.id);
         currentPosition.track = nextTrack;
 
         // Subtract movement
-        movementLeft = movementLeft - (distanceToBoundry * direction);
+        movementLeft = movementLeft - (distanceToBoundary * direction);
 
         // Reverse our movementLeft if we need to
-        const continueDirectionAfterBoundry = getDirectionAwayFromBoundry(nextTrack, nextBoundry.id);
-        if(continueDirectionAfterBoundry !== direction) {
+        const continueDirectionAfterBoundary = getDirectionAwayFromBoundary(nextTrack, nextBoundary.id);
+        if(continueDirectionAfterBoundary !== direction) {
             movementLeft = movementLeft * -1;
         }        
 
@@ -142,12 +142,12 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
 
     // Else we're advancing over a switch... or running a buffer
 
-    // const nextTrackId = resolveBoundry(currentTrack, nextBoundry);
+    // const nextTrackId = resolveBoundary(currentTrack, nextBoundary);
     // const remainingDistance = (situation.offset + movement) % currentTrack.length;
 
 
     // const nextTrack = getEntityById(entities, nextTrackId, isTrack);
-    // const newOffset = getOffsetFromBoundryDistance(nextTrack, nextBoundry,Math.abs(remainingDistance))
+    // const newOffset = getOffsetFromBoundaryDistance(nextTrack, nextBoundary,Math.abs(remainingDistance))
 
     // const endPosition: TrackPosition = {
     //     offset: newOffset,

@@ -1,6 +1,6 @@
 import { Buffer } from "./buffer"
 import { advanceAlongTrack, DIRECTION_BACKWARD, DIRECTION_FORWARD, TrackPosition } from "./situation"
-import { TrackSwitch, TrackBoundry, SwitchState } from "./switch"
+import { TrackSwitch, TrackBoundary, SwitchState } from "./switch"
 import { Track } from "./track"
 import { TrackSegment } from "./trackSegment";
 
@@ -12,7 +12,7 @@ function getNewId() {
     return id++;
 }
 
-function createTestTrack(boundries: TrackBoundry[], length: number) : Track {
+function createTestTrack(boundries: TrackBoundary[], length: number) : Track {
     return {boundries, length, id : getNewId(),type:"track" } as Track;
 }
 
