@@ -3,6 +3,7 @@ import { getId } from "../interfaces/id";
 import { Buffer } from "../obj/buffer";
 import { Junction } from "../obj/junction";
 import { createTrainSpan, Ride } from "../obj/ride";
+import { Signal } from "../obj/signal";
 import { Direction, DIRECTION_FORWARD, TrackPosition } from "../obj/situation";
 import { isSwitch, SwitchState, TrackBoundary, TrackSwitch } from "../obj/switch";
 import { createTrack, isTrack, Track } from "../obj/track";
@@ -96,6 +97,21 @@ export class WorldBuilder {
         this.entities.push(ride);
 
         return ride;
+    }
+
+    addSignal(track: Track, offset: number) {
+        const signal : Signal = {
+            id: this.counter++,
+            position: {
+                offset,
+                track
+            },
+            type: "signal",
+        }
+
+        this.entities.push(signal);
+
+        return signal;
     }
 
     setJunction(switchId: number, junction: Junction): void {

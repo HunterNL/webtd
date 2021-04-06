@@ -1,5 +1,6 @@
 import { Identifier } from "../interfaces/id";
 import { doRangesOverlap } from "../util/rangeOverlap";
+import { TrackPosition } from "./situation";
 
 /***
  * A range within a single piece of track
@@ -69,4 +70,12 @@ export function splitTrackAtPoints(trackId: number, length: number, points: numb
 
     return segments;
 
+}
+
+export function segmentContainsPosition(segment: TrackSegment, position: TrackPosition): boolean {
+    if(segment.trackId !== position.track.id) {
+        return false
+    }
+
+    return ((position.offset >= segment.start) && (position.offset <= segment.end));
 }

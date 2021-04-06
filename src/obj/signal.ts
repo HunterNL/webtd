@@ -1,6 +1,8 @@
 import { Entity, getEntityById } from "../interfaces/entity";
-import { TrackPosition } from "./situation";
+import { Ride } from "./ride";
+import { advanceAlongTrack, TrackPosition } from "./situation";
 import { isTrack } from "./track";
+import { segmentContainsPosition } from "./trackSegment";
 
 export type Signal = Entity & {
     position: TrackPosition,
@@ -27,3 +29,21 @@ export function loadSignal(entities: Entity[], signalSave: any): Signal {
 export function isSignalSave(any: any) {
     return any.type === "signal";
 }
+
+export function isSignal(any: any): any is Signal {
+    return any.type === 'signal'
+}
+
+export function lookupSignals(entities: Entity[], ride: Ride, distance: number) {
+    const {segments} = advanceAlongTrack(entities, ride.position, distance);
+
+    const allSignals = entities.filter(isSignal);
+
+
+    // TODO Return in order
+    return allSignals.filter(signal => {
+        return segments.some(segment => segmentContainsPosition(segment,signal.position))
+    })
+    
+}
+

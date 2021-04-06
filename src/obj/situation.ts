@@ -118,6 +118,7 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
             movementLeft = movementLeft * -1;
         }        
 
+        // Little failsafe, might aid in debugging 
         if(Math.abs(movementLeft) > Math.abs(movement)) {
             throw new Error("Logic error, movementleft should never exceed movement")
         }
