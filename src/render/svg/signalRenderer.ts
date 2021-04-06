@@ -16,14 +16,14 @@ export function getSignalFractionalLocation(signal: Signal): number {
 }
 
 
-export function createSignalRenderer(sign: Signal, parentElement: SVGElement) : SignalSVGRenderer {
+export function createSignalRenderer(signal: Signal, parentElement: SVGElement) : SignalSVGRenderer {
 
     const svgText = createSVGElement("text");
 
-    const label = sign?.renderData?.label || "SIGNAL";
+    const label = signal?.renderData?.label || "SIGNAL";
 
-    const [startPos,endPos] = getLinePositions(sign.position.track);
-    const positionFraction = getSignalFractionalLocation(sign);
+    const [startPos,endPos] = getLinePositions(signal.position.track);
+    const positionFraction = getSignalFractionalLocation(signal);
 
     const signalRenderLocation = vec2.lerp(vec2.create(), startPos, endPos, positionFraction);
 
@@ -36,7 +36,7 @@ export function createSignalRenderer(sign: Signal, parentElement: SVGElement) : 
 
     return {
         position: signalRenderLocation,
-        signal: sign,
+        signal: signal,
         renderLabel: label
     }
 }
