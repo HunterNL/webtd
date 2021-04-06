@@ -1,6 +1,7 @@
 import { Entity } from "../interfaces/entity";
 import { getId } from "../interfaces/id";
 import { Buffer } from "../obj/buffer";
+import { DriverMode } from "../obj/driver";
 import { Junction } from "../obj/junction";
 import { createTrainSpan, Ride } from "../obj/ride";
 import { Signal } from "../obj/signal";
@@ -15,6 +16,7 @@ type RideArguments = {
     direction?: Direction;
     speed?: number;
     targetSpeed?: number;
+    driverMode?: DriverMode
 };
 
 /***    
@@ -82,7 +84,7 @@ export class WorldBuilder {
         return train;
     }
 
-    addRide({ train, position, direction = DIRECTION_FORWARD, speed = 0, targetSpeed = 0 }: RideArguments): Ride {
+    addRide({ train, position, direction = DIRECTION_FORWARD, speed = 0, driverMode }: RideArguments): Ride {
         const ride : Ride = {
             id: this.counter++,
             position,
@@ -91,7 +93,7 @@ export class WorldBuilder {
             train,
             type: "ride",
             direction: direction,
-            targetSpeed
+            driverMode
         }
 
         this.entities.push(ride);

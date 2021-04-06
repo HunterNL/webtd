@@ -12,6 +12,8 @@ const dynamicEnvironment: DynamicEnvironment = {
     switchPositions: env.switches
 }
 
+console.log(env);
+
 
 function createRafFunction(renderer: SVGRenderer) {
     const onRAF = function() {

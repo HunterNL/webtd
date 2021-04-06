@@ -1,17 +1,18 @@
 import { clamp, isNumber } from "lodash";
 import { Entity, getEntityById } from "../interfaces/entity";
+import { DriverMode, driveTrain, hasDriver } from "./driver";
 import { advanceAlongTrack, Direction, isSituationSave, TrackPosition } from "./situation";
 import { isTrack } from "./track";
 import { TrackSpan } from "./trackSpan";
 import { isTrain, Train, trainGetAccelleration } from "./train";
 
-export interface Ride extends Entity {
+export interface Ride extends Entity{
     direction: number;
     position: TrackPosition;
     train: Train,
     span: TrackSpan;
     speed: number,
-    targetSpeed: number
+    driverMode?: DriverMode
 }
 
 export type RideSave = Entity & {
@@ -23,28 +24,33 @@ export function createTrainSpan(entities: Entity[], forwardPosition: TrackPositi
     return advanceAlongTrack(entities, forwardPosition, length * forwardDirection * -1);
 }
 
-export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
-    const {speed, targetSpeed} = ride;
-    const acceleration = trainGetAccelleration() * dt; // Change in speed allowed this tick
 
-    if(speed !== targetSpeed) {
-        applyRideAcceleration(targetSpeed, speed, acceleration, ride);
-    }
+
+
+// Update the ride, calling the driver function if set
+export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
+    const {speed} = ride;
+
+    const acceleration = (hasDriver(ride) ? driveTrain(entities, ride, dt) : 0) // Note: This makes runaway trains possible(!)
+    const maxAllowedAcceleration = trainGetAccelleration() * dt; // Change in speed allowed this tick
+
+    // Don't allow the driver to exceed the train's physical capable acceleration
+    const correctedAcceleration = clamp(acceleration,-maxAllowedAcceleration,maxAllowedAcceleration);
+
+
+    // Side effect
+    ride.speed = speed + correctedAcceleration;
 
 
     const movement = ride.speed * dt;
 
     if(movement !== 0 ) {
-        applyRideMovement(entities, ride, movement);
+        moveRide(entities, ride, movement);
     }
 }
 
-function applyRideAcceleration(targetSpeed: number, speed: number, acceleration: number, ride: Ride) {
-    const speedDifference = clamp(targetSpeed - speed, -acceleration, acceleration);
-    ride.speed = speed + speedDifference;
-}
-
-function applyRideMovement(entities: Entity[], ride: Ride, movement: number) {
+// Physically move the ride
+function moveRide(entities: Entity[], ride: Ride, movement: number) {
     // Figure out where the front of the train ends up
     const trainMovement = advanceAlongTrack(entities, ride.position, movement * ride.direction);
     const newForwardPosition = trainMovement.endPosition;
@@ -62,7 +68,7 @@ function applyRideMovement(entities: Entity[], ride: Ride, movement: number) {
     ride.span = trainSpan;
 }
 
-export function rideCreate(train: Train, span: TrackSpan, speed: number,id: number, direction: Direction, position: TrackPosition, targetSpeed: number): Ride {
+export function rideCreate(train: Train, span: TrackSpan, speed: number,id: number, direction: Direction, position: TrackPosition): Ride {
     return {
         id,
         type: "ride",
@@ -71,7 +77,6 @@ export function rideCreate(train: Train, span: TrackSpan, speed: number,id: numb
         speed,
         direction,
         position,
-        targetSpeed
     }
 }
 
@@ -96,10 +101,13 @@ export function loadRide(entities: Entity[], rideSave: any): Ride {
         train,
         type: "ride",
         direction: rideSave.direction,
-        targetSpeed: 11.11
     }
 }
 
 export function isRide(any: any): any is Ride {
     return (isTrain(any.train) && typeof any.speed === "number");
+}
+
+export function rideHasDriver(ride: Ride) {
+    return typeof ride.driverMode !== "undefined";
 }
