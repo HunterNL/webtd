@@ -1,6 +1,7 @@
 import { clamp, isNumber } from "lodash";
 import { Entity, getEntityById } from "../interfaces/entity";
-import { DriverMode, driveTrain, hasDriver } from "./driver";
+import { DriverMode, driveTrain, hasDriver, observeSignals } from "./driver";
+import { lookupSignals } from "./signal";
 import { advanceAlongTrack, Direction, isSituationSave, TrackPosition } from "./situation";
 import { isTrack } from "./track";
 import { TrackSpan } from "./trackSpan";
@@ -31,6 +32,13 @@ export function createTrainSpan(entities: Entity[], forwardPosition: TrackPositi
 export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
     const {speed} = ride;
 
+    if(hasDriver(ride)) {
+        const signals = lookupSignals(entities,ride,400);
+
+        //Side effect
+        ride.driverMode = observeSignals(ride,signals);
+    }
+
     const acceleration = (hasDriver(ride) ? driveTrain(entities, ride, dt) : 0) // Note: This makes runaway trains possible(!)
     const maxAllowedAcceleration = trainGetAccelleration() * dt; // Change in speed allowed this tick
 
@@ -39,7 +47,7 @@ export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
 
 
     // Side effect
-    ride.speed = speed + correctedAcceleration;
+    ride.speed = Math.max(speed + correctedAcceleration, 0); // Don't allow negative speed
 
 
     const movement = ride.speed * dt;
@@ -101,6 +109,7 @@ export function loadRide(entities: Entity[], rideSave: any): Ride {
         train,
         type: "ride",
         direction: rideSave.direction,
+        driverMode: rideSave.driverMode
     }
 }
 

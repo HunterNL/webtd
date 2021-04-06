@@ -111,14 +111,19 @@
                 "offset": 300
             },
             "direction": 1,
-            "speed": 40
+            "speed": 15,
+            "driverMode" : {
+                "type": "maintain_speed",
+                "targetSpeed": 13
+
+            }
         },{
             "type": "train",
             "id": 7,
             "length" : 70,
             "carsets": []
         },{
-            "type": "signal",
+            "type": "blah",
             "id" : 8,
             "renderData": {
                 "label" : "🚦"
@@ -127,6 +132,40 @@
                 "trackId": 0,
                 "offset": 390
             }
+        },{
+            "type": "signal",
+            "comment" : "Center track signal",
+            "id" : 7,
+            "renderData": {
+                "label" : "🚦"
+            },
+            "position": {
+                "trackId": 1,
+                "offset": 395
+            }
+        },{
+            "type": "signal",
+            "comment" : "Top buffer",
+            "id" : 8,
+            "renderData": {
+                "label" : "🚦"
+            },
+            "position": {
+                "trackId": 4,
+                "offset": 500
+            }
+        },{
+            "type": "signal",
+            "comment" : "Lower buffer",
+            "id" : 9,
+            "renderData": {
+                "label" : "🚦"
+            },
+            "position": {
+                "trackId": 2,
+                "offset": 500
+            }
         }
+        
     ]
 }

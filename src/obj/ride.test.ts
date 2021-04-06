@@ -25,7 +25,7 @@ describe('Ride',() => {
         test("Acceleration should be applied to speed over time", () => {
             const [entities,ride] = createWorld() as [Entity[], Ride & Driveable];
             ride.speed = 0;
-            ride.driverMode.targetSpeed = 10
+            (ride.driverMode as any).targetSpeed = 10
 
             updateRide(entities, ride, 1);
 
@@ -34,7 +34,7 @@ describe('Ride',() => {
         test("Acceleration should not exceed target speed ", () => {
             const [entities,ride] = createWorld() as [Entity[], Ride & Driveable];
             ride.speed = 0;
-            ride.driverMode.targetSpeed = 0.1;
+            (ride.driverMode as any).targetSpeed = 0.1; // TODO Fix types
 
             updateRide(entities, ride, 1);
 
@@ -42,7 +42,7 @@ describe('Ride',() => {
         })
         test("Acceleration should work for braking ", () => {
             const [entities,ride] = createWorld() as [Entity[], Ride & Driveable];
-            ride.driverMode.targetSpeed = 0;
+            (ride.driverMode as any).targetSpeed = 0; // TODO Fix types
             ride.speed = 10;
 
             updateRide(entities, ride, 1);
@@ -51,7 +51,7 @@ describe('Ride',() => {
         })
         test("Acceleration should work for braking ", () => {
             const [entities,ride] = createWorld() as [Entity[], Ride & Driveable];
-            ride.driverMode.targetSpeed = 0;
+            (ride.driverMode as any).targetSpeed = 0; // TODO Fix types
             ride.speed = 0.1
 
             updateRide(entities, ride, 1);

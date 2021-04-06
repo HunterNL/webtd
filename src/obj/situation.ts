@@ -146,3 +146,13 @@ export function situationRoomBehind(situation: TrackPosition) {
 export function isSituationSave(any: any): any is SituationSave {
     return isNumber(any.trackId) && isNumber(any.offset);
 }
+
+
+export function getDistanceToPosition(from: TrackPosition, to: TrackPosition, via: TrackSpan): number {
+    if(from.track.id !== to.track.id) {
+        console.warn("Distance across tracks unimplemented"); // Should throw
+        return Number.MAX_SAFE_INTEGER;
+    }
+
+    return to.offset - from.offset;
+}

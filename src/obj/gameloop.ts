@@ -7,7 +7,6 @@ export function createGameLoop(entities: Entity[],updateInterval:number,postUpda
 
 
     function loop(dt: number) {
-        console.log("Loop start")
         entities.filter(isRide).forEach(ride => updateRide(entities,ride,dt))
     }
 

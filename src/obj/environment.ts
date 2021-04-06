@@ -52,7 +52,7 @@ export function loadEnvironment(map: unknown): Environment {
 
     const signals: Signal[] = entitiesSaves.filter(isSignalSave).map(signalSave => loadSignal(tracks, signalSave))
 
-    const entities: Entity[] = ([] as Entity[]).concat(tracks,rides,switches,buffers);
+    const entities: Entity[] = ([] as Entity[]).concat(tracks,rides,switches,buffers, signals);
 
     return {
         tracks,
