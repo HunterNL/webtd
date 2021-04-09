@@ -74,7 +74,7 @@ function getDistanceToBoundary(position: TrackPosition, boundaryId: number): num
 /***   
  * Moves the given situation object by the given object, taking switch positions into account
  */
-export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, movement: number): TrackSpan {
+export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, movement: number): [TrackSpan, boolean] {
     const segments: TrackSegment[] = []; // For returning
 
     /**
@@ -92,18 +92,27 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
         const direction = getDirectionForMovement(movementLeft)
         const nextBoundary = getNextBoundary(currentPosition.track, direction);
         const distanceToBoundary = getDistanceToBoundary(currentPosition, nextBoundary.id);
+    
+        // Save the segment we "traveled"
+        const segment = createSegment(currentPosition.track.id,currentPosition.offset,currentPosition.offset+distanceToBoundary*direction)
+        segments.push(segment);
+
         const nextTrackId = resolveBoundary(currentPosition.track,nextBoundary);
-        
+
         if(typeof nextTrackId === "undefined") {
+
+
+            return [{
+                segments,
+                finalDirection: direction,
+                startPosition: situation,
+                endPosition: currentPosition
+            },false]
             // Oops
             throw new Error("Buffer overrun, derailed!");
         }
 
         const nextTrack = getEntityById(entities, nextTrackId, isTrack);
-
-        // Save the segment we "traveled"
-        const segment = createSegment(currentPosition.track.id,currentPosition.offset,currentPosition.offset+distanceToBoundary*direction)
-        segments.push(segment);
 
         // And advance to the next track.
         currentPosition.offset = getBoundaryPosition(nextTrack, nextBoundary.id);
@@ -131,12 +140,12 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
 
     currentPosition.offset = currentPosition.offset + movementLeft;
 
-    return {
+    return [{
         startPosition: situation,
         endPosition: currentPosition,
         segments,
         finalDirection: getDirectionForMovement(movementLeft)
-    }
+    },true]
     
 }
 

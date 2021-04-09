@@ -37,7 +37,8 @@ describe("Single track piece", function() {
     test("TrackPostion can advance forward",function() {
         const position : TrackPosition = {offset:0,track:simpleTrack}
     
-        const span = advanceAlongTrack([simpleTrack], position, 1);
+        const [span,didComplete] = advanceAlongTrack([simpleTrack], position, 1);
+        expect(didComplete).toBeTruthy()
 
     
         expect(span.endPosition.offset).toBe(1);
@@ -46,7 +47,8 @@ describe("Single track piece", function() {
     test("Segment contains only 1 entry, with expected span", () => {
         const position : TrackPosition = {offset:0,track:simpleTrack}
     
-        const span = advanceAlongTrack([simpleTrack], position, 1);
+        const [span,didComplete] = advanceAlongTrack([simpleTrack], position, 1);
+        expect(didComplete).toBeTruthy()
 
     
         expect(span.segments).toHaveLength(1);
@@ -64,7 +66,8 @@ describe("Single track piece", function() {
     test("TrackPostion can advance backward",function() {
         const position : TrackPosition = {offset:5,track:simpleTrack}
     
-        const span = advanceAlongTrack([simpleTrack], position, -1)
+        const [span,didComplete] = advanceAlongTrack([simpleTrack], position, -1)
+        expect(didComplete).toBeTruthy()
     
         expect(span.endPosition.offset).toBe(4);
         expect(span.finalDirection).toBe(DIRECTION_BACKWARD)
@@ -73,10 +76,9 @@ describe("Single track piece", function() {
     
     test("TrackPostion can advance into a buffer and crash",function() {
         const position : TrackPosition = {offset:1,track:simpleTrack}
-    
-        expect(() => {
-            advanceAlongTrack([simpleTrack], position, 10)
-        }).toThrowError("Buffer overrun, derailed!")
+
+        const [span,didComplete] = advanceAlongTrack([simpleTrack], position, 10)
+        expect(didComplete).toBeFalsy();
     })
 })
 
@@ -119,7 +121,8 @@ describe("Simple switch layout", function () {
     test("TrackPosition can advance along switches", function() {
         const position : TrackPosition = {offset:8,track:entryTrack}
     
-        const span = advanceAlongTrack(allEntities,position,4);
+        const [span,didComplete] = advanceAlongTrack(allEntities,position,4);
+        expect(didComplete).toBeTruthy()
     
         expect(span.endPosition.offset).toBe(2);
         expect(span.endPosition.track).toBe(straightTrack);
@@ -145,7 +148,8 @@ describe("Simple switch layout", function () {
     test("TrackPosition can reverse along switches", function() {
         const position : TrackPosition = {offset:3,track:straightTrack}
     
-        const span = advanceAlongTrack(allEntities,position,-5);
+        const [span,didComplete] = advanceAlongTrack(allEntities,position,-5);
+        expect(didComplete).toBeTruthy()
     
         expect(span.endPosition.offset).toBe(8);
         expect(span.endPosition.track).toBe(entryTrack);
@@ -206,7 +210,8 @@ describe("Reverse exit track", function() {
     test("TrackPosition can advance along switches", function() {
         const position : TrackPosition = {offset:8,track:entryTrack}
     
-        const span = advanceAlongTrack(allEntities,position,4);
+        const [span,didComplete] = advanceAlongTrack(allEntities,position,4);
+        expect(didComplete).toBeTruthy();
     
         expect(span.endPosition.offset).toBe(8);
         expect(span.endPosition.track).toBe(straightTrack);
@@ -229,7 +234,8 @@ describe("Reverse exit track", function() {
     test("TrackPosition can reverse along switches", function() {
         const position : TrackPosition = {offset:9,track:straightTrack}
     
-        const span = advanceAlongTrack(allEntities,position,2);
+        const [span, didComplete] = advanceAlongTrack(allEntities,position,2);
+        expect(didComplete).toBeTruthy();
     
         expect(span.endPosition.offset).toBe(9);
         expect(span.endPosition.track).toBe(entryTrack);

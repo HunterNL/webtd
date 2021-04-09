@@ -22,7 +22,13 @@ export type RideSave = Entity & {
 }
 
 export function createTrainSpan(entities: Entity[], forwardPosition: TrackPosition, length: number, forwardDirection: Direction): TrackSpan {
-    return advanceAlongTrack(entities, forwardPosition, length * forwardDirection * -1);
+    const [span, didComplete] = advanceAlongTrack(entities, forwardPosition, length * forwardDirection * -1);
+    
+    if(!didComplete) {
+        throw new Error("Failed to create train span, train derailed?");
+    }
+
+    return span;
 }
 
 
@@ -61,18 +67,18 @@ export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
 function moveRide(entities: Entity[], ride: Ride, movement: number) {
     // Figure out where the front of the train ends up
     const trainMovement = advanceAlongTrack(entities, ride.position, movement * ride.direction);
-    const newForwardPosition = trainMovement.endPosition;
+    const newForwardPosition = trainMovement[0].endPosition;
 
     // #TODO MULTI TRACK DRIFTING
     // Could figure out the postion of every bogey and do this check individualy, break connections if track differs
     // Run backwards from the front to figure out where the rest of the train ends up
     // const trainSpan = advanceAlongTrack(entities, newForwardPosition, ride.train.length * trainMovement.finalDirection * -1) // -1, we're looking backwards
-    const trainSpan = createTrainSpan(entities, newForwardPosition, ride.train.length, trainMovement.finalDirection);
+    const trainSpan = createTrainSpan(entities, newForwardPosition, ride.train.length, trainMovement[0].finalDirection);
 
 
     // Todo: Simpify into a single span with proper direction
     ride.position = newForwardPosition;
-    ride.direction = trainMovement.finalDirection;
+    ride.direction = trainMovement[0].finalDirection;
     ride.span = trainSpan;
 }
 

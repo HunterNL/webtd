@@ -1,6 +1,5 @@
 import { WorldBuilder } from "../util/worldBuilder";
 import { advanceAlongTrack, TrackPosition } from "./situation";
-import { TrackSpan } from "./trackSpan";
 
 function buildWorld() {
     const wb = new WorldBuilder();
@@ -40,7 +39,8 @@ describe("Trackspan", () => {
             offset:8
         };
 
-        const span: TrackSpan = advanceAlongTrack(entities, position, -5);
+        const [span,didComplete] = advanceAlongTrack(entities, position, -5);
+        expect(didComplete).toBeTruthy();
 
         expect(span.segments).toHaveLength(1);
 
