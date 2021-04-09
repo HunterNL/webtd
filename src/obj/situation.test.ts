@@ -1,27 +1,10 @@
-import { Buffer } from "./buffer"
-import { advanceAlongTrack, DIRECTION_BACKWARD, DIRECTION_FORWARD, TrackPosition } from "./situation"
-import { TrackSwitch, TrackBoundary, SwitchState } from "./switch"
-import { Track } from "./track"
+import { Entity } from "../interfaces/entity";
+import { WorldBuilder } from "../util/worldBuilder";
+import { advanceAlongTrack, TrackPosition } from "./situation";
+import { Track } from "./track";
 import { TrackSegment } from "./trackSegment";
 
 // Simple 1 track
-
-let id = 0;
-
-function getNewId() {
-    return id++;
-}
-
-function createTestTrack(boundries: TrackBoundary[], length: number) : Track {
-    return {boundries, length, id : getNewId(),type:"track" } as Track;
-}
-
-function createTestBuffer() {
-    return {id: getNewId(), type: "end"} as Buffer;
-}
-
-
-describe("Single track piece", function() {
     /*
     ┌─────────────────────────────────────────────┐
     │                                             │
@@ -31,58 +14,16 @@ describe("Single track piece", function() {
     └─────────────────────────────────────────────┘
     */
 
-    const [startBuffer, endBuffer] = [createTestBuffer(),createTestBuffer()]
-    const simpleTrack = createTestTrack([startBuffer,endBuffer], 10);
+function createSimpleWorld(): Track {
+    const wb = new WorldBuilder();
 
-    test("TrackPostion can advance forward",function() {
-        const position : TrackPosition = {offset:0,track:simpleTrack}
-    
-        const [span,didComplete] = advanceAlongTrack([simpleTrack], position, 1);
-        expect(didComplete).toBeTruthy()
+    const [start,end] = [wb.addBuffer(),wb.addBuffer()];
 
-    
-        expect(span.endPosition.offset).toBe(1);
-    })
+    const track = wb.addTrack(start, end, 10);
 
-    test("Segment contains only 1 entry, with expected span", () => {
-        const position : TrackPosition = {offset:0,track:simpleTrack}
-    
-        const [span,didComplete] = advanceAlongTrack([simpleTrack], position, 1);
-        expect(didComplete).toBeTruthy()
+    return track;
+}
 
-    
-        expect(span.segments).toHaveLength(1);
-        const segment : TrackSegment = span.segments[0];
-
-        expect(segment).toEqual({
-            trackId: simpleTrack.id,
-            start: 0,
-            end: 1
-        })
-
-
-    })
-    
-    test("TrackPostion can advance backward",function() {
-        const position : TrackPosition = {offset:5,track:simpleTrack}
-    
-        const [span,didComplete] = advanceAlongTrack([simpleTrack], position, -1)
-        expect(didComplete).toBeTruthy()
-    
-        expect(span.endPosition.offset).toBe(4);
-        expect(span.finalDirection).toBe(DIRECTION_BACKWARD)
-    })
-    
-    
-    test("TrackPostion can advance into a buffer and crash",function() {
-        const position : TrackPosition = {offset:1,track:simpleTrack}
-
-        const [span,didComplete] = advanceAlongTrack([simpleTrack], position, 10)
-        expect(didComplete).toBeFalsy();
-    })
-})
-
-describe("Simple switch layout", function () {
     /*
     ┌─────────────────────────────────────────────┐
     │                                             │
@@ -96,163 +37,285 @@ describe("Simple switch layout", function () {
     │                                             │
     └─────────────────────────────────────────────┘
     */
+function createSwitchWorld(): [Entity[], Track,Track,Track] {
+    const wb = new WorldBuilder();
 
+    const [start,endTop,endBottom] = [wb.addBuffer(),wb.addBuffer(),wb.addBuffer()];
+    const trackSwitch = wb.addSwitch();
 
-    const trackSwitch : TrackSwitch = {
-        currentState : SwitchState.Straight,
-        id: getNewId(),
-        type: "switch"
-    } as any;
+    const entryTrack = wb.addTrack(start, trackSwitch, 10);
+    const straightTrack = wb.addTrack(trackSwitch, endTop, 10);
+    const sideTrack = wb.addTrack(trackSwitch, endBottom, 10);
 
-    const [entryBuffer,straightBuffer,sideBufffer] = [createTestBuffer(),createTestBuffer(),createTestBuffer()];
-    // const [entryTrack,straightTrack,sideTrack] = [createTestTrack([], 10),createTestTrack([], 10),createTestTrack([], 10)]
-
-    const entryTrack = createTestTrack([entryBuffer,trackSwitch], 10)
-    const straightTrack = createTestTrack([trackSwitch,straightBuffer], 10)
-    const sideTrack = createTestTrack([trackSwitch,sideBufffer], 10)
-
-    trackSwitch.junction = {
+    wb.setJunction(trackSwitch.id, {
         straightConnections: [[entryTrack.id,straightTrack.id]],
         sideConnections: [[entryTrack.id,sideTrack.id]]
-    }
-
-    const allEntities = [entryTrack,straightTrack,sideTrack,entryBuffer,straightBuffer,sideBufffer,trackSwitch];
-    
-    test("TrackPosition can advance along switches", function() {
-        const position : TrackPosition = {offset:8,track:entryTrack}
-    
-        const [span,didComplete] = advanceAlongTrack(allEntities,position,4);
-        expect(didComplete).toBeTruthy()
-    
-        expect(span.endPosition.offset).toBe(2);
-        expect(span.endPosition.track).toBe(straightTrack);
-
-        expect(span.segments).toHaveLength(2);
-        const [firstSegment,secondSegment] = span.segments;
-
-        expect(firstSegment).toEqual({
-            trackId:entryTrack.id,
-            start: 8,
-            end: 10
-        })
-
-        expect(secondSegment).toEqual({
-            trackId: straightTrack.id,
-            start: 0,
-            end: 2
-        })
-
-        expect(span.finalDirection).toBe(DIRECTION_FORWARD)
     })
-    
-    test("TrackPosition can reverse along switches", function() {
-        const position : TrackPosition = {offset:3,track:straightTrack}
-    
-        const [span,didComplete] = advanceAlongTrack(allEntities,position,-5);
-        expect(didComplete).toBeTruthy()
-    
-        expect(span.endPosition.offset).toBe(8);
-        expect(span.endPosition.track).toBe(entryTrack);
-        expect(span.segments).toHaveLength(2);
 
-        const [firstSegment,secondSegment] = span.segments;
+    return [wb.getEntities(),entryTrack,straightTrack,sideTrack];
+}
 
-        expect(firstSegment.trackId).toBe(straightTrack.id);
-        expect(firstSegment.start).toBe(0);
-        expect(firstSegment.end).toBe(3);
+    /*
+┌─────────────────────────────────────────────┐
+│                                             │
+│                          SideTrack          │
+│                       ┌─────────────────B   │
+│                       │                10   │
+│                       │                     │
+│    EntryTrack         │0  StraightTrack     │
+│  B────────────────────S─────────────────B   │
+│  0                  10|10               0   │
+│                        !!                   │
+└─────────────────────────────────────────────┘
+*/
 
-        expect(secondSegment.trackId).toBe(entryTrack.id);
-        expect(secondSegment.end).toBe(10) // Track length
-        expect(secondSegment.start).toBe(8);
+function createReverseSwitchWorld(): [Entity[], Track,Track,Track] {
+    const wb = new WorldBuilder();
 
-        expect(span.finalDirection).toBe(DIRECTION_BACKWARD);
-    })
-    
-    
-})
+    const [start,endTop,endBottom] = [wb.addBuffer(),wb.addBuffer(),wb.addBuffer()];
+    const trackSwitch = wb.addSwitch();
 
+    const entryTrack = wb.addTrack(start, trackSwitch, 10);
+    const straightTrack = wb.addTrack(endBottom, trackSwitch, 10);
+    const sideTrack = wb.addTrack(trackSwitch, endTop, 10);
 
-describe("Reverse exit track", function() {
-        /*
-    ┌─────────────────────────────────────────────┐
-    │                                             │
-    │                          SideTrack          │
-    │                       ┌─────────────────B   │
-    │                       │                10   │
-    │                       │                     │
-    │    EntryTrack         │0  StraightTrack     │
-    │  B────────────────────S─────────────────B   │
-    │  0                  10|10               0   │
-    │                                             │
-    └─────────────────────────────────────────────┘
-    */
-
-    const trackSwitch : TrackSwitch = {
-        currentState : SwitchState.Straight,
-        id: getNewId(),
-        type: "switch"
-    } as any;
-
-    const [entryBuffer,straightBuffer,sideBufffer] = [createTestBuffer(),createTestBuffer(),createTestBuffer()];
-    // const [entryTrack,straightTrack,sideTrack] = [createTestTrack([], 10),createTestTrack([], 10),createTestTrack([], 10)]
-
-    const entryTrack = createTestTrack([entryBuffer,trackSwitch], 10)
-    const straightTrack = createTestTrack([straightBuffer,trackSwitch], 10) // Gets reversed here
-    const sideTrack = createTestTrack([trackSwitch,sideBufffer], 10)
-
-    trackSwitch.junction = {
+    wb.setJunction(trackSwitch.id, {
         straightConnections: [[entryTrack.id,straightTrack.id]],
         sideConnections: [[entryTrack.id,sideTrack.id]]
-    }
-
-    const allEntities = [entryTrack,straightTrack,sideTrack,entryBuffer,straightBuffer,sideBufffer,trackSwitch];
-
-    test("TrackPosition can advance along switches", function() {
-        const position : TrackPosition = {offset:8,track:entryTrack}
-    
-        const [span,didComplete] = advanceAlongTrack(allEntities,position,4);
-        expect(didComplete).toBeTruthy();
-    
-        expect(span.endPosition.offset).toBe(8);
-        expect(span.endPosition.track).toBe(straightTrack);
-
-        expect(span.segments).toHaveLength(2);
-
-        const [firstSegment,secondSegment] = span.segments;
-
-        expect(firstSegment.trackId).toBe(entryTrack.id);
-        expect(firstSegment.start).toBe(8);
-        expect(firstSegment.end).toBe(10);
-
-        expect(secondSegment.trackId).toBe(straightTrack.id);
-        expect(secondSegment.start).toBe(8);
-        expect(secondSegment.end).toBe(10);
-
-        expect(span.finalDirection).toBe(DIRECTION_BACKWARD)
     })
 
-    test("TrackPosition can reverse along switches", function() {
-        const position : TrackPosition = {offset:9,track:straightTrack}
+    return [wb.getEntities(),entryTrack,straightTrack,sideTrack];
+}
+
+describe('advanceAlongTrack',() => {
     
-        const [span, didComplete] = advanceAlongTrack(allEntities,position,2);
-        expect(didComplete).toBeTruthy();
+        describe("Single track piece", function() {
     
-        expect(span.endPosition.offset).toBe(9);
-        expect(span.endPosition.track).toBe(entryTrack);
-
-        expect(span.segments).toHaveLength(2);
-
-        const [firstSegment,secondSegment] = span.segments;
-
-        expect(firstSegment.trackId).toBe(straightTrack.id);
-        expect(firstSegment.start).toBe(9);
-        expect(firstSegment.end).toBe(10);
-
-        expect(secondSegment.trackId).toBe(entryTrack.id);
-        expect(secondSegment.start).toBe(9);
-        expect(secondSegment.end).toBe(10);
-
-        expect(span.finalDirection).toBe(DIRECTION_BACKWARD);
-    })
+            describe('Advanding forward',() => {
+                test("TrackPostion can correctly advance forward",function() {
+                    const simpleTrack = createSimpleWorld();
+                    const position : TrackPosition = {offset:0,track:simpleTrack}
+                
+                    const [span] = advanceAlongTrack([simpleTrack], position, 1);
+                
+                    expect(span.endPosition.offset).toBe(1);
+                })
+            
+                test("Segment contains only 1 entry", () => {
+                    const simpleTrack = createSimpleWorld();
+                    const position : TrackPosition = {offset:0,track:simpleTrack}
+                
+                    const [span] = advanceAlongTrack([simpleTrack], position, 1);
+                
+                    expect(span.segments).toHaveLength(1);
+                })
+            
+                test("Segment contains expected span", () => {
+                    const simpleTrack = createSimpleWorld();
+                    const position : TrackPosition = {offset:0,track:simpleTrack}
+                
+                    const [span] = advanceAlongTrack([simpleTrack], position, 1);
+            
+                    
+                    const segment : TrackSegment = span.segments[0];
+            
+                    expect(segment).toEqual({
+                        trackId: simpleTrack.id,
+                        start: 0,
+                        end: 1
+                    })
+                })
     
+                test("TrackPostion can advance into a buffer and crash",function() {
+                    const simpleTrack = createSimpleWorld();
+                    const position : TrackPosition = {offset:1,track:simpleTrack}
+            
+                    const [,didComplete] = advanceAlongTrack([simpleTrack], position, 10)
+                    expect(didComplete).toBe(false);
+                })
+                
+            })
+            describe('Advancing backward',() => {
+                
+                test("TrackPostion ends up in the right place",function() {
+                    const simpleTrack = createSimpleWorld();
+                    const position : TrackPosition = {offset:5,track:simpleTrack}
+                
+                    const [span] = advanceAlongTrack([simpleTrack], position, -1)
+                
+                    expect(span.endPosition.offset).toBe(4);
+                })
+    
+                test("Segment contains only 1 entry", () => {
+                    const simpleTrack = createSimpleWorld();
+                    const position : TrackPosition = {offset:5,track:simpleTrack}
+                
+                    const [span] = advanceAlongTrack([simpleTrack], position, -1);
+                
+                    expect(span.segments).toHaveLength(1);
+                })
+    
+                test("Segment contains expected span", () => {
+                    const simpleTrack = createSimpleWorld();
+                    const position : TrackPosition = {offset:5,track:simpleTrack}
+                
+                    const [span] = advanceAlongTrack([simpleTrack], position, -1);
+            
+                    const segment : TrackSegment = span.segments[0];
+            
+                    expect(segment).toEqual({
+                        trackId: simpleTrack.id,
+                        start: 4,
+                        end: 5
+                    })
+                })
+                
+                test("TrackPostion can advance into a buffer and crash",function() {
+                    const simpleTrack = createSimpleWorld();
+                    const position : TrackPosition = {offset:1,track:simpleTrack}
+            
+                    const [,didComplete] = advanceAlongTrack([simpleTrack], position, -2)
+                    expect(didComplete).toBe(false);
+                })
+            })
+        })
+    
+        describe("Simple switch layout", function () {
+                
+            describe('Advancing forward',() => {
+                test("TrackPosition ends up in the right place", function() {
+                    const [allEntities,entryTrack,straightTrack] = createSwitchWorld();
+            
+                    const position : TrackPosition = {offset:8,track:entryTrack}
+                
+                    const [span] = advanceAlongTrack(allEntities,position,4);
+                
+                    expect(span.endPosition.offset).toBe(2);
+                    expect(span.endPosition.track).toBe(straightTrack);
+                })
+            
+                test("Correct segments are created", function() {
+                    const [allEntities,entryTrack,straightTrack] = createSwitchWorld();
+            
+                    const position : TrackPosition = {offset:8,track:entryTrack}
+                
+                    const [span] = advanceAlongTrack(allEntities,position,4);
+                
+                    expect(span.segments).toHaveLength(2);
+                    const [firstSegment,secondSegment] = span.segments;
+            
+                    expect(firstSegment).toEqual({
+                        trackId:entryTrack.id,
+                        start: 8,
+                        end: 10
+                    })
+            
+                    expect(secondSegment).toEqual({
+                        trackId: straightTrack.id,
+                        start: 0,
+                        end: 2
+                    })
+                })
+            })
+            
+            describe('Advancing backwards',() => {
+                test("TrackPosition ends up in the right place", function() {
+                    const [allEntities,entryTrack,straightTrack] = createSwitchWorld();
+                    const position : TrackPosition = {offset:3,track:straightTrack}
+                
+                    const [span] = advanceAlongTrack(allEntities,position,-5);
+                
+                    expect(span.endPosition.offset).toBe(8);
+                    expect(span.endPosition.track).toBe(entryTrack);
+                })
+                test("Correct segments are created", function() {
+                    const [allEntities,entryTrack,straightTrack] = createSwitchWorld();
+                    const position : TrackPosition = {offset:3,track:straightTrack}
+                
+                    const [span] = advanceAlongTrack(allEntities,position,-5);
+    
+                    expect(span.segments).toHaveLength(2);
+            
+                    const [firstSegment,secondSegment] = span.segments;
+            
+                    expect(firstSegment.trackId).toBe(straightTrack.id);
+                    expect(firstSegment.start).toBe(0);
+                    expect(firstSegment.end).toBe(3);
+            
+                    expect(secondSegment.trackId).toBe(entryTrack.id);
+                    expect(secondSegment.end).toBe(10) // Track length
+                    expect(secondSegment.start).toBe(8);
+    
+                })
+            })
+            
+            
+        })
+    
+    
+        describe("Reverse exit track", function() {
+            describe('Advancing forward',() => {
+                test("TrackPosition ends up in the right place", function() {
+                    const [allEntities,entryTrack,straightTrack] = createReverseSwitchWorld();
+                    
+                    const position : TrackPosition = {offset:8,track:entryTrack}
+                
+                    const [span,didComplete] = advanceAlongTrack(allEntities,position,4);
+                    expect(didComplete).toBeTruthy();
+                
+                    expect(span.endPosition.offset).toBe(8);
+                    expect(span.endPosition.track).toBe(straightTrack);
+                })
+                test("Correct segments are created", function() {
+                    const [allEntities,entryTrack,straightTrack] = createReverseSwitchWorld();
+                    
+                    const position : TrackPosition = {offset:8,track:entryTrack}
+                
+                    const [span] = advanceAlongTrack(allEntities,position,4);
+    
+                    expect(span.segments).toHaveLength(2);
+    
+                    const [firstSegment,secondSegment] = span.segments;
+    
+                    expect(firstSegment.trackId).toBe(entryTrack.id);
+                    expect(firstSegment.start).toBe(8);
+                    expect(firstSegment.end).toBe(10);
+    
+                    expect(secondSegment.trackId).toBe(straightTrack.id);
+                    expect(secondSegment.start).toBe(8);
+                    expect(secondSegment.end).toBe(10);
+                })
+            })
+    
+        describe('Advancing backwards',() => {
+                test("TrackPosition ends up in the right place", function() {
+                    const [allEntities,entryTrack,straightTrack] = createReverseSwitchWorld();
+                    const position : TrackPosition = {offset:9,track:straightTrack}
+                
+                    const [span] = advanceAlongTrack(allEntities,position,2);
+                
+                    expect(span.endPosition.offset).toBe(9);
+                    expect(span.endPosition.track).toBe(entryTrack);
+    
+                })
+                test("Correct segments are created", function() {
+                    const [allEntities,entryTrack,straightTrack] = createReverseSwitchWorld();
+                    const position : TrackPosition = {offset:9,track:straightTrack}
+                
+                    const [span,] = advanceAlongTrack(allEntities,position,2);
+            
+                    expect(span.segments).toHaveLength(2);
+            
+                    const [firstSegment,secondSegment] = span.segments;
+            
+                    expect(firstSegment.trackId).toBe(straightTrack.id);
+                    expect(firstSegment.start).toBe(9);
+                    expect(firstSegment.end).toBe(10);
+            
+                    expect(secondSegment.trackId).toBe(entryTrack.id);
+                    expect(secondSegment.start).toBe(9);
+                    expect(secondSegment.end).toBe(10);
+                })        
+        })
+        })
 })
