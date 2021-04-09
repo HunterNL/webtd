@@ -76,7 +76,7 @@ export function driveTrain(entities: Entity[], ride: Ride & Driveable, dt: numbe
         console.log("Remaining distance:" + remainingDistance + " Speed: " + ride.speed);
 
         if (remainingDistance < 0.1) {
-            return -acceleration; // We're so close, just slam on the brakes
+            return Math.max(0, -acceleration); // We're so close, just slam on the brakes
         }
 
         if(trainStoppingDistance > remainingDistance) {
