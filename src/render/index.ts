@@ -3,6 +3,7 @@ import { flatten } from "lodash";
 import { Entity } from "../interfaces/entity";
 import { isBuffer } from "../obj/buffer";
 import { DynamicEnvironment, Environment } from "../obj/environment";
+import { toggleSignal } from "../obj/signal";
 import { getPathTroughSwitch, throwSwitch, TrackBoundary, TrackSwitch } from "../obj/switch";
 import { Track } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
@@ -262,6 +263,7 @@ export class SVGRenderer {
         }));
 
         renderSwitchInteractables(this.env.switches, this.interactableGroup);
+        renderSignalInteractables(this.signRenderers,this.interactableGroup);
         renderDebugIds(this.env.entities, this.textGroup);
 
         renderElement.appendChild(this.trackGroup);
@@ -312,6 +314,26 @@ function renderSwitchInteractables(switches: TrackSwitch[], interactableGroup: S
 
         circle.addEventListener("click", () => {
             throwSwitch(trackSwitch);
+        })
+
+
+        interactableGroup.appendChild(circle);
+    })
+}
+
+function renderSignalInteractables(signal: SignalSVGRenderer[], interactableGroup: SVGGElement) {
+    signal.forEach(signal => {
+        const circle = createSVGElement("circle");
+        circle.setAttribute("cx", signal.position[0] + "");
+        circle.setAttribute("cy", signal.position[1] + "");
+        circle.setAttribute("r", "10");
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke-width", "1");
+        circle.setAttribute("stroke", COLOR_UNOCCUPIED)
+        circle.setAttribute("pointer-events", "bounding-box");
+
+        circle.addEventListener("click", () => {
+            toggleSignal(signal.signal)
         })
 
 

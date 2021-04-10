@@ -1,8 +1,8 @@
-import { clamp, head, inRange } from "lodash";
+import { clamp, head } from "lodash";
 import { Entity } from "../interfaces/entity";
 import { stoppingDistance } from "../util/physics";
 import { Ride } from "./ride";
-import { Signal } from "./signal";
+import { ASPECT_PROCEED_SLOW, ASPECT_STOP, Signal } from "./signal";
 import { getDistanceToPosition, TrackPosition } from "./situation";
 import { trainGetAccelleration } from "./train";
 
@@ -37,13 +37,25 @@ export function observeSignals(ride: Ride & Driveable, signals: Signal[]): Drive
         return ride.driverMode
     }
 
-    return {
-        type: "stop_at",
-        stopPosition: {
-            track: firstSignal.position.track,
-            offset: firstSignal.position.offset - SIGNAL_STOP_AHEAD_DISTANCE // TODO Signal facing & reverse track compat
+    if(firstSignal.currentAspect === ASPECT_STOP) {
+        return {
+            type: "stop_at",
+            stopPosition: {
+                track: firstSignal.position.track,
+                offset: firstSignal.position.offset - SIGNAL_STOP_AHEAD_DISTANCE // TODO Signal facing & reverse track compat
+            }
         }
     }
+
+    if(firstSignal.currentAspect === ASPECT_PROCEED_SLOW) {
+        return {
+            type: "maintain_speed",
+            targetSpeed: 11.11
+        }
+    }
+
+    throw new Error("Unknown signal aspect");
+    
 }
 
 /**
@@ -56,6 +68,8 @@ export function observeSignals(ride: Ride & Driveable, signals: Signal[]): Drive
 export function driveTrain(entities: Entity[], ride: Ride & Driveable, dt: number) : number {
     const {driverMode, speed} = ride;
     const accelerationCapability = trainGetAccelleration();
+
+    console.log(driverMode.type);
 
     // Todo proper multiple modes
     if(driverMode.type === "maintain_speed") {

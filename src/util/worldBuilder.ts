@@ -4,7 +4,7 @@ import { Buffer } from "../obj/buffer";
 import { DriverMode } from "../obj/driver";
 import { Junction } from "../obj/junction";
 import { createTrainSpan, Ride } from "../obj/ride";
-import { Signal } from "../obj/signal";
+import { Aspect, ASPECT_STOP, Signal } from "../obj/signal";
 import { Direction, DIRECTION_FORWARD, TrackPosition } from "../obj/situation";
 import { isSwitch, SwitchState, TrackBoundary, TrackSwitch } from "../obj/switch";
 import { createTrack, isTrack, Track } from "../obj/track";
@@ -101,7 +101,7 @@ export class WorldBuilder {
         return ride;
     }
 
-    addSignal(track: Track, offset: number) {
+    addSignal(track: Track, offset: number, aspect: Aspect = ASPECT_STOP) {
         const signal : Signal = {
             id: this.counter++,
             position: {
@@ -109,6 +109,7 @@ export class WorldBuilder {
                 track
             },
             type: "signal",
+            currentAspect: aspect
         }
 
         this.entities.push(signal);
