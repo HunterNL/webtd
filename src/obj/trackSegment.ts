@@ -18,25 +18,24 @@ export type TrackSegment = {
  * @param offset2 
  * @returns 
  */
-export function createSegment(trackId: number,offset1: number,offset2: number): TrackSegment {
-    const isInversed = offset2 < offset1;
-    const min = isInversed ? offset2 : offset1;
-    const max = isInversed ? offset1 : offset2;
 
-    return {
-        trackId,
-        start: min,
-        end: max
+export function segmentGetOrdered(segment: TrackSegment): [number,number] {
+    if(segment.end > segment.start) {
+        return [segment.start,segment.end];
+    } else {
+        return [segment.end,segment.start]
     }
 }
-
 
 export function doSegmentsOverlap(segmentA: TrackSegment, segmentB: TrackSegment): boolean {
     if(segmentA.trackId !== segmentB.trackId) {
         return false;
     }
 
-    return doRangesOverlap(segmentA.start, segmentA.end, segmentB.start, segmentB.end);
+    const segmentAOrdered = segmentGetOrdered(segmentA)
+    const segmentBOrdered = segmentGetOrdered(segmentB)
+
+    return doRangesOverlap(segmentAOrdered[0], segmentAOrdered[1], segmentBOrdered[0], segmentBOrdered[1]);
 }
 
 export function doesSegmentContainSegment(parent: TrackSegment, child: TrackSegment): boolean {

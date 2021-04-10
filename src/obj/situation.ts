@@ -2,7 +2,7 @@ import { isNumber } from "lodash";
 import { Entity, getEntityById } from "../interfaces/entity";
 import { resolveBoundary } from "./switch";
 import { getBoundaryPosition, getDirectionAwayFromBoundary, getNextBoundary, isTrack, Track } from "./track";
-import { createSegment, TrackSegment } from "./trackSegment";
+import { TrackSegment } from "./trackSegment";
 import { TrackSpan } from "./trackSpan";
 
 export type TrackPosition = {
@@ -94,7 +94,11 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
         const distanceToBoundary = getDistanceToBoundary(currentPosition, nextBoundary.id);
     
         // Save the segment we "traveled"
-        const segment = createSegment(currentPosition.track.id,currentPosition.offset,currentPosition.offset+distanceToBoundary*direction)
+        const segment : TrackSegment = {
+            start: currentPosition.offset,
+            end: currentPosition.offset+distanceToBoundary*direction,
+            trackId: currentPosition.track.id
+        }
         segments.push(segment);
 
         const nextTrackId = resolveBoundary(currentPosition.track,nextBoundary);
@@ -134,7 +138,11 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
     }
 
     // At this point we're left inside a single track
-    const segment = createSegment(currentPosition.track.id,currentPosition.offset,currentPosition.offset+movementLeft);
+    const segment : TrackSegment = {
+        start: currentPosition.offset,
+        end: currentPosition.offset+movementLeft,
+        trackId: currentPosition.track.id
+    }
 
     segments.push(segment);
 

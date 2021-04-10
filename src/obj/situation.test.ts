@@ -168,8 +168,8 @@ describe("advanceAlongTrack", () => {
 
                 expect(segment).toEqual({
                     trackId: simpleTrack.id,
-                    start: 4,
-                    end: 5,
+                    start: 5,
+                    end: 4,
                 });
             });
 
@@ -241,12 +241,12 @@ describe("advanceAlongTrack", () => {
                 const [firstSegment, secondSegment] = span.segments;
 
                 expect(firstSegment.trackId).toBe(straightTrack.id);
-                expect(firstSegment.start).toBe(0);
-                expect(firstSegment.end).toBe(3);
+                expect(firstSegment.start).toBe(3);
+                expect(firstSegment.end).toBe(0);
 
                 expect(secondSegment.trackId).toBe(entryTrack.id);
-                expect(secondSegment.end).toBe(10); // Track length
-                expect(secondSegment.start).toBe(8);
+                expect(secondSegment.start).toBe(10); // Track length
+                expect(secondSegment.end).toBe(8);
             });
         });
     });
@@ -288,8 +288,8 @@ describe("advanceAlongTrack", () => {
                 expect(firstSegment.end).toBe(10);
 
                 expect(secondSegment.trackId).toBe(straightTrack.id);
-                expect(secondSegment.start).toBe(8);
-                expect(secondSegment.end).toBe(10);
+                expect(secondSegment.start).toBe(10);
+                expect(secondSegment.end).toBe(8);
             });
         });
 
@@ -326,8 +326,8 @@ describe("advanceAlongTrack", () => {
                 expect(firstSegment.end).toBe(10);
 
                 expect(secondSegment.trackId).toBe(entryTrack.id);
-                expect(secondSegment.start).toBe(9);
-                expect(secondSegment.end).toBe(10);
+                expect(secondSegment.start).toBe(10);
+                expect(secondSegment.end).toBe(9);
             });
         });
     });
