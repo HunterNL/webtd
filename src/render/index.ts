@@ -7,7 +7,7 @@ import { toggleSignal } from "../obj/signal";
 import { getPathTroughSwitch, throwSwitch, TrackBoundary, TrackSwitch } from "../obj/switch";
 import { Track } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
-import { createSignalRenderer, SignalSVGRenderer } from "./svg/signalRenderer";
+import { createSignalRenderer, SignalSVGRenderer, updateSignalRender } from "./svg/signalRenderer";
 import { createTrackRenderer, TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
 
 // const LABEL_OFFSET = 10;
@@ -276,6 +276,10 @@ export class SVGRenderer {
         this.trackRenderers.forEach( trackRenderData => {
             updateTrackRender(trackRenderData, dynamicEnvironment.occupiedTrackSegments)
         });
+
+        this.signRenderers.forEach(signRenderer => {
+            updateSignalRender(signRenderer)
+        })
     }
 }
 
