@@ -31,9 +31,6 @@ export function createTrainSpan(entities: Entity[], forwardPosition: TrackPositi
     return span;
 }
 
-
-
-
 // Update the ride, calling the driver function if set
 export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
     const {speed} = ride;

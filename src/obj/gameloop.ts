@@ -1,13 +1,15 @@
 import { Entity } from "../interfaces/entity";
 import { isRide, updateRide } from "./ride";
 
+const TIMESCALE = 1;
+
 export function createGameLoop(entities: Entity[],updateInterval:number,postUpdate: (dt:number,entities:Entity[]) => any) {
     let lastLoopTime: number
     let intervalHandle: number;
 
 
     function loop(dt: number) {
-        entities.filter(isRide).forEach(ride => updateRide(entities,ride,dt))
+        entities.filter(isRide).forEach(ride => updateRide(entities,ride,dt*TIMESCALE))
     }
 
     function loopWrapper() {

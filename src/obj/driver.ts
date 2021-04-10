@@ -1,4 +1,4 @@
-import { clamp, head } from "lodash";
+import { clamp, head, inRange } from "lodash";
 import { Entity } from "../interfaces/entity";
 import { stoppingDistance } from "../util/physics";
 import { Ride } from "./ride";
@@ -75,8 +75,29 @@ export function driveTrain(entities: Entity[], ride: Ride & Driveable, dt: numbe
 
         console.log("Remaining distance:" + remainingDistance + " Speed: " + ride.speed);
 
+        // const minTravelThisTick = Math.max(0, (ride.speed - acceleration) * dt);
+        // const maxTravelThisTick = Math.max(0, (ride.speed + acceleration) * dt);
+
+        // console.log(minTravelThisTick,maxTravelThisTick)
+
+        // // Remaining distance is one tick away, asuming we didn't overrun
+        // if(inRange(remainingDistance, minTravelThisTick,maxTravelThisTick)) {
+        //     debugger
+        //     const desiredSpeedTick = remainingDistance;
+        //     const currentSpeedTick = ride.speed * dt;
+
+        //     const desiredAcceleration = desiredSpeedTick - currentSpeedTick
+
+        //     return desiredAcceleration / dt;
+
+        // }
+
         if (remainingDistance < 0.1) {
-            return Math.max(0, -acceleration); // We're so close, just slam on the brakes
+            if(ride.speed === 0 ) {
+                return 0;
+            }
+
+            return -acceleration
         }
 
         if(trainStoppingDistance > remainingDistance) {

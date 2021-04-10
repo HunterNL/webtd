@@ -5,6 +5,7 @@ import { createGameLoop } from "./obj/gameloop";
 import { doSegmentsOverlap } from "./obj/trackSegment";
 import { SVGRenderer } from "./render/index";
 
+const LOOP_INTERVAL = 500;//ms
 
 const env = loadEnvironment(exampleEnvironment);
 const dynamicEnvironment: DynamicEnvironment = {
@@ -43,7 +44,7 @@ function onDomReady() {
     window.requestAnimationFrame(raf);
 
 
-    const {start} = createGameLoop(env.entities, 1000, () => {
+    const {start} = createGameLoop(env.entities, LOOP_INTERVAL, () => {
         const tracks = env.tracks;
         const rides = env.rides;
 
