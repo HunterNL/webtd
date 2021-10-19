@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { flatten } from "lodash";
+import { flatten, head, tail } from "lodash";
 import { Entity } from "../interfaces/entity";
 import { isBuffer } from "../obj/buffer";
 import { DynamicEnvironment, Environment } from "../obj/environment";
@@ -105,13 +105,18 @@ function renderDebugIds(entities: Entity[], containingElement: SVGGElement) {
 }
 
 export function shouldDrawAllTheWay(track: Track, boundary: TrackBoundary) {
+    return true;
     if(isBuffer(boundary)) {
         return true;
     }
 
-    const nextTrack = getPathTroughSwitch(boundary, track.id);
+    // const nextTrack = getPathTroughSwitch(boundary, track.id);
 
-    return typeof nextTrack !== 'undefined';
+    // return typeof nextTrack !== 'undefined';
+}
+
+export function createPathString(positions: vec2[]) {
+    return "M " + head(positions)?.join(" ") + tail(positions).map(a => "L " + a.join(" ")).join(" ")
 }
 
 export function getRenderPositionsForTrackSegment(trackRenderPositions: [vec2,vec2], switchOffset: [boolean,boolean], trackLength: number, segment: TrackSegment, renderData?: vec2): [vec2,vec2] {

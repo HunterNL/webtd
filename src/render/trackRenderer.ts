@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
 import { initial, tail } from "lodash";
-import { createSVGElement, getColorForOccupationStatus, getLineVector, getRenderPositionsForTrackSegment, shouldDrawAllTheWay } from ".";
+import { createPathString, createSVGElement, getColorForOccupationStatus, getLineVector, getRenderPositionsForTrackSegment, shouldDrawAllTheWay } from ".";
 import { TrackSwitch } from "../obj/switch";
 import { Track, trackGetOtherBoundary } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
@@ -67,7 +67,9 @@ export function createTrackSegmentRenderer(track: Track, parentElement: SVGEleme
 
 
     return renderLines.map(line => {
-        const element = createSVGElement("line");
+        const element = createSVGElement("path");
+        element.setAttribute("d", createPathString(renderPath));
+        element.setAttribute("fill", "none")
         parentElement.appendChild(element);
         
         return {
@@ -94,10 +96,10 @@ export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, occupi
 
     const [segmentStart,segmentEnd] = getRenderPositionsForTrackSegment([trackRenderData.startPos,trackRenderData.endPos],switchOffsets,track.length,trackRenderData.detectionSegment);
 
-    element.setAttribute("x1", ""+ segmentStart[0])
-    element.setAttribute("y1", ""+ segmentStart[1])
-    element.setAttribute("x2", ""+ segmentEnd[0])
-    element.setAttribute("y2", ""+ segmentEnd[1])
+    // element.setAttribute("x1", ""+ segmentStart[0])
+    // element.setAttribute("y1", ""+ segmentStart[1])
+    // element.setAttribute("x2", ""+ segmentEnd[0])
+    // element.setAttribute("y2", ""+ segmentEnd[1])
 
     // Set stroke color to train detection status
     trackRenderData.element.setAttribute("stroke", getColorForOccupationStatus(occupiedSegments.includes(trackRenderData.detectionSegment)));
