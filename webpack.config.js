@@ -19,11 +19,12 @@ module.exports = {
         }]
     },
     devServer: {
-        contentBase: './bundle/generated/dev',
-        overlay: true,
+        static: {
+            directory: path.join(__dirname,"bundle/generated/dev"),
+            serveIndex: true,
+            watch: false
+        },
         host: "127.0.0.1",
-        public: "127.0.0.1",
-        disableHostCheck: true,
         port: 8080
 
     },
