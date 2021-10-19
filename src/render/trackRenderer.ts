@@ -1,9 +1,11 @@
 import { vec2 } from "gl-matrix";
 import { initial, tail } from "lodash";
 import { createSVGElement, getColorForOccupationStatus, getLineVector, getRenderPositionsForTrackSegment, shouldDrawAllTheWay } from ".";
-import { Track } from "../obj/track";
+import { TrackSwitch } from "../obj/switch";
+import { Track, trackGetOtherBoundary } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
 import { combine } from "../util/combine";
+import { requireRenderPosition } from "./svg/switchRenderer";
 
 const SWITCH_RENDER_RADIUS = 7;
 
@@ -128,6 +130,20 @@ function shortenEnd(waypoints: vec2[]): vec2[] {
     const lastPoint =  vec2.scaleAndAdd(vec2.create(), waypoints[length-1], direction, SWITCH_RENDER_RADIUS);
 
     return [...initial(waypoints),lastPoint];
+}
+
+export function getNearestRenderWaypoint(swi: TrackSwitch,track: Track): vec2 {
+    const waypoints = track?.renderData?.waypoints;
+
+    if(!Array.isArray(waypoints) || waypoints.length === 0) {
+        return requireRenderPosition(trackGetOtherBoundary(track, swi.id))
+    }
+
+    if(waypoints.length > 1) {
+        throw new Error("Multiple render waypoints unsupported");
+    }
+
+    return waypoints[0];
 }
 
 // function findPositionOnLine(lines: [vec2, vec2][], normalizedPosition: number) {

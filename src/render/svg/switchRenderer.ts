@@ -5,6 +5,7 @@ import { switchGetActivePaths, switchGetPathForState, SwitchState, TrackSwitch }
 import { isTrack, trackGetOtherBoundary } from "../../obj/track";
 import { TrackSegment } from "../../obj/trackSegment";
 import { getDirection } from "../../util/vec2";
+import { getNearestRenderWaypoint } from "../trackRenderer";
 
 const SWITCH_PATH_LENGTH = 10;
 
@@ -16,7 +17,7 @@ export type SwitchSVGRenderer = {
     paths: Map<SwitchState, string>,
 }
 
-function requireRenderPosition(obj: any): vec2 {
+export function requireRenderPosition(obj: any): vec2 {
     if (!obj.renderData) {
         throw new Error("No renderData");
     }
@@ -28,12 +29,15 @@ function requireRenderPosition(obj: any): vec2 {
     return obj.renderData.position
 }
 
+
+
 function createSVGPathStringForSwitchPath(swi: TrackSwitch, switchState: SwitchState, entities: Entity[]): string {
     const trackIds = switchGetPathForState(swi, switchState)[0]; // TODO Support multiple paths
     const switchPos = requireRenderPosition(swi);
 
     const [startPos, endPos] = trackIds.map(trackId => {
-        return requireRenderPosition(trackGetOtherBoundary(getEntityById(entities,trackId,isTrack), swi.id))
+        const track = getEntityById(entities,trackId,isTrack);
+        return getNearestRenderWaypoint(swi, track)
     }).map(remotePosition => {
         const direction = getDirection(switchPos, remotePosition);
         return vec2.scaleAndAdd(vec2.create(), switchPos, direction, SWITCH_PATH_LENGTH)
