@@ -139,7 +139,7 @@ export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
         length: trackSave.length,
         type: "track",
         segments: {
-            detection: generateSegments(trackId, boundaries, length, trackSave.detectionDeviders)
+            detection: generateSegments(trackId, boundaries, trackSave.length, trackSave.detectionDeviders)
         }, // generateSegments(trackSave.length, trackSave.id),
         detectionDeviders: trackSave.detectionDeviders,
         renderData: trackSave.renderData
