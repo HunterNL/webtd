@@ -24,7 +24,7 @@
             "name": "Launch chrome",
             "port": 9222,
             "webRoot": "${workspaceFolder}",
-            "url": "http://localhost:8080"
+            "url": "http://localhost:8080",
         }
     ]
 }

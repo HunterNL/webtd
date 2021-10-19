@@ -1,7 +1,8 @@
 import { vec2 } from "gl-matrix";
+import { last } from "lodash";
 import { createSVGElement } from "..";
 import { ASPECT_STOP, Signal } from "../../obj/signal";
-import { getLinePositions } from "../trackRenderer";
+import { getTrackRenderPath } from "../trackRenderer";
 
 const SVG_CONTENT = `<svg viewBox="184.686 41.924 130.627 182.26" width="130.627" height="182.26" xmlns="http://www.w3.org/2000/svg">
   <path d="M 609 301 m -46.691 0 a 46.691 46.691 0 1 0 93.382 0 a 46.691 46.691 0 1 0 -93.382 0 Z M 609 301 m -28.015 0 a 28.015 28.015 0 0 1 56.03 0 a 28.015 28.015 0 0 1 -56.03 0 Z" transform="matrix(-0.80339, 0.595454, -0.595454, -0.80339, 918.49585, -13.57336)"/>
@@ -37,7 +38,15 @@ export function createSignalRenderer(signal: Signal, parentElement: SVGElement) 
 
     // const label = signal?.renderData?.label || "SIGNAL";
 
-    const [startPos,endPos] = getLinePositions(signal.position.track);
+    // TODO Support render waypoints?
+    const trackRenderPath = getTrackRenderPath(signal.position.track);
+    const startPos = trackRenderPath[0];
+    const endPos = last(trackRenderPath);
+
+    if(!endPos) {
+        throw new Error("Line lacks final waypoint")
+    }
+
     const positionFraction = getSignalFractionalLocation(signal);
 
     const signalRenderLocation = vec2.lerp(vec2.create(), startPos, endPos, positionFraction);

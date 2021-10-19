@@ -1,61 +1,84 @@
 import { vec2 } from "gl-matrix";
-import { createSVGElement, getColorForOccupationStatus, getRenderPositionsForTrackSegment, shouldDrawAllTheWay } from ".";
+import { initial, tail } from "lodash";
+import { createSVGElement, getColorForOccupationStatus, getLineVector, getRenderPositionsForTrackSegment, shouldDrawAllTheWay } from ".";
 import { Track } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
+import { combine } from "../util/combine";
+
+const SWITCH_RENDER_RADIUS = 7;
 
 export type TrackSegmentSVGRender = {
     track: Track,
     element: SVGElement,
-    trackSegment: TrackSegment,
+    detectionSegment: TrackSegment,
     startPos: vec2,
     endPos: vec2,
-    isFirstSegment: boolean,
-    isLastSegment: boolean,
+    // isFirstSegment: boolean,
+    // isLastSegment: boolean,
+    // segmentIndex: number,
 }
 
-export function getLinePositions(track: Track): [vec2,vec2] {
+export function getTrackRenderPath(track: Track): vec2[] {
     const [startBoundary, endBoundary] = track.boundries;
 
     if (!startBoundary.renderData || !endBoundary.renderData) {
         throw new Error("Boundary lacks renderData");
     }
 
-
     if (!startBoundary.renderData.position || !endBoundary.renderData.position) {
-        throw new Error("Boundary lacks proper renderData");
+        throw new Error("Boundary lacks renderData position");
     }
 
     const startPos = startBoundary.renderData.position;
     const endPos = endBoundary.renderData.position;
 
-    return [startPos,endPos]
+    return [startPos, ...getWaypoints(track), endPos];
 }
 
-export function createTrackRenderer(track: Track, trackSegment: TrackSegment, parentElement: SVGElement): TrackSegmentSVGRender  {
-    const element = createSVGElement("line");
+// function getSegmentRenderPosition(track: Track, segment:)
 
-    const [startPos,endPos] = getLinePositions(track);
-    
-    // const switchOffsets : [boolean,boolean] = [false,false]; // TODO switch offsets
+export function createTrackSegmentRenderer(track: Track, parentElement: SVGElement): TrackSegmentSVGRender[]  {
+    // const lastIndex = track.segments.detection.length - 1;
 
-    // const [segmentStart,segmentEnd] = getRenderPositionsForTrackSegment(track.renderData.position,switchOffsets,track.length,trackSegment)
+    const coreSegments = track.segments.detection.filter(segment => typeof segment.startBoundary === "undefined" && typeof segment.endBoundary === "undefined"); //Filter out switch related segments
 
-    // element.setAttribute("x1", ""+ segmentStart[0])
-    // element.setAttribute("y1", ""+ segmentStart[1])
-    // element.setAttribute("x2", ""+ segmentEnd[0])
-    // element.setAttribute("y2", ""+ segmentEnd[1])
+    const starsWithSwitch = track.boundries[0].type === "switch";
+    const endsWithSwitch = track.boundries[1].type === "switch";
 
-    parentElement.appendChild(element);
-
-    return {
-        track,
-        trackSegment,
-        element,
-        startPos,
-        endPos,
-        isFirstSegment: trackSegment.start === 0,
-        isLastSegment: trackSegment.end === track.length
+    if(coreSegments.length > 1) {
+        throw new Error("coreSegments >1 unsupported");
     }
+
+    const segment = coreSegments[0];
+
+    let renderPath = getTrackRenderPath(track);
+
+    if(starsWithSwitch) {
+        renderPath = shortenStart(renderPath)
+    }
+
+    if(endsWithSwitch) {
+        renderPath = shortenEnd(renderPath);
+    }
+
+    const renderLines: [vec2, vec2][] = combine(renderPath, toTuple);
+
+
+    return renderLines.map(line => {
+        const element = createSVGElement("line");
+        parentElement.appendChild(element);
+        
+        return {
+            track,
+            // isFirstSegment: index === 0,
+            // isLastSegment: index === lastIndex,
+            trackSegment: segment,
+            element: element,
+            detectionSegment: segment,
+            startPos: line[0],
+            endPos: line[1],
+        }
+    });
 }
 
 export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, occupiedSegments: TrackSegment[]) {
@@ -67,7 +90,7 @@ export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, occupi
         !shouldDrawAllTheWay(track, track.boundries[1])
     ];
 
-    const [segmentStart,segmentEnd] = getRenderPositionsForTrackSegment([trackRenderData.startPos,trackRenderData.endPos],switchOffsets,track.length,trackRenderData.trackSegment);
+    const [segmentStart,segmentEnd] = getRenderPositionsForTrackSegment([trackRenderData.startPos,trackRenderData.endPos],switchOffsets,track.length,trackRenderData.detectionSegment);
 
     element.setAttribute("x1", ""+ segmentStart[0])
     element.setAttribute("y1", ""+ segmentStart[1])
@@ -75,5 +98,111 @@ export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, occupi
     element.setAttribute("y2", ""+ segmentEnd[1])
 
     // Set stroke color to train detection status
-    trackRenderData.element.setAttribute("stroke", getColorForOccupationStatus(occupiedSegments.includes(trackRenderData.trackSegment)));
+    trackRenderData.element.setAttribute("stroke", getColorForOccupationStatus(occupiedSegments.includes(trackRenderData.detectionSegment)));
 }
+
+function getWaypoints(track: Track): vec2[] {
+    if(track?.renderData?.waypoints) {
+        return track.renderData.waypoints
+    } else {
+        return []
+    }
+}
+function toTuple<T,U>(a:T, b:U) : [T,U] {
+    return [a,b];
+}
+
+
+function shortenStart(waypoints: vec2[]): vec2[] {
+    const direction = getLineVector(waypoints[0],waypoints[1])
+
+    const firstPoint =  vec2.scaleAndAdd(vec2.create(), waypoints[0], direction, SWITCH_RENDER_RADIUS);
+
+    return [firstPoint,...tail(waypoints)]
+}
+
+function shortenEnd(waypoints: vec2[]): vec2[] {
+    const length = waypoints.length;
+    const direction = getLineVector(waypoints[length-1],waypoints[length-2])
+
+    const lastPoint =  vec2.scaleAndAdd(vec2.create(), waypoints[length-1], direction, SWITCH_RENDER_RADIUS);
+
+    return [...initial(waypoints),lastPoint];
+}
+
+// function findPositionOnLine(lines: [vec2, vec2][], normalizedPosition: number) {
+//     const lineLenghts = lines.map(([veca,vecb]) => vec2.distance(veca,vecb))
+
+//     const completeLength = lineLenghts.reduce(add,0);
+//     const realOffset = completeLength * normalizedPosition;
+
+
+
+
+// }
+
+// function screenPosForTrackoffset(trackPosition: TrackPosition): vec2 {
+//     const track = trackPosition.track;
+//     const lines = getLinePositions(trackPosition.track);
+
+//     if(trackPosition.offset === 0) {
+//         return lines[0][0];
+//     }
+
+//     if(trackPosition.offset === trackPosition.track.length) {
+//         const lastLine = last(lines);
+
+//         if(!lastLine) {
+//             throw new Error("wtf");
+//         }
+//         return lastLine[1];
+//     }
+
+//     console.log(lines.length)
+
+//     if(lines.length > 1) {
+//         console.log(lines);
+//     }
+    
+
+//     const lineLenghts = lines.map(([veca,vecb]) => vec2.distance(veca,vecb))
+//     const lineLength = lineLenghts.reduce(add,0);
+
+//     const normalizedPosition = trackPosition.offset / track.length;    
+//     const screenSpaceLineOffset = lineLength * normalizedPosition; // Screenspace offset 
+
+//     const [lineIndex,lineOffset] = getScreenSpaceLineOffset(lineLenghts, screenSpaceLineOffset);
+
+//     const baseLine = lines[lineIndex];
+//     const lineMovement = vec2.subtract(vec2.create(), baseLine[1], baseLine[0]);
+//     const lineVector = vec2.normalize(lineMovement, lineMovement);
+
+    
+
+//     const screenPos = vec2.add(vec2.create(), baseLine[0], vec2.scale(vec2.create(), lineVector, lineOffset));
+
+//     if(lines.length > 1 ) {
+//         console.log(screenPos)
+//     }
+
+//     return screenPos
+// }
+
+// /**
+//  * 
+//  * @param linesLenghts 
+//  * @param targetPosition 
+//  * @returns [lineIndex,lineOffset]
+//  */
+// function getScreenSpaceLineOffset(linesLenghts: number[], targetPosition: number): [number,number] {
+//     let lineStartPos = 0;
+//     for (let index = 0; index < linesLenghts.length; index++) {
+//         const currentLineLength = linesLenghts[index];
+//         if(targetPosition >= lineStartPos && targetPosition <= lineStartPos + currentLineLength) {
+//             return [index, lineStartPos+targetPosition]
+//         }
+//         lineStartPos += currentLineLength;
+//     }
+
+//     throw new Error("Targetposition not found")
+// }

@@ -1,23 +1,42 @@
 import { Identifier } from "../interfaces/id";
 import { doRangesOverlap } from "../util/rangeOverlap";
 import { TrackPosition } from "./situation";
+import { TrackBoundary } from "./switch";
+
+// type world = "world"
+// type hello<T extends String> = `hello ${T}`;
+
+// type aaaa = hello<"derg">;
+
+// type cap<T extends string> = Capitalize<T>;
+
+// type segmentBoundary = {
+//     startsAtBoundary: true,
+//     boundary: TrackBoundary
+// }
+
+// type midpoint = {
+//     startsAtBoundary: false,
+//     boundary: number
+// }
+
+// type SegmentStart = segmentBoundary | midpoint
+
+// type adaddad = NewType<"foo">
+// type Boundary<Taa extends string> = NewType;
 
 /***
  * A range within a single piece of track
  */
 export type TrackSegment = {
-    trackId: Identifier
+    trackId: Identifier,
+    // length: number,
+    startBoundary?: TrackBoundary,
+    endBoundary?: TrackBoundary,
     start: number,
     end: number
 }
-
-/**
- * Helper that fixes offset order
- * @param track 
- * @param offset1 
- * @param offset2 
- * @returns 
- */
+// } & SegmentStart
 
 export function segmentGetOrdered(segment: TrackSegment): [number,number] {
     if(segment.end > segment.start) {
@@ -44,6 +63,20 @@ export function doesSegmentContainSegment(parent: TrackSegment, child: TrackSegm
     }
 
     return child.start >= parent.start && child.end <= parent.end;
+}
+
+
+export function splitRangeAtPoints(range:number, points:number[]) : [number,number][] {
+    let lastPoint = 0;
+
+    const segments : [number,number][] = points.map(point => {
+        lastPoint = lastPoint + point
+        return [lastPoint-point, point];
+    })
+
+    segments.push([lastPoint,range]);
+
+    return segments;
 }
 
 export function splitTrackAtPoints(trackId: number, length: number, points: number[]): TrackSegment[] {

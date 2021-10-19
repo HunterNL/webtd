@@ -1,8 +1,9 @@
-import { Entity } from "../interfaces/entity";
+import { flatten, uniq } from "lodash";
+import { Entity, getEntityById } from "../interfaces/entity";
 import { Identifier, isIdentifiable, isIdentifier } from "../interfaces/id";
 import { Buffer, isBuffer } from "./buffer";
 import { isJunction, Junction } from "./junction";
-import { Track } from "./track";
+import { isTrack, Track, trackGetOtherEnd } from "./track";
 
 // const SWITCH_ACTUATION_TIME = 3; //seconds
 
@@ -58,17 +59,37 @@ export function isSwitch(a: any): a is TrackSwitch  {
         (a as any).type === "switch";
 }
 
-export function switchGetActivePaths(swi: TrackSwitch): Array<[Identifier,Identifier]> {
-    if(swi.currentState === SwitchState.Straight) {
+export function switchGetPathForState(swi: TrackSwitch, switchState: SwitchState): [number, number][] {
+    if(switchState === SwitchState.Straight) {
         return swi.junction.straightConnections
     }
 
-    if(swi.currentState === SwitchState.Side) {
+    if(switchState === SwitchState.Side) {
         return swi.junction.sideConnections
     }
 
     throw new Error("Unknown switch state");
+}
+
+export function switchGetActivePaths(swi: TrackSwitch): Array<[Identifier,Identifier]> {
+    return switchGetPathForState(swi, swi.currentState)
 }   
+
+export function switchGetAjoiningTrackIds(swi: TrackSwitch): Identifier[] {
+    return uniq(flatten(swi.junction.sideConnections.concat(swi.junction.straightConnections)));
+}
+
+export function switchGetRemoteBoundaries(swi: TrackSwitch, entities: Entity[]) {
+    const ajoiningTracks = switchGetAjoiningTrackIds(swi)
+        .map(id => getEntityById(entities, id, isTrack));
+    return ajoiningTracks.map(track => trackGetOtherEnd(track, swi.id));
+}
+
+export function switchGetActiveRemoteBoundaries(swi: TrackSwitch, entities: Entity[]) {
+    const ajoiningTracks = uniq(flatten(switchGetActivePaths(swi)))
+        .map(id => getEntityById(entities, id, isTrack));
+    return ajoiningTracks.map(track => trackGetOtherEnd(track, swi.id));
+}
 
 export function throwSwitch(trackSwitch: TrackSwitch) {
     if(trackSwitch.currentState === SwitchState.Straight) {

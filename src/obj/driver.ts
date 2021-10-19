@@ -69,8 +69,6 @@ export function driveTrain(entities: Entity[], ride: Ride & Driveable, dt: numbe
     const {driverMode, speed} = ride;
     const accelerationCapability = trainGetAccelleration();
 
-    console.log(driverMode.type);
-
     // Todo proper multiple modes
     if(driverMode.type === "maintain_speed") {
         
@@ -87,7 +85,7 @@ export function driveTrain(entities: Entity[], ride: Ride & Driveable, dt: numbe
         const trainStoppingDistance = stoppingDistance(speed, acceleration);
         const remainingDistance = getDistanceToPosition(ride.position,driverMode.stopPosition, 1 as any);
 
-        console.log("Remaining distance:" + remainingDistance + " Speed: " + ride.speed);
+        // console.log("Remaining distance:" + remainingDistance + " Speed: " + ride.speed);
 
         // const minTravelThisTick = Math.max(0, (ride.speed - acceleration) * dt);
         // const maxTravelThisTick = Math.max(0, (ride.speed + acceleration) * dt);

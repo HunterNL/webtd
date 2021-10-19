@@ -8,12 +8,13 @@ import { getPathTroughSwitch, throwSwitch, TrackBoundary, TrackSwitch } from "..
 import { Track } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
 import { createSignalRenderer, SignalSVGRenderer, updateSignalRender } from "./svg/signalRenderer";
-import { createTrackRenderer, TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
+import { createSwitchRenderer, SwitchSVGRenderer, updateSwitchRenderer } from "./svg/switchRenderer";
+import { createTrackSegmentRenderer, TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
 
 // const LABEL_OFFSET = 10;
 
-const COLOR_UNOCCUPIED="#aaa";
-const COLOR_OCCUPIED="#f5ff44"
+export const COLOR_UNOCCUPIED="#aaa";
+export const COLOR_OCCUPIED="#f5ff44"
 
 const SWITCH_WRONGWAY_OFFSET = 25;
 
@@ -113,15 +114,17 @@ export function shouldDrawAllTheWay(track: Track, boundary: TrackBoundary) {
     return typeof nextTrack !== 'undefined';
 }
 
-export function getRenderPositionsForTrackSegment(trackRenderPositions: [vec2,vec2], switchOffset: [boolean,boolean], trackLength: number, segment: TrackSegment): [vec2,vec2] {
+export function getRenderPositionsForTrackSegment(trackRenderPositions: [vec2,vec2], switchOffset: [boolean,boolean], trackLength: number, segment: TrackSegment, renderData?: vec2): [vec2,vec2] {
     const [startPos,endPos] = trackRenderPositions;
     const [startOffset, endOffset] = switchOffset;
 
     const lineVector = getLineVector(startPos, endPos);
     const drawLineLength = vec2.distance(startPos, endPos)
 
-    const startPosFraction = segment.start / trackLength;
-    const endPosFraction = segment.end / trackLength;
+    const startPosFraction = 0
+    const endPosFraction = 1
+    // const startPosFraction = segment.start / trackLength;
+    // const endPosFraction = segment.end / trackLength;
 
     const startVec = vec2.scale(vec2.create(), lineVector, startPosFraction * drawLineLength);
     const endVec = vec2.scale(vec2.create(), lineVector, endPosFraction * drawLineLength);
@@ -240,6 +243,7 @@ export class SVGRenderer {
     trackRenderers: TrackSegmentSVGRender[];
     signalGroup: SVGGElement;
     signRenderers: SignalSVGRenderer[];
+    switchRenderers: SwitchSVGRenderer[];
 
     constructor(env: Environment, renderElement: SVGElement) {
         this.env = env;
@@ -257,10 +261,12 @@ export class SVGRenderer {
         // this.trackRenderers = createTrackRenderers(env.tracks, this.trackGroup);
 
         this.trackRenderers = flatten(this.env.tracks.map(track => {
-            return track.segments.detection.map(segment => {
-                return createTrackRenderer(track, segment, this.trackGroup)
-            })
+                return createTrackSegmentRenderer(track, this.trackGroup)
         }));
+
+        this.switchRenderers = this.env.switches.map(trackSwitch => {
+            return createSwitchRenderer(trackSwitch, this.env.tracks, this.trackGroup);
+        })
 
         renderSwitchInteractables(this.env.switches, this.interactableGroup);
         renderSignalInteractables(this.signRenderers,this.interactableGroup);
@@ -280,6 +286,8 @@ export class SVGRenderer {
         this.signRenderers.forEach(signRenderer => {
             updateSignalRender(signRenderer)
         })
+
+        this.switchRenderers.forEach(updateSwitchRenderer)
     }
 }
 

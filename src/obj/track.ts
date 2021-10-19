@@ -1,9 +1,9 @@
 import { Entity, getEntityById } from "../interfaces/entity";
-import { getId, Identifiable, isIdentifiable } from "../interfaces/id";
+import { getId, Identifiable, Identifier, isIdentifiable } from "../interfaces/id";
 import { isLengthable, Lengthable } from "../interfaces/lengthable";
 import { Direction, DIRECTION_FORWARD, TrackPosition } from "./situation";
 import { isTrackBoundary, resolveBoundary, TrackBoundary } from "./switch";
-import { splitTrackAtPoints, TrackSegment } from "./trackSegment";
+import { splitRangeAtPoints, TrackSegment } from "./trackSegment";
 
 
 
@@ -55,50 +55,50 @@ export interface TrackSave extends Identifiable, Lengthable, Entity {
 }
 
 const IDEAL_SEGMENT_SPACING = 100;
-export function generateSegments(length: number, trackId: number): TrackSegment[] {
-    const midPoint = length/2;
+// export function generateSegments(length: number, trackId: number): TrackSegment[] {
+//     const midPoint = length/2;
 
-    if(length<10) {
-        return [{
-            trackId,
-            start:0,
-            end: midPoint
-        },{
-            trackId,
-            start:midPoint,
-            end: length
-        }]
-    }
+//     if(length<10) {
+//         return [{
+//             trackId,
+//             start:0,
+//             end: midPoint
+//         },{
+//             trackId,
+//             start:midPoint,
+//             end: length
+//         }]
+//     }
 
-    // Two short segments at the start and end
-    const endSegments : TrackSegment []= [
-        {
-            start: 0,
-            end: 5,
-            trackId
+//     // Two short segments at the start and end
+//     const endSegments : TrackSegment []= [
+//         {
+//             start: 0,
+//             end: 5,
+//             trackId
 
-        },{
-            start: length-5,
-            end: length,
-            trackId
-        }
-    ]
+//         },{
+//             start: length-5,
+//             end: length,
+//             trackId
+//         }
+//     ]
 
-    const segmentCount = Math.floor((length-10)/IDEAL_SEGMENT_SPACING);
-    const segmentSize = (length-10)/segmentCount;
+//     const segmentCount = Math.floor((length-10)/IDEAL_SEGMENT_SPACING);
+//     const segmentSize = (length-10)/segmentCount;
 
-    const midSegments : TrackSegment[] = [];
+//     const midSegments : TrackSegment[] = [];
 
-    for (let index = 0; index < segmentCount; index++) {
-        midSegments.push({
-            start: index+5,
-            end: index*segmentSize+5,
-            trackId
-        })
-    }
+//     for (let index = 0; index < segmentCount; index++) {
+//         midSegments.push({
+//             start: index+5,
+//             end: index*segmentSize+5,
+//             trackId
+//         })
+//     }
 
-    return endSegments.concat(midSegments);
-}
+//     return endSegments.concat(midSegments);
+// }
 
 export function isTrackSave(any: any): any is TrackSave {
     return any.type === "track";
@@ -115,16 +115,31 @@ export function resolveBoundries(entities: Entity[],ids: number[]): [TrackBounda
     return [entA, entB]
 }
 
+function generateSegments(trackId: Identifier, boundaries: [TrackBoundary, TrackBoundary], length: number, deviders: number[]): TrackSegment[] {
+    const segments = splitRangeAtPoints(length, deviders);
+
+    return segments.map((range,index) => {
+        return {
+            start: range[0],
+            end: range[1],
+            trackId,
+            startBoundary: (index === 0 ? boundaries[0] : undefined),
+            endBoundary: (index === segments.length -1 ? boundaries[1] : undefined)
+        }
+    })
+}
+
 export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
     const trackId = trackSave.id;
+    const boundaries = resolveBoundries(entities, trackSave.boundries);
 
     return {
         id: trackId,
-        boundries: resolveBoundries(entities, trackSave.boundries),
+        boundries: boundaries,
         length: trackSave.length,
         type: "track",
         segments: {
-            detection: splitTrackAtPoints(trackId, trackSave.length, trackSave.detectionDeviders)
+            detection: generateSegments(trackId, boundaries, length, trackSave.detectionDeviders)
         }, // generateSegments(trackSave.length, trackSave.id),
         detectionDeviders: trackSave.detectionDeviders,
         renderData: trackSave.renderData
@@ -208,4 +223,12 @@ export function getDirectionAwayFromBoundary(track: Track, boundaryId: number): 
     }
 
     throw new Error("Unknown boundaryId");
+}
+
+export function trackGetOtherBoundary(track: Track, boundaryId: number): TrackBoundary {
+    if(track.boundries[0].id === boundaryId) {
+        return track.boundries[1];
+    } else {
+        return track.boundries[0];
+    }
 }

@@ -45,7 +45,7 @@
                 "sideConnections": [[3,5]]
             },
             "renderData": {
-                "position": [400,50]
+                "position": [580,50]
             }
         },
         {
@@ -84,10 +84,14 @@
         },
         {
             "type" : "track",
+            "comment" : "upside",
             "id": 3,
             "length" : 500,
             "boundries" : [21,22],
-            "detectionDeviders": [100,400]
+            "detectionDeviders": [100,400],
+            "renderData" : {
+                "waypoints": [[220,50]]
+            }
         },
         {
             "type" : "track",

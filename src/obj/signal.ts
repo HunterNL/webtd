@@ -46,7 +46,7 @@ export function isSignal(any: any): any is Signal {
 }
 
 export function lookupSignals(entities: Entity[], ride: Ride, distance: number) {
-    const [{segments},_] = advanceAlongTrack(entities, ride.position, distance);
+    const [{segments}] = advanceAlongTrack(entities, ride.position, distance);
 
     const allSignals = entities.filter(isSignal);
 
