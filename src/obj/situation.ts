@@ -165,10 +165,14 @@ export function isSituationSave(any: any): any is SituationSave {
 }
 
 
-export function getDistanceToPosition(from: TrackPosition, to: TrackPosition, via: TrackSpan): number {
+export function getDistanceToPosition(from: TrackPosition, to: TrackPosition, via?: TrackSpan): number {
     if(from.track.id !== to.track.id) {
         console.warn("Distance across tracks unimplemented"); // Should throw
         return Number.MAX_SAFE_INTEGER;
+    }
+
+    if(via) {
+        throw new Error("Unimplemented");
     }
 
     return to.offset - from.offset;

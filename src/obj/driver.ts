@@ -83,7 +83,7 @@ export function driveTrain(entities: Entity[], ride: Ride & Driveable, dt: numbe
         const acceleration = trainGetAccelleration() * ACCELERATION_MARGIN;
 
         const trainStoppingDistance = stoppingDistance(speed, acceleration);
-        const remainingDistance = getDistanceToPosition(ride.position,driverMode.stopPosition, 1 as any);
+        const remainingDistance = getDistanceToPosition(ride.position,driverMode.stopPosition);
 
         // console.log("Remaining distance:" + remainingDistance + " Speed: " + ride.speed);
 
