@@ -11,7 +11,7 @@ import { splitRangeAtPoints, TrackSegment } from "./trackSegment";
 export type Track = Identifiable & Lengthable & Entity & {
     boundries: [TrackBoundary,TrackBoundary],
     length: number
-    detectionDeviders: number[]
+    detectionDividers: number[]
     renderData?: {
         start: [number,number],
         end: [number, number]
@@ -26,7 +26,7 @@ export type Track = Identifiable & Lengthable & Entity & {
 export function createTrack(id: number, startBoundary: TrackBoundary, endBoundary: TrackBoundary, length: number): Track {
     return {
         boundries: [startBoundary,endBoundary],
-        detectionDeviders: [],
+        detectionDividers: [],
         id,
         length,
         segments: {detection:[]},
@@ -49,7 +49,7 @@ export function getBoundaryPosition(track: Track, boundaryId: number): number {
 }
 
 export interface TrackSave extends Identifiable, Lengthable, Entity {
-    detectionDeviders: number[];
+    detectionDividers: number[];
     boundries: [number, number],
     renderData: any,
 }
@@ -115,8 +115,8 @@ export function resolveBoundries(entities: Entity[],ids: number[]): [TrackBounda
     return [entA, entB]
 }
 
-function generateSegments(trackId: Identifier, boundaries: [TrackBoundary, TrackBoundary], length: number, deviders: number[]): TrackSegment[] {
-    const segments = splitRangeAtPoints(length, deviders);
+function generateSegments(trackId: Identifier, boundaries: [TrackBoundary, TrackBoundary], length: number, dividers: number[]): TrackSegment[] {
+    const segments = splitRangeAtPoints(length, dividers);
 
     return segments.map((range,index) => {
         return {
@@ -139,9 +139,9 @@ export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
         length: trackSave.length,
         type: "track",
         segments: {
-            detection: generateSegments(trackId, boundaries, trackSave.length, trackSave.detectionDeviders)
+            detection: generateSegments(trackId, boundaries, trackSave.length, trackSave.detectionDividers)
         }, // generateSegments(trackSave.length, trackSave.id),
-        detectionDeviders: trackSave.detectionDeviders,
+        detectionDividers: trackSave.detectionDividers,
         renderData: trackSave.renderData
     }
 }
