@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
 import { initial, tail } from "lodash";
-import { createPathString, createSVGElement, getColorForOccupationStatus, getLineVector, getRenderPositionsForTrackSegment, shouldDrawAllTheWay } from ".";
+import { createPathString, createSVGElement, getColorForOccupationStatus, getLineVector } from ".";
 import { TrackSwitch } from "../obj/switch";
 import { Track, trackGetOtherBoundary } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
@@ -15,9 +15,6 @@ export type TrackSegmentSVGRender = {
     detectionSegment: TrackSegment,
     startPos: vec2,
     endPos: vec2,
-    // isFirstSegment: boolean,
-    // isLastSegment: boolean,
-    // segmentIndex: number,
 }
 
 export function getTrackRenderPath(track: Track): vec2[] {
@@ -36,8 +33,6 @@ export function getTrackRenderPath(track: Track): vec2[] {
 
     return [startPos, ...getWaypoints(track), endPos];
 }
-
-// function getSegmentRenderPosition(track: Track, segment:)
 
 export function createTrackSegmentRenderer(track: Track, parentElement: SVGElement): TrackSegmentSVGRender[]  {
     // const lastIndex = track.segments.detection.length - 1;
@@ -74,8 +69,6 @@ export function createTrackSegmentRenderer(track: Track, parentElement: SVGEleme
         
         return {
             track,
-            // isFirstSegment: index === 0,
-            // isLastSegment: index === lastIndex,
             trackSegment: segment,
             element: element,
             detectionSegment: segment,
@@ -87,22 +80,10 @@ export function createTrackSegmentRenderer(track: Track, parentElement: SVGEleme
 
 export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, occupiedSegments: TrackSegment[]) {
     // TODO switch offsets
-    const {track, element} = trackRenderData;
-
-    const switchOffsets : [boolean,boolean] = [
-        !shouldDrawAllTheWay(track, track.boundries[0]),
-        !shouldDrawAllTheWay(track, track.boundries[1])
-    ];
-
-    const [segmentStart,segmentEnd] = getRenderPositionsForTrackSegment([trackRenderData.startPos,trackRenderData.endPos],switchOffsets,track.length,trackRenderData.detectionSegment);
-
-    // element.setAttribute("x1", ""+ segmentStart[0])
-    // element.setAttribute("y1", ""+ segmentStart[1])
-    // element.setAttribute("x2", ""+ segmentEnd[0])
-    // element.setAttribute("y2", ""+ segmentEnd[1])
+    const {element} = trackRenderData;
 
     // Set stroke color to train detection status
-    trackRenderData.element.setAttribute("stroke", getColorForOccupationStatus(occupiedSegments.includes(trackRenderData.detectionSegment)));
+    element.setAttribute("stroke", getColorForOccupationStatus(occupiedSegments.includes(trackRenderData.detectionSegment)));
 }
 
 function getWaypoints(track: Track): vec2[] {

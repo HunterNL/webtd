@@ -2,7 +2,7 @@ import { vec2 } from "gl-matrix";
 import { COLOR_UNOCCUPIED, createSVGElement } from "..";
 import { Entity, getEntityById } from "../../interfaces/entity";
 import { switchGetActivePaths, switchGetPathForState, SwitchState, TrackSwitch } from "../../obj/switch";
-import { isTrack, trackGetOtherBoundary } from "../../obj/track";
+import { isTrack } from "../../obj/track";
 import { TrackSegment } from "../../obj/trackSegment";
 import { getDirection } from "../../util/vec2";
 import { getNearestRenderWaypoint } from "../trackRenderer";

@@ -1,11 +1,9 @@
 import { vec2 } from "gl-matrix";
 import { flatten, head, tail } from "lodash";
 import { Entity } from "../interfaces/entity";
-import { isBuffer } from "../obj/buffer";
 import { DynamicEnvironment, Environment } from "../obj/environment";
 import { toggleSignal } from "../obj/signal";
-import { getPathTroughSwitch, throwSwitch, TrackBoundary, TrackSwitch } from "../obj/switch";
-import { Track } from "../obj/track";
+import { throwSwitch, TrackSwitch } from "../obj/switch";
 import { TrackSegment } from "../obj/trackSegment";
 import { createSignalRenderer, SignalSVGRenderer, updateSignalRender } from "./svg/signalRenderer";
 import { createSwitchRenderer, SwitchSVGRenderer, updateSwitchRenderer } from "./svg/switchRenderer";
@@ -104,22 +102,11 @@ function renderDebugIds(entities: Entity[], containingElement: SVGGElement) {
     })
 }
 
-export function shouldDrawAllTheWay(track: Track, boundary: TrackBoundary) {
-    return true;
-    if(isBuffer(boundary)) {
-        return true;
-    }
-
-    // const nextTrack = getPathTroughSwitch(boundary, track.id);
-
-    // return typeof nextTrack !== 'undefined';
-}
-
 export function createPathString(positions: vec2[]) {
     return "M " + head(positions)?.join(" ") + tail(positions).map(a => "L " + a.join(" ")).join(" ")
 }
 
-export function getRenderPositionsForTrackSegment(trackRenderPositions: [vec2,vec2], switchOffset: [boolean,boolean], trackLength: number, segment: TrackSegment, renderData?: vec2): [vec2,vec2] {
+export function getRenderPositionsForTrackSegment(trackRenderPositions: [vec2,vec2], switchOffset: [boolean,boolean], trackLength: number, segment: TrackSegment): [vec2,vec2] {
     const [startPos,endPos] = trackRenderPositions;
     const [startOffset, endOffset] = switchOffset;
 
@@ -295,28 +282,6 @@ export class SVGRenderer {
         this.switchRenderers.forEach(updateSwitchRenderer)
     }
 }
-
-// export function renderEnv(env: Environment,renderElement: SVGElement): void {
-//     // renderElement.childNodes.forEach(child => renderElement.removeChild(child));
-
-//     const trackGroup = createSVGElement("g")
-//     const textGroup = createSVGElement("g");
-//     const interactableGroup = createSVGElement("g");
-
-//     // const occupiedTracksArray = env.rides.map(ride. => getSpanningTracks(env.entities,ride));
-//     // const occupiedTracksIds = flatten(env.rides.map(ride => ride.span.segments.map(segment => segment.trackId)))
-
-//     const occupiedTrackSegments = flatten(env.rides.map(ride => ride.span.segments))
-
-//     renderDebugIds(env.entities, textGroup)
-//     renderTracks(env.tracks, occupiedTrackSegments, trackGroup)
-//     renderSwitchInteractables(env.switches, interactableGroup);
-
-//     renderElement.appendChild(trackGroup);
-//     renderElement.appendChild(textGroup);
-//     renderElement.appendChild(interactableGroup)
-
-// }
 
 function renderSwitchInteractables(switches: TrackSwitch[], interactableGroup: SVGGElement) {
     switches.forEach(trackSwitch => {
