@@ -292,6 +292,7 @@ function renderSwitchInteractables(switches: TrackSwitch[], interactableGroup: S
         circle.setAttribute("fill", "none");
         circle.setAttribute("stroke-width", "1");
         circle.setAttribute("stroke", COLOR_UNOCCUPIED)
+        circle.setAttribute("opacity", ".3")
         circle.setAttribute("pointer-events", "bounding-box");
 
         circle.addEventListener("click", () => {

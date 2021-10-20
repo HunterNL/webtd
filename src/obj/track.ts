@@ -54,7 +54,7 @@ export interface TrackSave extends Identifiable, Lengthable, Entity {
     renderData: any,
 }
 
-const IDEAL_SEGMENT_SPACING = 100;
+// const IDEAL_SEGMENT_SPACING = 100;
 // export function generateSegments(length: number, trackId: number): TrackSegment[] {
 //     const midPoint = length/2;
 

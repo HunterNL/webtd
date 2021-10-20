@@ -7,7 +7,7 @@ import { TrackSegment } from "../obj/trackSegment";
 import { combine } from "../util/combine";
 import { requireRenderPosition } from "./svg/switchRenderer";
 
-const SWITCH_RENDER_RADIUS = 7;
+const SWITCH_RENDER_RADIUS = 12;
 
 export type TrackSegmentSVGRender = {
     track: Track,
