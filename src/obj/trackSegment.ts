@@ -1,3 +1,4 @@
+import { sortBy } from "lodash";
 import { Identifier } from "../interfaces/id";
 import { doRangesOverlap } from "../util/rangeOverlap";
 import { TrackPosition } from "./situation";
@@ -67,9 +68,11 @@ export function doesSegmentContainSegment(parent: TrackSegment, child: TrackSegm
 
 
 export function splitRangeAtPoints(range:number, points:number[]) : [number,number][] {
+    const sortedPoints = sortBy(points)
+
     let lastPoint = 0;
 
-    const segments : [number,number][] = points.map(point => {
+    const segments : [number,number][] = sortedPoints.map(point => {
         lastPoint = lastPoint + point
         return [lastPoint-point, point];
     })

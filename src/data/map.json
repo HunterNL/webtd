@@ -76,7 +76,7 @@
         {
             "type" : "track",
             "id": 2,
-            "length" : 5,
+            "length" : 500,
             "boundries" : [23,12]
         },
         {
@@ -98,7 +98,7 @@
         {
             "type" : "track",
             "id": 5,
-            "length" : 500,
+            "length" : 5,
             "boundries" : [22,23]
         },{
             "type": "ride",

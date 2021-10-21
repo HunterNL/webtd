@@ -279,7 +279,7 @@ export class SVGRenderer {
             updateSignalRender(signRenderer)
         })
 
-        this.switchRenderers.forEach(updateSwitchRenderer)
+        this.switchRenderers.forEach(r => updateSwitchRenderer(r,dynamicEnvironment));
     }
 }
 

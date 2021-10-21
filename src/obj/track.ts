@@ -1,3 +1,4 @@
+import { head, last } from "lodash";
 import { Entity, getEntityById } from "../interfaces/entity";
 import { getId, Identifiable, Identifier, isIdentifiable } from "../interfaces/id";
 import { isLengthable, Lengthable } from "../interfaces/lengthable";
@@ -184,6 +185,29 @@ export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
         detectionDividers: trackSave.detectionDividers,
         renderData: trackSave.renderData
     }
+}
+
+export function trackGetDetectionSegmentAjoiningBoundary(track: Track, boundaryId: Identifier): TrackSegment {
+    const isStartBoundary = track.boundries[0].id === boundaryId;
+    const isEndBoundary = track.boundries[1].id === boundaryId;
+
+    if(!isStartBoundary && !isEndBoundary) {
+        throw new Error("Track doesn't border boundary");
+    }
+
+    let segment
+
+    if(isStartBoundary) {
+        segment = head(track.segments.detection);
+    } else {
+        segment = last(track.segments.detection)
+    }
+
+    if(!segment) {
+        throw new Error("Did not get a segment");
+    }
+
+    return segment
 }
 
 export function trackGetStart(track: Track): TrackBoundary {

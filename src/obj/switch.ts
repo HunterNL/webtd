@@ -3,7 +3,8 @@ import { Entity, getEntityById } from "../interfaces/entity";
 import { Identifier, isIdentifiable, isIdentifier } from "../interfaces/id";
 import { Buffer, isBuffer } from "./buffer";
 import { isJunction, Junction } from "./junction";
-import { isTrack, Track, trackGetOtherEnd } from "./track";
+import { isTrack, Track, trackGetDetectionSegmentAjoiningBoundary, trackGetOtherEnd } from "./track";
+import { TrackSegment } from "./trackSegment";
 
 // const SWITCH_ACTUATION_TIME = 3; //seconds
 
@@ -77,6 +78,11 @@ export function switchGetActivePaths(swi: TrackSwitch): Array<[Identifier,Identi
 
 export function switchGetAjoiningTrackIds(swi: TrackSwitch): Identifier[] {
     return uniq(flatten(swi.junction.sideConnections.concat(swi.junction.straightConnections)));
+}
+
+export function switchGetAjoiningDetectionSegments(swi: TrackSwitch, tracks: Track[]): TrackSegment[] {
+    const ajoiningTracks = switchGetAjoiningTrackIds(swi).map(id => getEntityById(tracks,id,isTrack));
+    return ajoiningTracks.map(track => trackGetDetectionSegmentAjoiningBoundary(track, swi.id));
 }
 
 export function switchGetRemoteBoundaries(swi: TrackSwitch, entities: Entity[]) {

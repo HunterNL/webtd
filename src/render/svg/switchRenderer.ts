@@ -1,7 +1,8 @@
 import { vec2 } from "gl-matrix";
-import { COLOR_UNOCCUPIED, createSVGElement } from "..";
+import { COLOR_UNOCCUPIED, createSVGElement, getColorForOccupationStatus } from "..";
 import { Entity, getEntityById } from "../../interfaces/entity";
-import { switchGetActivePaths, switchGetPathForState, SwitchState, TrackSwitch } from "../../obj/switch";
+import { DynamicEnvironment } from "../../obj/environment";
+import { switchGetAjoiningDetectionSegments, switchGetPathForState, SwitchState, TrackSwitch } from "../../obj/switch";
 import { isTrack } from "../../obj/track";
 import { TrackSegment } from "../../obj/trackSegment";
 import { getDirection } from "../../util/vec2";
@@ -70,7 +71,7 @@ export function createSwitchRenderer(trackSwitch: TrackSwitch, entities: Entity[
     parentElement.appendChild(svgElement)
 
     return {
-        detectionSegments: [],
+        detectionSegments: switchGetAjoiningDetectionSegments(trackSwitch, entities.filter(isTrack)),
         element: svgElement,
         origPos: renderPosition,
         trackSwitch,
@@ -78,12 +79,16 @@ export function createSwitchRenderer(trackSwitch: TrackSwitch, entities: Entity[
     }
 }
 
-export function updateSwitchRenderer(r: SwitchSVGRenderer) {
+export function updateSwitchRenderer(r: SwitchSVGRenderer, dynamicEnvironment: DynamicEnvironment) {
     //TODO Render actual paths instead of origin to boundary?
     // const activeTrackIds = uniq(flatten(switchGetActivePaths(r.trackSwitch)))
     // const activeTracks = activeTrackIds.map(id => getEntityById(tracks, id, isTrack));
 
     const switchState = r.trackSwitch.currentState;
+
+    const hasOccupiedSegments = r.detectionSegments.some(segment => dynamicEnvironment.occupiedTrackSegments.includes(segment));
+
+    const color = getColorForOccupationStatus(hasOccupiedSegments);
 
     const pathString = r.paths.get(switchState);
 
@@ -93,7 +98,8 @@ export function updateSwitchRenderer(r: SwitchSVGRenderer) {
     }
 
     r.element.setAttribute("d", pathString)
+    r.element.setAttribute("stroke", color);
 
-    switchGetActivePaths(r.trackSwitch);
+    // switchGetActivePaths(r.trackSwitch);
 
 }
