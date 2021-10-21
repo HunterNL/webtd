@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
-import { initial, tail } from "lodash";
+import { initial, reject, tail } from "lodash";
 import { createPathString, createSVGElement, getColorForOccupationStatus, getLineVector } from ".";
-import { TrackSwitch } from "../obj/switch";
+import { isSwitch, TrackSwitch } from "../obj/switch";
 import { Track, trackGetOtherBoundary } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
 import { combine } from "../util/combine";
@@ -37,7 +37,9 @@ export function getTrackRenderPath(track: Track): vec2[] {
 export function createTrackSegmentRenderer(track: Track, parentElement: SVGElement): TrackSegmentSVGRender[]  {
     // const lastIndex = track.segments.detection.length - 1;
 
-    const coreSegments = track.segments.detection.filter(segment => typeof segment.startBoundary === "undefined" && typeof segment.endBoundary === "undefined"); //Filter out switch related segments
+    const coreSegments = reject(track.segments.detection, segment => isSwitch(segment.startBoundary) || isSwitch(segment.endBoundary))
+
+    // const coreSegments =  track.segments.detection.filter(segment => typeof segment.startBoundary === "undefined" && typeof segment.endBoundary === "undefined"); //Filter out switch related segments
 
     const starsWithSwitch = track.boundries[0].type === "switch";
     const endsWithSwitch = track.boundries[1].type === "switch";
