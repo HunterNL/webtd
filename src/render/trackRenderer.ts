@@ -4,7 +4,7 @@ import { createPathString, createSVGElement, getColorForOccupationStatus, getLin
 import { isSwitch, TrackSwitch } from "../obj/switch";
 import { Track, trackGetOtherBoundary } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
-import { combine } from "../util/combine";
+import { joinWith } from "../util/joinWith";
 import { requireRenderPosition } from "./svg/switchRenderer";
 
 const SWITCH_RENDER_RADIUS = 12;
@@ -35,14 +35,12 @@ export function getTrackRenderPath(track: Track): vec2[] {
 }
 
 export function createTrackSegmentRenderer(track: Track, parentElement: SVGElement): TrackSegmentSVGRender[]  {
-    // const lastIndex = track.segments.detection.length - 1;
 
+    // Filter out track segments handled by switchrenderers
     const coreSegments = reject(track.segments.detection, segment => isSwitch(segment.startBoundary) || isSwitch(segment.endBoundary))
 
-    // const coreSegments =  track.segments.detection.filter(segment => typeof segment.startBoundary === "undefined" && typeof segment.endBoundary === "undefined"); //Filter out switch related segments
-
-    const starsWithSwitch = track.boundries[0].type === "switch";
-    const endsWithSwitch = track.boundries[1].type === "switch";
+    const starsWithSwitch = isSwitch(track.boundries[0]);
+    const endsWithSwitch = isSwitch(track.boundries[1]);
 
     if(coreSegments.length > 1) {
         throw new Error("coreSegments >1 unsupported");
@@ -60,7 +58,7 @@ export function createTrackSegmentRenderer(track: Track, parentElement: SVGEleme
         renderPath = shortenEnd(renderPath);
     }
 
-    const renderLines: [vec2, vec2][] = combine(renderPath, toTuple);
+    const renderLines: [vec2, vec2][] = joinWith(renderPath, toTuple);
 
 
     return renderLines.map(line => {

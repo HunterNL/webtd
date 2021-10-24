@@ -1,6 +1,6 @@
-export function combine<T,U>(list: Array<T>, func: (a:T,b: T) => U) : Array<U> {
+export function joinWith<T,U>(list: Array<T>, func: (a:T,b: T) => U) : Array<U> {
     if(list.length < 2 ) {
-        throw new Error("Combine needs an array of at least 2 items");
+        throw new Error("joinWith needs an array of at least 2 items");
     }
 
     const returnValues = []
