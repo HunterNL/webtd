@@ -39,7 +39,7 @@ export function createTrackSegmentRenderer(track: Track, parentElement: SVGEleme
     // Filter out track segments handled by switchrenderers
     const coreSegments = reject(track.segments.detection, segment => isSwitch(segment.startBoundary) || isSwitch(segment.endBoundary))
 
-    const starsWithSwitch = isSwitch(track.boundries[0]);
+    const startsWithSwitch = isSwitch(track.boundries[0]);
     const endsWithSwitch = isSwitch(track.boundries[1]);
 
     if(coreSegments.length > 1) {
@@ -50,7 +50,7 @@ export function createTrackSegmentRenderer(track: Track, parentElement: SVGEleme
 
     let renderPath = getTrackRenderPath(track);
 
-    if(starsWithSwitch) {
+    if(startsWithSwitch) {
         renderPath = shortenStart(renderPath)
     }
 
