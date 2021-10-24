@@ -2,7 +2,7 @@ import { vec2 } from "gl-matrix";
 import { initial, reject, tail } from "lodash";
 import { createPathString, createSVGElement, getColorForOccupationStatus, getLineVector } from ".";
 import { isSwitch, TrackSwitch } from "../obj/switch";
-import { Track, trackGetOtherBoundary } from "../obj/track";
+import { isTooShortForSegment, Track, trackGetOtherBoundary } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
 import { joinWith } from "../util/joinWith";
 import { requireRenderPosition } from "./svg/switchRenderer";
@@ -41,6 +41,10 @@ export function createTrackSegmentRenderer(track: Track, parentElement: SVGEleme
 
     const startsWithSwitch = isSwitch(track.boundries[0]);
     const endsWithSwitch = isSwitch(track.boundries[1]);
+
+    if(startsWithSwitch && endsWithSwitch && isTooShortForSegment(track.length)) {
+        return []; // SwitchRenderer takes care of this bit
+    }
 
     if(coreSegments.length > 1) {
         throw new Error("coreSegments >1 unsupported");

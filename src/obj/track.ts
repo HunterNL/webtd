@@ -119,11 +119,15 @@ export function resolveBoundries(entities: Entity[], ids: number[]): [TrackBound
     return [entA, entB]
 }
 
+export function isTooShortForSegment(trackLength: number): boolean {
+    return trackLength < (MIN_BLOCK_SIZE + SWITCH_WELD_OFFSET *2);
+}
+
 function createWeldPoints(trackLength: number, hasSwitchAtFront: boolean, hasSwitchAtBack: boolean): number[] {
 
     // Common case
     if (hasSwitchAtBack && hasSwitchAtFront) {
-        if (trackLength < (MIN_BLOCK_SIZE + SWITCH_WELD_OFFSET * 2)) {
+        if(isTooShortForSegment(trackLength)) {
             return [trackLength / 2]; // Small connection spur, split the track down the middle
         }
 
