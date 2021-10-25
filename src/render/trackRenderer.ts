@@ -1,13 +1,12 @@
 import { vec2 } from "gl-matrix";
-import { initial, reject, tail } from "lodash";
-import { createPathString, createSVGElement, getColorForOccupationStatus, getLineVector } from ".";
+import { reject } from "lodash";
+import { createPathString, createSVGElement, getColorForOccupationStatus, shortenEnd, shortenStart } from ".";
 import { isSwitch, TrackSwitch } from "../obj/switch";
 import { isTooShortForSegment, Track, trackGetOtherBoundary } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
 import { joinWith } from "../util/joinWith";
 import { requireRenderPosition } from "./svg/switchRenderer";
 
-const SWITCH_RENDER_RADIUS = 12;
 
 export type TrackSegmentSVGRender = {
     track: Track,
@@ -20,18 +19,23 @@ export type TrackSegmentSVGRender = {
 export function getTrackRenderPath(track: Track): vec2[] {
     const [startBoundary, endBoundary] = track.boundries;
 
-    if (!startBoundary.renderData || !endBoundary.renderData) {
-        throw new Error("Boundary lacks renderData");
+    const startPos = requireRenderPosition(startBoundary);
+    const endPos = requireRenderPosition(endBoundary);
+
+    let wayPoints =  [startPos, ...getWaypoints(track), endPos];
+
+    const startsWithSwitch = isSwitch(startBoundary);
+    const endsWithSwitch = isSwitch(endBoundary);
+
+    if(startsWithSwitch) {
+        wayPoints = shortenStart(wayPoints)
     }
 
-    if (!startBoundary.renderData.position || !endBoundary.renderData.position) {
-        throw new Error("Boundary lacks renderData position");
+    if(endsWithSwitch) {
+        wayPoints = shortenEnd(wayPoints);
     }
 
-    const startPos = startBoundary.renderData.position;
-    const endPos = endBoundary.renderData.position;
-
-    return [startPos, ...getWaypoints(track), endPos];
+    return wayPoints;
 }
 
 export function createTrackSegmentRenderer(track: Track, parentElement: SVGElement): TrackSegmentSVGRender[]  {
@@ -54,16 +58,7 @@ export function createTrackSegmentRenderer(track: Track, parentElement: SVGEleme
 
     let renderPath = getTrackRenderPath(track);
 
-    if(startsWithSwitch) {
-        renderPath = shortenStart(renderPath)
-    }
-
-    if(endsWithSwitch) {
-        renderPath = shortenEnd(renderPath);
-    }
-
     const renderLines: [vec2, vec2][] = joinWith(renderPath, toTuple);
-
 
     return renderLines.map(line => {
         const element = createSVGElement("path");
@@ -101,23 +96,6 @@ function toTuple<T,U>(a:T, b:U) : [T,U] {
     return [a,b];
 }
 
-
-function shortenStart(waypoints: vec2[]): vec2[] {
-    const direction = getLineVector(waypoints[0],waypoints[1])
-
-    const firstPoint =  vec2.scaleAndAdd(vec2.create(), waypoints[0], direction, SWITCH_RENDER_RADIUS);
-
-    return [firstPoint,...tail(waypoints)]
-}
-
-function shortenEnd(waypoints: vec2[]): vec2[] {
-    const length = waypoints.length;
-    const direction = getLineVector(waypoints[length-1],waypoints[length-2])
-
-    const lastPoint =  vec2.scaleAndAdd(vec2.create(), waypoints[length-1], direction, SWITCH_RENDER_RADIUS);
-
-    return [...initial(waypoints),lastPoint];
-}
 
 export function getNearestRenderWaypoint(swi: TrackSwitch,track: Track): vec2 {
     const waypoints = track?.renderData?.waypoints;

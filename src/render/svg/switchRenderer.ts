@@ -50,7 +50,7 @@ function createSVGPathStringForSwitchPath(swi: TrackSwitch, switchState: SwitchS
     return "M " + startPos.join(" ") + " L " + switchPos.join(" ") + " L " + endPos.join(" ");
 }
 
-function getPositionOnPointCircle(switchPos: vec2, remotePosition: vec2) {
+export function getPositionOnPointCircle(switchPos: vec2, remotePosition: vec2) {
     const direction = getDirection(switchPos, remotePosition);
     return vec2.scaleAndAdd(vec2.create(), switchPos, direction, SWITCH_PATH_LENGTH)
 }

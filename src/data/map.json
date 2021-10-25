@@ -143,8 +143,19 @@
             }
         },{
             "type": "signal",
-            "comment" : "Top buffer",
+            "comment" : "Top track signal",
             "id" : 8,
+            "renderData": {
+                "label" : "🚦"
+            },
+            "position": {
+                "trackId": 3,
+                "offset": 495
+            }
+        },{
+            "type": "signal",
+            "comment" : "Top buffer",
+            "id" : 500,
             "renderData": {
                 "label" : "🚦"
             },
@@ -155,7 +166,7 @@
         },{
             "type": "signal",
             "comment" : "Lower buffer",
-            "id" : 9,
+            "id" : 501,
             "renderData": {
                 "label" : "🚦"
             },

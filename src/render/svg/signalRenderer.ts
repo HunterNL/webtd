@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
 import { last } from "lodash";
-import { createSVGElement } from "..";
+import { createSVGElement, vec2PathLerp } from "..";
 import { ASPECT_STOP, Signal } from "../../obj/signal";
 import { getTrackRenderPath } from "../trackRenderer";
 
@@ -18,15 +18,15 @@ export type SignalSVGRenderer = {
 
 export function getSignalFractionalLocation(signal: Signal): number {
     const trackLength = signal.position.track.length;
-    
+
     return signal.position.offset / trackLength;
 }
 
 
-export function createSignalRenderer(signal: Signal, parentElement: SVGElement) : SignalSVGRenderer {
+export function createSignalRenderer(signal: Signal, parentElement: SVGElement): SignalSVGRenderer {
 
     const svgGroup = createSVGElement("g");
-    
+
 
 
     // svgText.setAttribute("viewbox", "184.686 41.924 130.627 182.26");
@@ -40,22 +40,21 @@ export function createSignalRenderer(signal: Signal, parentElement: SVGElement) 
 
     // TODO Support render waypoints?
     const trackRenderPath = getTrackRenderPath(signal.position.track);
-    const startPos = trackRenderPath[0];
+    const positionFraction = getSignalFractionalLocation(signal);
+    const signalRenderLocation = vec2PathLerp(trackRenderPath, positionFraction)
+
     const endPos = last(trackRenderPath);
 
-    if(!endPos) {
+    if (!endPos) {
         throw new Error("Line lacks final waypoint")
     }
-
-    const positionFraction = getSignalFractionalLocation(signal);
-
-    const signalRenderLocation = vec2.lerp(vec2.create(), startPos, endPos, positionFraction);
+    
     vec2.add(signalRenderLocation, signalRenderLocation, vec2.fromValues(0, 10));
 
     // svgText.setAttribute("x", ""+ signalRenderLocation[0] );
     // svgText.setAttribute("y", ""+ (signalRenderLocation[1]+10) );
     svgGroup.setAttribute("text-anchor", "middle"); //Centering horizontally
-    svgGroup.setAttribute("transform", "translate("+signalRenderLocation[0]+","+(signalRenderLocation[1]+10)+") scale(.1) rotate(90)")
+    svgGroup.setAttribute("transform", "translate(" + signalRenderLocation[0] + "," + (signalRenderLocation[1] + 10) + ") scale(.1) rotate(90)")
 
     parentElement.appendChild(svgGroup);
 

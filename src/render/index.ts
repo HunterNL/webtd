@@ -1,10 +1,11 @@
 import { vec2 } from "gl-matrix";
-import { flatten, head, tail } from "lodash";
+import { add, first, flatten, head, initial, last, tail } from "lodash";
 import { Entity } from "../interfaces/entity";
 import { DynamicEnvironment, Environment } from "../obj/environment";
 import { toggleSignal } from "../obj/signal";
 import { throwSwitch, TrackSwitch } from "../obj/switch";
 import { TrackSegment } from "../obj/trackSegment";
+import { joinWith } from "../util/joinWith";
 import { createSignalRenderer, SignalSVGRenderer, updateSignalRender } from "./svg/signalRenderer";
 import { createSwitchRenderer, SwitchSVGRenderer, updateSwitchRenderer } from "./svg/switchRenderer";
 import { createTrackSegmentRenderer, TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
@@ -13,6 +14,8 @@ import { createTrackSegmentRenderer, TrackSegmentSVGRender, updateTrackRender } 
 
 export const COLOR_UNOCCUPIED="#aaa";
 export const COLOR_OCCUPIED="#f5ff44"
+
+export const SWITCH_RENDER_RADIUS = 12;
 
 const SWITCH_WRONGWAY_OFFSET = 25;
 
@@ -322,4 +325,77 @@ function renderSignalInteractables(signal: SignalSVGRenderer[], interactableGrou
 
         interactableGroup.appendChild(circle);
     })
+}
+
+export function shortenStart(waypoints: vec2[]): vec2[] {
+    const direction = getLineVector(waypoints[0],waypoints[1])
+
+    const firstPoint =  vec2.scaleAndAdd(vec2.create(), waypoints[0], direction, SWITCH_RENDER_RADIUS);
+
+    return [firstPoint,...tail(waypoints)]
+}
+
+export function shortenEnd(waypoints: vec2[]): vec2[] {
+    const length = waypoints.length;
+    const direction = getLineVector(waypoints[length-1],waypoints[length-2])
+
+    const lastPoint =  vec2.scaleAndAdd(vec2.create(), waypoints[length-1], direction, SWITCH_RENDER_RADIUS);
+
+    return [...initial(waypoints),lastPoint];
+}
+
+export function vec2pathLength(positions:vec2[]): number {
+    return joinWith(positions, vec2.distance).reduce(add,0);
+}
+
+export function vec2PathLerp(positions: vec2[], lerp: number): vec2 {
+    if(positions.length < 2) {
+        throw new Error("Path too short, needs at least 2 positions");
+    }
+
+    if(lerp > 1 || lerp < 0) {
+        throw new Error("Lerp out of range, extrapolation unimplemented");
+    }
+
+    // Common case
+    if(positions.length === 2) {
+        return vec2.lerp(vec2.create(), positions[0], positions[1], lerp);
+    }
+
+    //Handle 0 and 1 manually to avoid some possible floating point issues
+    if(lerp === 0) {
+        return first(positions) as vec2
+    } else if (lerp === 1) {
+        return last(positions) as vec2
+    }
+
+    const positionOnTrack = vec2pathLength(positions) * lerp;
+
+    let lastPos = positions[0];
+    let totalDistance = 0;
+
+    for (let index = 1; index < positions.length; index++) { // note index = 1
+        const currentPosition = positions[index];
+        const legDistance = vec2.distance(lastPos, currentPosition);
+
+        totalDistance = totalDistance + legDistance;
+
+        if(totalDistance === positionOnTrack) {
+            // We're exactly at a waypoint 
+            return currentPosition
+        }
+        
+        if(totalDistance > positionOnTrack) {
+            // We've "moved" past the point on the path, point is in the last leg
+
+            const positionOnLeg = totalDistance - positionOnTrack;
+            const positionFraction = positionOnLeg / legDistance;
+
+            return vec2.lerp(vec2.create(), currentPosition, lastPos, positionFraction);
+        }
+
+        lastPos = currentPosition;
+    }
+
+    throw new Error("Somehow could not find position on path");
 }
