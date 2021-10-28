@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { add, first, flatten, head, initial, last, tail } from "lodash";
+import { add, first, head, initial, last, tail } from "lodash";
 import { Entity } from "../interfaces/entity";
 import { DynamicEnvironment, Environment } from "../obj/environment";
 import { toggleSignal } from "../obj/signal";
@@ -8,7 +8,7 @@ import { TrackSegment } from "../obj/trackSegment";
 import { joinWith } from "../util/joinWith";
 import { createSignalRenderer, SignalSVGRenderer, updateSignalRender } from "./svg/signalRenderer";
 import { createSwitchRenderer, SwitchSVGRenderer, updateSwitchRenderer } from "./svg/switchRenderer";
-import { createTrackSegmentRenderer, TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
+import { createBlockRenderer, TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
 
 // const LABEL_OFFSET = 10;
 
@@ -235,10 +235,11 @@ export class SVGRenderer {
     trackGroup: SVGGElement;
     textGroup: SVGGElement;
     interactableGroup: SVGGElement;
-    trackRenderers: TrackSegmentSVGRender[];
+    // trackRenderers: TrackSegmentSVGRender[];
     signalGroup: SVGGElement;
     signRenderers: SignalSVGRenderer[];
     switchRenderers: SwitchSVGRenderer[];
+    blocks: TrackSegmentSVGRender[];
 
     constructor(env: Environment, renderElement: SVGElement) {
         this.env = env;
@@ -255,9 +256,11 @@ export class SVGRenderer {
 
         // this.trackRenderers = createTrackRenderers(env.tracks, this.trackGroup);
 
-        this.trackRenderers = flatten(this.env.tracks.map(track => {
-                return createTrackSegmentRenderer(track, this.trackGroup)
-        }));
+        // this.trackRenderers = flatten(this.env.tracks.map(track => {
+        //         return createBlockRenderer(track, this.trackGroup)
+        // }));
+
+        this.blocks = this.env.detectionBlocks.map(block => createBlockRenderer(block,this.trackGroup));
 
         this.switchRenderers = this.env.switches.map(trackSwitch => {
             return createSwitchRenderer(trackSwitch, this.env.tracks, this.trackGroup);
@@ -274,8 +277,8 @@ export class SVGRenderer {
     }
 
     render(dynamicEnvironment: DynamicEnvironment): void {
-        this.trackRenderers.forEach( trackRenderData => {
-            updateTrackRender(trackRenderData, dynamicEnvironment.occupiedTrackSegments)
+        this.blocks.forEach( block => {
+            updateTrackRender(block, dynamicEnvironment.occupiedTrackSegments)
         });
 
         this.signRenderers.forEach(signRenderer => {
@@ -327,19 +330,19 @@ function renderSignalInteractables(signal: SignalSVGRenderer[], interactableGrou
     })
 }
 
-export function shortenStart(waypoints: vec2[]): vec2[] {
+export function shortenStart(waypoints: vec2[], margin: number): vec2[] {
     const direction = getLineVector(waypoints[0],waypoints[1])
 
-    const firstPoint =  vec2.scaleAndAdd(vec2.create(), waypoints[0], direction, SWITCH_RENDER_RADIUS);
+    const firstPoint =  vec2.scaleAndAdd(vec2.create(), waypoints[0], direction, margin);
 
     return [firstPoint,...tail(waypoints)]
 }
 
-export function shortenEnd(waypoints: vec2[]): vec2[] {
+export function shortenEnd(waypoints: vec2[], margin: number): vec2[] {
     const length = waypoints.length;
     const direction = getLineVector(waypoints[length-1],waypoints[length-2])
 
-    const lastPoint =  vec2.scaleAndAdd(vec2.create(), waypoints[length-1], direction, SWITCH_RENDER_RADIUS);
+    const lastPoint =  vec2.scaleAndAdd(vec2.create(), waypoints[length-1], direction, margin);
 
     return [...initial(waypoints),lastPoint];
 }

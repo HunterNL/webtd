@@ -35,7 +35,7 @@ export type TrackSegment = {
     startBoundary?: TrackBoundary,
     endBoundary?: TrackBoundary,
     start: number,
-    end: number
+    end: number,
 }
 // } & SegmentStart
 

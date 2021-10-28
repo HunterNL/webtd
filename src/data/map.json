@@ -71,7 +71,11 @@
             "type" : "track",
             "id": 1,
             "length" : 500,
-            "boundries" : [21,23]
+            "boundries" : [21,23],
+            "features":[{
+                "type": "weld",
+                "offset": 400
+            }]
         },
         {
             "type" : "track",
@@ -85,9 +89,13 @@
             "id": 3,
             "length" : 500,
             "boundries" : [21,22],
-            "renderData" : {
-                "waypoints": [[220,50]]
-            }
+            "features": [{
+                "type" : "renderPoint",
+                "position": [220,50]
+            },{
+                "type": "weld",
+                "offset": 300
+            }]
         },
         {
             "type" : "track",

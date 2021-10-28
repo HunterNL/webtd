@@ -1,80 +1,114 @@
 import { vec2 } from "gl-matrix";
-import { reject } from "lodash";
-import { createPathString, createSVGElement, getColorForOccupationStatus, shortenEnd, shortenStart } from ".";
+import { createPathString, createSVGElement, getColorForOccupationStatus, shortenEnd, shortenStart, SWITCH_RENDER_RADIUS } from ".";
+import { DetectionBlock } from "../obj/detectionBlock";
 import { isSwitch, TrackSwitch } from "../obj/switch";
-import { isTooShortForSegment, Track, trackGetOtherBoundary } from "../obj/track";
+import { Track, trackGetRenderPath } from "../obj/track";
 import { TrackSegment } from "../obj/trackSegment";
-import { joinWith } from "../util/joinWith";
-import { requireRenderPosition } from "./svg/switchRenderer";
 
 
 export type TrackSegmentSVGRender = {
-    track: Track,
     element: SVGElement,
     detectionSegment: TrackSegment,
-    startPos: vec2,
-    endPos: vec2,
 }
 
-export function getTrackRenderPath(track: Track): vec2[] {
-    const [startBoundary, endBoundary] = track.boundries;
+export type TrackRenderSegment = {
 
-    const startPos = requireRenderPosition(startBoundary);
-    const endPos = requireRenderPosition(endBoundary);
-
-    let wayPoints =  [startPos, ...getWaypoints(track), endPos];
-
-    const startsWithSwitch = isSwitch(startBoundary);
-    const endsWithSwitch = isSwitch(endBoundary);
-
-    if(startsWithSwitch) {
-        wayPoints = shortenStart(wayPoints)
-    }
-
-    if(endsWithSwitch) {
-        wayPoints = shortenEnd(wayPoints);
-    }
-
-    return wayPoints;
 }
 
-export function createTrackSegmentRenderer(track: Track, parentElement: SVGElement): TrackSegmentSVGRender[]  {
+// export function trackSegmentRenderPath(trackSegment: TrackSegment): vec2[] {
+//     const {startBoundary, endBoundary} = trackSegment;
 
-    // Filter out track segments handled by switchrenderers
-    const coreSegments = reject(track.segments.detection, segment => isSwitch(segment.startBoundary) || isSwitch(segment.endBoundary))
+//     const startPos = requireRenderPosition(startBoundary);
+//     const endPos = requireRenderPosition(endBoundary);
 
+//     let wayPoints =  [startPos, ...getWaypoints(trackSegment), endPos];
+
+//     const startsWithSwitch = isSwitch(startBoundary);
+//     const endsWithSwitch = isSwitch(endBoundary);
+
+//     if(startsWithSwitch) {
+//         wayPoints = shortenStart(wayPoints)
+//     }
+
+//     if(endsWithSwitch) {
+//         wayPoints = shortenEnd(wayPoints);
+//     }
+
+//     return wayPoints;
+// }
+
+// export function trackSplitIntoRenderSegtions(track: Track): TrackRenderSection {
+//     track.
+// }
+
+// export function getTrackRenderPath(track: Track): vec2[] {
+//     const [startBoundary, endBoundary] = track.boundries;
+
+//     const startPos = requireRenderPosition(startBoundary);
+//     const endPos = requireRenderPosition(endBoundary);
+
+//     let wayPoints =  [startPos, ...getWaypoints(track), endPos];
+
+//     const startsWithSwitch = isSwitch(startBoundary);
+//     const endsWithSwitch = isSwitch(endBoundary);
+
+//     if(startsWithSwitch) {
+//         wayPoints = shortenStart(wayPoints, SWITCH_RENDER_RADIUS)
+//     }
+
+//     if(endsWithSwitch) {
+//         wayPoints = shortenEnd(wayPoints, SWITCH_RENDER_RADIUS);
+//     }
+
+//     return wayPoints;
+// }
+
+// function createPartialRenderPath()
+
+export function pathAddSwitchMargin(track: Track, renderPath: vec2[], margin: number) {
     const startsWithSwitch = isSwitch(track.boundries[0]);
     const endsWithSwitch = isSwitch(track.boundries[1]);
 
-    if(startsWithSwitch && endsWithSwitch && isTooShortForSegment(track.length)) {
-        return []; // SwitchRenderer takes care of this bit
+    return shortenPath(renderPath, startsWithSwitch, endsWithSwitch, margin)
+}
+
+export function shortenPath(path: vec2[], shortStart: boolean, shortEnd: boolean, margin: number) {
+
+    if(shortStart) {
+        path = shortenStart(path, margin)
     }
 
-    if(coreSegments.length > 1) {
-        throw new Error("coreSegments >1 unsupported");
+    if(shortEnd) {
+        path = shortenEnd(path, margin)
     }
 
-    const segment = coreSegments[0];
+    return path;
+}
 
-    let renderPath = getTrackRenderPath(track);
+export function createBlockRenderer(detectionBlock: DetectionBlock, parentElement: SVGElement): TrackSegmentSVGRender  {
+    // const renderLines: [vec2, vec2][] = joinWith(renderPath, toTuple);
 
-    const renderLines: [vec2, vec2][] = joinWith(renderPath, toTuple);
+    // Filter out track segments handled by switchrenderers
+    // const coreSegments = reject(track.segments.detection, segment => isSwitch(segment.startBoundary) || isSwitch(segment.endBoundary))
 
-    return renderLines.map(line => {
-        const element = createSVGElement("path");
-        element.setAttribute("d", createPathString(renderPath));
-        element.setAttribute("fill", "none")
-        parentElement.appendChild(element);
-        
-        return {
-            track,
-            trackSegment: segment,
-            element: element,
-            detectionSegment: segment,
-            startPos: line[0],
-            endPos: line[1],
-        }
-    });
+    let renderPoints = detectionBlock.renderPoints;
+
+    const startOffset = detectionBlock.startsAtSwitch ? SWITCH_RENDER_RADIUS : 1;
+    const endOffset = detectionBlock.endsAtSwitch ? SWITCH_RENDER_RADIUS : 1
+
+    renderPoints = shortenStart(renderPoints, startOffset);
+    renderPoints = shortenEnd(renderPoints, endOffset)
+
+
+    const element = createSVGElement("path");
+    element.setAttribute("d", createPathString(renderPoints));
+    element.setAttribute("fill", "none")
+    parentElement.appendChild(element);
+    
+    return {
+        element,
+        detectionSegment: detectionBlock.segment,
+    }
 }
 
 export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, occupiedSegments: TrackSegment[]) {
@@ -86,11 +120,12 @@ export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, occupi
 }
 
 function getWaypoints(track: Track): vec2[] {
-    if(track?.renderData?.waypoints) {
-        return track.renderData.waypoints
-    } else {
-        return []
+    const rd = track.renderData
+    if(typeof rd === "undefined") {
+        return [];
     }
+
+    return rd
 }
 function toTuple<T,U>(a:T, b:U) : [T,U] {
     return [a,b];
@@ -98,17 +133,12 @@ function toTuple<T,U>(a:T, b:U) : [T,U] {
 
 
 export function getNearestRenderWaypoint(swi: TrackSwitch,track: Track): vec2 {
-    const waypoints = track?.renderData?.waypoints;
+    const renderPath = trackGetRenderPath(track);
+    const isStartSwitch = track.boundries[0].id == swi.id;
 
-    if(!Array.isArray(waypoints) || waypoints.length === 0) {
-        return requireRenderPosition(trackGetOtherBoundary(track, swi.id))
-    }
+    const index = isStartSwitch ? 1 : renderPath.length - 2;
 
-    if(waypoints.length > 1) {
-        throw new Error("Multiple render waypoints unsupported");
-    }
-
-    return waypoints[0];
+    return renderPath[index];
 }
 
 // function findPositionOnLine(lines: [vec2, vec2][], normalizedPosition: number) {

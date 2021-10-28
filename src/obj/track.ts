@@ -1,7 +1,11 @@
-import { head, last } from "lodash";
+import { vec2 } from "gl-matrix";
+import { chain, first, head, last } from "lodash";
 import { Entity, getEntityById } from "../interfaces/entity";
 import { getId, Identifiable, Identifier, isIdentifiable } from "../interfaces/id";
 import { isLengthable, Lengthable } from "../interfaces/lengthable";
+import { vec2PathLerp } from "../render";
+import { requireRenderPosition } from "../render/svg/switchRenderer";
+import { DetectionBlock } from "./detectionBlock";
 import { Direction, DIRECTION_FORWARD, TrackPosition } from "./situation";
 import { isSwitch, isTrackBoundary, resolveBoundary, TrackBoundary } from "./switch";
 import { splitRangeAtPoints, TrackSegment } from "./trackSegment";
@@ -14,11 +18,9 @@ export const MIN_BLOCK_SIZE = 100;
 // A track is the full lenght of track between two of either a switch or endpoint
 export type Track = Identifiable & Lengthable & Entity & {
     boundries: [TrackBoundary, TrackBoundary],
-    length: number
-    detectionDividers: number[]
+    length: number,
     renderData?: {
-        start: [number, number],
-        end: [number, number]
+        rawFeatures: TrackFeature[],
     },
     type: "track",
     segments: {
@@ -27,10 +29,26 @@ export type Track = Identifiable & Lengthable & Entity & {
 
 }
 
+type TrackWeld = {
+    type:"weld",
+    offset: number,
+    position?: vec2
+}
+
+function isWeld(feature: TrackFeature): feature is TrackWeld {
+    return feature.type === "weld";
+}
+
+type TrackRenderPoint = {
+    type: "renderPoint",
+    position: vec2
+}
+
+export type TrackFeature = TrackWeld | TrackRenderPoint
+
 export function createTrack(id: number, startBoundary: TrackBoundary, endBoundary: TrackBoundary, length: number): Track {
     return {
         boundries: [startBoundary, endBoundary],
-        detectionDividers: [],
         id,
         length,
         segments: { detection: [] },
@@ -53,56 +71,11 @@ export function getBoundaryPosition(track: Track, boundaryId: number): number {
 }
 
 export interface TrackSave extends Identifiable, Lengthable, Entity {
-    detectionDividers: number[];
     boundries: [number, number],
     renderData: any,
+    features: TrackFeature[]
 }
 
-// const IDEAL_SEGMENT_SPACING = 100;
-// export function generateSegments(length: number, trackId: number): TrackSegment[] {
-//     const midPoint = length/2;
-
-//     if(length<10) {
-//         return [{
-//             trackId,
-//             start:0,
-//             end: midPoint
-//         },{
-//             trackId,
-//             start:midPoint,
-//             end: length
-//         }]
-//     }
-
-//     // Two short segments at the start and end
-//     const endSegments : TrackSegment []= [
-//         {
-//             start: 0,
-//             end: 5,
-//             trackId
-
-//         },{
-//             start: length-5,
-//             end: length,
-//             trackId
-//         }
-//     ]
-
-//     const segmentCount = Math.floor((length-10)/IDEAL_SEGMENT_SPACING);
-//     const segmentSize = (length-10)/segmentCount;
-
-//     const midSegments : TrackSegment[] = [];
-
-//     for (let index = 0; index < segmentCount; index++) {
-//         midSegments.push({
-//             start: index+5,
-//             end: index*segmentSize+5,
-//             trackId
-//         })
-//     }
-
-//     return endSegments.concat(midSegments);
-// }
 
 export function isTrackSave(any: any): any is TrackSave {
     return any.type === "track";
@@ -173,10 +146,22 @@ export function generateSegments(trackId: Identifier, boundaries: [TrackBoundary
     })
 }
 
+export function segmentIsSwitchAdjecent(trackSegment: TrackSegment): boolean {
+    return isSwitch(trackSegment.endBoundary) || isSwitch(trackSegment.startBoundary);
+}
+
+export function trackGetWeldOffsets(trackSave: TrackSave): number[] {
+    if(!Array.isArray(trackSave.features)) {
+        return []
+    }
+
+    return trackSave.features.filter(isWeld).map(w => w.offset);
+}
+
 export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
     const trackId = trackSave.id;
     const boundaries = resolveBoundries(entities, trackSave.boundries);
-    const forcedWelds = (Array.isArray(trackSave.detectionDividers) ? trackSave.detectionDividers : [])
+    const forcedWelds = trackGetWeldOffsets(trackSave)
 
     return {
         id: trackId,
@@ -185,10 +170,129 @@ export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
         type: "track",
         segments: {
             detection: generateSegments(trackId, boundaries, trackSave.length, forcedWelds)
-        }, // generateSegments(trackSave.length, trackSave.id),
-        detectionDividers: trackSave.detectionDividers,
-        renderData: trackSave.renderData
+        },
+        renderData: {
+            rawFeatures: trackSave.features
+        }
     }
+}
+
+export function trackGetRenderPath(track: Track): vec2[] {
+    const startPos = requireRenderPosition(track.boundries[0]);
+    const endPos = requireRenderPosition(track.boundries[1]);
+
+    if(!track.renderData) {
+        return [startPos,endPos]
+    }
+
+    const features = track.renderData.rawFeatures;
+
+    if(!Array.isArray(features)) {
+        return [startPos,endPos]
+    }
+
+    const waypoints = features.filter(feature => typeof feature.position !== "undefined").map(feature => feature.position) as vec2[];
+    return [startPos,...waypoints,endPos];   
+}
+
+export function trackRenderLoad(track: Track, trackSave: TrackSave): DetectionBlock[] {
+    const baseSegments = chain(track.segments.detection).reject(segmentIsSwitchAdjecent).value();
+
+    if(baseSegments.length === 0) {
+        return [];
+    }
+
+    const features = Array.isArray(track.renderData.rawFeatures) ? track.renderData.rawFeatures : [] as TrackFeature[];
+    const weldCount = features.filter(isWeld).length;
+
+    if(baseSegments.length !== weldCount+1) {
+        throw new Error("Segment size mismatch");
+    }
+
+    // const startPos = requireRenderPosition(track.boundries[0]);
+    // const endPos = requireRenderPosition(track.boundries[1]);
+
+    const startsAtSwitch = isSwitch(track.boundries[0])
+    const endsAtSwitch = isSwitch(track.boundries[1]);
+
+    // const waypoints = features.filter(feature => typeof feature.position !== "undefined").map(feature => feature.position) as vec2[];
+    const renderPath = trackGetRenderPath(track);
+
+    const startPos = first(renderPath);
+    const endPos = last(renderPath);
+
+    if(!startPos) {
+        throw new Error("No startPos");
+        
+    }
+
+    if(!endPos) {
+        throw new Error("No endPos");
+    }
+
+    const featuresWithRenderPos = features.map((feature: TrackFeature) => {
+        let position = feature.position;
+
+        if(!position && isWeld(feature)) {
+            position = vec2PathLerp(renderPath,feature!.offset / track.length);
+        }
+
+        return {...feature, position}
+    }) as TrackFeature[];
+
+    const blocks: DetectionBlock[] = [];
+
+    let renderPoints = [startPos] as vec2[];
+    let segmentCount = 0;
+
+    for (let index = 0; index < featuresWithRenderPos.length; index++) {
+        const feature = featuresWithRenderPos[index];
+        if(!feature) {
+            throw new Error("No feature");
+            
+        }
+
+        const rp = feature.position;
+        if(!rp) {
+            throw new Error("Features has no renderPos");
+            
+        }
+
+        renderPoints.push(rp);
+        let isFirstBlock = true;
+
+        if(isWeld(feature)) {
+            const segment = baseSegments[segmentCount];
+
+            if(!segment) {
+                throw new Error("No segment");
+                
+            }
+
+            blocks.push({
+                segment,
+                renderPoints,
+                startsAtSwitch: isFirstBlock && startsAtSwitch,
+                endsAtSwitch: false
+            })
+            segmentCount++;
+            renderPoints = [rp]
+            isFirstBlock = false;
+        }
+    }
+
+    renderPoints.push(endPos)
+
+    blocks.push({
+        renderPoints: renderPoints,
+        segment: baseSegments[segmentCount],
+        startsAtSwitch: featuresWithRenderPos.length === 0 && startsAtSwitch,
+        endsAtSwitch: endsAtSwitch
+    })
+
+    // fixSwitchOffset(blocks, startsAtSwitch,endsAtSwitch))
+
+    return blocks;
 }
 
 export function trackGetDetectionSegmentAjoiningBoundary(track: Track, boundaryId: Identifier): TrackSegment {
@@ -300,3 +404,14 @@ export function trackGetOtherBoundary(track: Track, boundaryId: number): TrackBo
         return track.boundries[0];
     }
 }
+
+// function fixSwitchOffset(blocks: DetectionBlock[], startsWithSwitch: boolean, endsWithSwitch: boolean) {
+
+
+//     if(startsWithSwitch) {
+//         const firstBlock = blocks[0];
+//         firstBlock.renderPoints[0] = firstBlock
+//     }
+
+    
+// }
