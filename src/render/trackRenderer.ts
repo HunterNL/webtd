@@ -1,9 +1,10 @@
 import { vec2 } from "gl-matrix";
-import { createPathString, createSVGElement, getColorForOccupationStatus, shortenEnd, shortenStart, SWITCH_RENDER_RADIUS } from ".";
+import { createPathString, getColorForOccupationStatus, shortenEnd, shortenStart, SWITCH_RENDER_RADIUS } from ".";
 import { DetectionBlock } from "../obj/detectionBlock";
 import { Track, trackGetRenderPath } from "../obj/physical/track";
 import { isSwitch, TrackSwitch } from "../obj/physical/switch";
 import { TrackSegment } from "../obj/physical/trackSegment";
+import { createSVGElement } from "./svg";
 
 
 export type TrackSegmentSVGRender = {

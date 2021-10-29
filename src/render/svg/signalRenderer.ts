@@ -1,9 +1,10 @@
 import { vec2 } from "gl-matrix";
 import { last } from "lodash";
-import { createSVGElement, SWITCH_RENDER_RADIUS, vec2PathLerp } from "..";
+import { SWITCH_RENDER_RADIUS, vec2PathLerp } from "..";
 import { trackGetRenderPath } from "../../obj/physical/track";
 import { ASPECT_STOP, Signal } from "../../obj/physical/signal";
 import { pathAddSwitchMargin } from "../trackRenderer";
+import { createSVGElement } from ".";
 
 const SVG_CONTENT = `<svg viewBox="184.686 41.924 130.627 182.26" width="130.627" height="182.26" xmlns="http://www.w3.org/2000/svg">
   <path d="M 609 301 m -46.691 0 a 46.691 46.691 0 1 0 93.382 0 a 46.691 46.691 0 1 0 -93.382 0 Z M 609 301 m -28.015 0 a 28.015 28.015 0 0 1 56.03 0 a 28.015 28.015 0 0 1 -56.03 0 Z" transform="matrix(-0.80339, 0.595454, -0.595454, -0.80339, 918.49585, -13.57336)"/>

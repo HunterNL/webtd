@@ -1,5 +1,6 @@
 import { vec2 } from "gl-matrix";
-import { COLOR_UNOCCUPIED, createSVGElement, getColorForOccupationStatus } from "..";
+import { createSVGElement } from ".";
+import { COLOR_UNOCCUPIED, getColorForOccupationStatus } from "..";
 import { Entity, getEntityById } from "../../interfaces/entity";
 import { DynamicEnvironment } from "../../obj/environment";
 import { TrackSwitch, SwitchState, switchGetPathForState, switchGetAjoiningTrackIds, isSwitch, switchGetAjoiningDetectionSegments } from "../../obj/physical/switch";

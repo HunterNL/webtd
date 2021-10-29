@@ -3,7 +3,7 @@ import exampleEnvironment from "./data/map.json";
 import { DynamicEnvironment, loadEnvironment } from "./obj/environment";
 import { createGameLoop } from "./obj/gameloop";
 import { doSegmentsOverlap } from "./obj/physical/trackSegment";
-import { SVGRenderer } from "./render/index";
+import { SVGRenderer } from "./render/svg/SVGRenderer";
 
 const LOOP_INTERVAL = 500;//ms
 
@@ -27,6 +27,7 @@ function createRafFunction(renderer: SVGRenderer) {
 
 function onDomReady() {
     const renderElement = document.getElementById("gamecontainer");
+    const rideList = document.getElementById("ridecontainer");
 
     if(!renderElement) {
         throw new Error("renderElement not found!");
@@ -36,7 +37,19 @@ function onDomReady() {
         throw new Error("RenderElement is not an SVGElement");
     }
 
-    const renderer = new SVGRenderer(env, renderElement)
+    if(!rideList) {
+        throw new Error("Ridelist not found");
+    }
+
+    if(!(rideList instanceof HTMLDivElement)) {
+        throw new Error("RideList not a Div");
+        
+    }
+
+    const renderer = new SVGRenderer(env, {
+        svgElement: renderElement,
+        html: rideList
+    })
     renderer.render(dynamicEnvironment);
 
     const raf = createRafFunction(renderer);
