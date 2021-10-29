@@ -119,18 +119,9 @@ export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, occupi
     element.setAttribute("stroke", getColorForOccupationStatus(occupiedSegments.includes(trackRenderData.detectionSegment)));
 }
 
-function getWaypoints(track: Track): vec2[] {
-    const rd = track.renderData
-    if(typeof rd === "undefined") {
-        return [];
-    }
-
-    return rd
-}
 function toTuple<T,U>(a:T, b:U) : [T,U] {
     return [a,b];
 }
-
 
 export function getNearestRenderWaypoint(swi: TrackSwitch,track: Track): vec2 {
     const renderPath = trackGetRenderPath(track);

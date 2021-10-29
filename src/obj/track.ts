@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { chain, first, head, last } from "lodash";
+import { chain, first, head, isUndefined, last } from "lodash";
 import { Entity, getEntityById } from "../interfaces/entity";
 import { getId, Identifiable, Identifier, isIdentifiable } from "../interfaces/id";
 import { isLengthable, Lengthable } from "../interfaces/lengthable";
@@ -195,27 +195,35 @@ export function trackGetRenderPath(track: Track): vec2[] {
     return [startPos,...waypoints,endPos];   
 }
 
-export function trackRenderLoad(track: Track, trackSave: TrackSave): DetectionBlock[] {
+export function trackGetFeatures(track: Track): TrackFeature[] {
+    if(isUndefined(track.renderData)) {
+        return []
+    }
+
+    if(Array.isArray(track.renderData.rawFeatures)) {
+        return track.renderData.rawFeatures
+    }
+
+    return [];
+}
+
+export function trackRenderLoad(track: Track): DetectionBlock[] {
     const baseSegments = chain(track.segments.detection).reject(segmentIsSwitchAdjecent).value();
 
     if(baseSegments.length === 0) {
         return [];
     }
 
-    const features = Array.isArray(track.renderData.rawFeatures) ? track.renderData.rawFeatures : [] as TrackFeature[];
+    const features = trackGetFeatures(track)
     const weldCount = features.filter(isWeld).length;
 
     if(baseSegments.length !== weldCount+1) {
-        throw new Error("Segment size mismatch");
+        throw new Error("Segment size mismatch " + baseSegments.length + " <> " + (weldCount + 1));
     }
-
-    // const startPos = requireRenderPosition(track.boundries[0]);
-    // const endPos = requireRenderPosition(track.boundries[1]);
 
     const startsAtSwitch = isSwitch(track.boundries[0])
     const endsAtSwitch = isSwitch(track.boundries[1]);
 
-    // const waypoints = features.filter(feature => typeof feature.position !== "undefined").map(feature => feature.position) as vec2[];
     const renderPath = trackGetRenderPath(track);
 
     const startPos = first(renderPath);
@@ -223,7 +231,6 @@ export function trackRenderLoad(track: Track, trackSave: TrackSave): DetectionBl
 
     if(!startPos) {
         throw new Error("No startPos");
-        
     }
 
     if(!endPos) {

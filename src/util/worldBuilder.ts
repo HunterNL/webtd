@@ -7,7 +7,7 @@ import { createTrainSpan, Ride } from "../obj/ride";
 import { Aspect, ASPECT_STOP, Signal } from "../obj/signal";
 import { Direction, DIRECTION_FORWARD, TrackPosition } from "../obj/situation";
 import { isSwitch, SwitchState, TrackBoundary, TrackSwitch } from "../obj/switch";
-import { createTrack, isTrack, Track } from "../obj/track";
+import { createTrack, isTrack, Track, TrackFeature } from "../obj/track";
 import { Train } from "../obj/train";
 
 type RideArguments = {
@@ -150,4 +150,13 @@ export class WorldBuilder {
         junction.sideConnections.forEach(connection => connection.forEach(requireValidTrack));
     }
     
+}
+
+
+export class TrackBuilder {
+    constructor(public readonly track: Track) {}
+
+    addFeature(trackFeature: TrackFeature) {
+        this.track.renderData?.rawFeatures.push(trackFeature);
+    }
 }

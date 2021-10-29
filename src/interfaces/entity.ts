@@ -1,3 +1,4 @@
+import { vec2 } from "gl-matrix";
 import { Ride } from "../obj/ride";
 import { Signal } from "../obj/signal";
 import { TrackSwitch } from "../obj/switch";
@@ -21,7 +22,10 @@ export type EntityType = keyof EntityTypeMap;
 
 export type Entity = Identifiable & {
     type: EntityType;
-    renderData?: any
+    renderData?: {
+        renderPos?: vec2,
+        [key: string]: any
+    }
 }
 
 export function isEntity(a: any): a is Entity {

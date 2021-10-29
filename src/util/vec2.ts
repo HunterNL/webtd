@@ -5,3 +5,7 @@ export function getDirection(origin: vec2, target: vec2): vec2 {
         vec2.sub(vec2.create(), target, origin)
     );
 }
+
+export function vec2ToTuple(v: vec2): [number,number] {
+    return [v[0],v[1]]
+}

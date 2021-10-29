@@ -7,7 +7,7 @@ import { throwSwitch, TrackSwitch } from "../obj/switch";
 import { TrackSegment } from "../obj/trackSegment";
 import { joinWith } from "../util/joinWith";
 import { createSignalRenderer, SignalSVGRenderer, updateSignalRender } from "./svg/signalRenderer";
-import { createSwitchRenderer, SwitchSVGRenderer, updateSwitchRenderer } from "./svg/switchRenderer";
+import { createSwitchRenderer, requireRenderPosition, SwitchSVGRenderer, updateSwitchRenderer } from "./svg/switchRenderer";
 import { createBlockRenderer, TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
 
 // const LABEL_OFFSET = 10;
@@ -292,8 +292,11 @@ export class SVGRenderer {
 function renderSwitchInteractables(switches: TrackSwitch[], interactableGroup: SVGGElement) {
     switches.forEach(trackSwitch => {
         const circle = createSVGElement("circle");
-        circle.setAttribute("cx", trackSwitch.renderData.position[0]);
-        circle.setAttribute("cy", trackSwitch.renderData.position[1]);
+        const renderPos = requireRenderPosition(trackSwitch);
+
+
+        circle.setAttribute("cx", renderPos[0]+"");
+        circle.setAttribute("cy", renderPos[1]+"");
         circle.setAttribute("r", "10");
         circle.setAttribute("fill", "none");
         circle.setAttribute("stroke-width", "1");
