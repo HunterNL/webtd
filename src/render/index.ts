@@ -1,13 +1,14 @@
 import { vec2 } from "gl-matrix";
-import { add, first, head, initial, last, tail } from "lodash";
+import { add, first, flatten, head, initial, last, tail } from "lodash";
 import { Entity } from "../interfaces/entity";
-import { DynamicEnvironment, Environment } from "../obj/environment";
+import { DynamicEnvironment, PhysicalEnvironment } from "../obj/environment";
 import { toggleSignal } from "../obj/physical/signal";
 import { TrackSwitch, throwSwitch } from "../obj/physical/switch";
 import { TrackSegment } from "../obj/physical/trackSegment";
 import { joinWith } from "../util/joinWith";
 import { createSignalRenderer, SignalSVGRenderer, updateSignalRender } from "./svg/signalRenderer";
 import { createSwitchRenderer, requireRenderPosition, SwitchSVGRenderer, updateSwitchRenderer } from "./svg/switchRenderer";
+import { trackCreateRenderBlocks } from "./trackCreateRenderBlocks";
 import { createBlockRenderer, TrackSegmentSVGRender, updateTrackRender } from "./trackRenderer";
 
 // const LABEL_OFFSET = 10;
@@ -230,7 +231,7 @@ export function createSVGElement<K extends keyof SVGElementTagNameMap>(elementNa
 }
 
 export class SVGRenderer {
-    env: Environment;
+    env: PhysicalEnvironment;
     renderElement: SVGElement;
     trackGroup: SVGGElement;
     textGroup: SVGGElement;
@@ -241,7 +242,7 @@ export class SVGRenderer {
     switchRenderers: SwitchSVGRenderer[];
     blocks: TrackSegmentSVGRender[];
 
-    constructor(env: Environment, renderElement: SVGElement) {
+    constructor(env: PhysicalEnvironment, renderElement: SVGElement) {
         this.env = env;
         this.renderElement = renderElement
 
@@ -260,7 +261,9 @@ export class SVGRenderer {
         //         return createBlockRenderer(track, this.trackGroup)
         // }));
 
-        this.blocks = this.env.detectionBlocks.map(block => createBlockRenderer(block,this.trackGroup));
+        const blocks = flatten(this.env.tracks.map(trackCreateRenderBlocks));
+
+        this.blocks = blocks.map(block => createBlockRenderer(block,this.trackGroup));
 
         this.switchRenderers = this.env.switches.map(trackSwitch => {
             return createSwitchRenderer(trackSwitch, this.env.tracks, this.trackGroup);

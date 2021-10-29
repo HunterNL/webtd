@@ -1,6 +1,7 @@
 import { vec2ToTuple } from "../util/vec2";
 import { WorldBuilder } from "../util/worldBuilder";
-import { generateSegments, Track, trackRenderLoad } from "./physical/track";
+import { generateSegments, Track } from "../obj/physical/track";
+import { trackCreateRenderBlocks } from "./trackCreateRenderBlocks";
 
 function createBufferWorld(welds: number[]): Track {
     const wb = new WorldBuilder();
@@ -37,7 +38,7 @@ describe('detectionBlock',() => {
         describe('switch data',() => {
             test("2 buffers",() => {
                 const track = createBufferWorld([])
-                const blocks = trackRenderLoad(track);
+                const blocks = trackCreateRenderBlocks(track);
     
                 expect(blocks[0]).toEqual(expect.objectContaining({
                     startsAtSwitch: false,
@@ -46,7 +47,7 @@ describe('detectionBlock',() => {
             })
             test("2 switches",() => {
                 const track = createSwitchWorld([])
-                const blocks = trackRenderLoad(track);
+                const blocks = trackCreateRenderBlocks(track);
     
                 expect(blocks[0]).toEqual(expect.objectContaining({
                     startsAtSwitch: true,
@@ -55,7 +56,7 @@ describe('detectionBlock',() => {
             })
             test("2 switches - 2 blocks",() => {
                 const track = createSwitchWorld([200])
-                const blocks = trackRenderLoad(track);
+                const blocks = trackCreateRenderBlocks(track);
     
                 expect(blocks[0]).toEqual(expect.objectContaining({
                     startsAtSwitch: true,
@@ -72,7 +73,7 @@ describe('detectionBlock',() => {
         describe('generates renderPath',() => {
             test("without renderpoints",() => {
                 const track = createBufferWorld([])
-                const blocks = trackRenderLoad(track);
+                const blocks = trackCreateRenderBlocks(track);
 
                 expect(blocks[0]).toEqual(expect.objectContaining({
                     renderPoints: [[0,0],[0,100]]
@@ -86,7 +87,7 @@ describe('detectionBlock',() => {
                     rawFeatures:[{type:"renderPoint",position:[50,50]}]
                 }
 
-                const blocks = trackRenderLoad(track);
+                const blocks = trackCreateRenderBlocks(track);
 
                 expect(blocks[0]).toEqual(expect.objectContaining({
                     renderPoints: [[0,0],[50,50],[0,100]]
@@ -104,14 +105,11 @@ describe('detectionBlock',() => {
                     ]
                 }
 
-                const blocks = trackRenderLoad(track);
+                const blocks = trackCreateRenderBlocks(track);
 
                 expect(blocks[0].renderPoints.map(vec2ToTuple)).toEqual([[0,0],[50,50],[25,75]]);
 
                 expect(blocks[1].renderPoints.map(vec2ToTuple)).toEqual([[25,75],[0,100]]);
-        })
-
-       
+        }) 
     })
-    
 })

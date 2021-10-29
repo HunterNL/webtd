@@ -4,7 +4,7 @@ import { Identifier, isIdentifiable } from "../interfaces/id";
 import { DetectionBlock } from "./detectionBlock";
 import { Buffer, isBuffer } from "./physical/buffer";
 import { isRideSave, loadRide, Ride } from "./physical/ride";
-import { isTrack, isTrackSave, Track, trackLoad, trackRenderLoad } from "./physical/track";
+import { isTrack, isTrackSave, Track, trackLoad } from "./physical/track";
 import { TrackSegment } from "./physical/trackSegment";
 import { isTrain, Train } from "./physical/train";
 import { isSignalSave, loadSignal, Signal } from "./physical/signal";
@@ -19,14 +19,13 @@ export function isValidSafeData(any: any): any is EnvironmentSave {
     return Array.isArray(any.entities) && any.entities.every(isIdentifiable);
 }
 
-export type Environment=  {
+export type PhysicalEnvironment=  {
     tracks: Track[],
     rides: Ride[],
     entities: Entity[],
     switches: TrackSwitch[],
     buffers: Buffer[],
     signals: Signal[],
-    detectionBlocks: DetectionBlock[]
 }
 
 export type DynamicEnvironment = {
@@ -34,7 +33,7 @@ export type DynamicEnvironment = {
     switchPositions: TrackSwitch[], // For now just the entire object
 }
 
-export function loadEnvironment(map: unknown): Environment {
+export function loadEnvironment(map: unknown): PhysicalEnvironment {
     if(!isValidSafeData(map)) {
         throw new Error("Invalid save");
     }
@@ -59,20 +58,17 @@ export function loadEnvironment(map: unknown): Environment {
 
     const entities: Entity[] = ([] as Entity[]).concat(tracks,rides,switches,buffers, signals);
 
-    const detectionBlocks = flatten(zipWith(tracks, trackSaves, trackRenderLoad));
-
     return {
         tracks,
         rides,
         entities,
         switches,
         buffers,
-        signals,
-        detectionBlocks
+        signals
     }
 }
 
-export function getNextFreeId(env: Environment): number {
+export function getNextFreeId(env: PhysicalEnvironment): number {
     for(let n = 0; n < Number.MAX_SAFE_INTEGER; n++) {
         if(env.entities.find(ent => ent.id === n)) continue;
         return n;
@@ -80,7 +76,7 @@ export function getNextFreeId(env: Environment): number {
 
     throw new Error("Something went terribly wrong finding a free number");
 }
-export function verifyConnections(env: Environment): void {
+export function verifyConnections(env: PhysicalEnvironment): void {
     const getEnt = (n: Identifier) => getEntityById(env.entities,n,isEntity);
 
     env.tracks.forEach(track => track.boundries.forEach(boundary => getEnt(boundary.id)));
