@@ -1,6 +1,6 @@
-import { Entity, getEntityById } from "../interfaces/entity";
+import { Entity, getEntityById } from "../../interfaces/entity";
 import { Ride } from "./ride";
-import { advanceAlongTrack, TrackPosition } from "./situation";
+import { TrackPosition, advanceAlongTrack } from "./situation";
 import { isTrack } from "./track";
 import { segmentContainsPosition } from "./trackSegment";
 

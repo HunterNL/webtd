@@ -1,5 +1,5 @@
-import { Entity } from "../interfaces/entity";
-import { WorldBuilder } from "../util/worldBuilder";
+import { Entity } from "../../interfaces/entity";
+import { WorldBuilder } from "../../util/worldBuilder";
 import { Driveable } from "./driver";
 import { Ride, updateRide } from "./ride";
 

@@ -1,9 +1,10 @@
 import { isNumber } from "lodash";
-import { Entity, getEntityById } from "../interfaces/entity";
+import { Entity, getEntityById } from "../../interfaces/entity";
+import { TrackSpan } from "../trackSpan";
 import { resolveBoundary } from "./switch";
 import { getBoundaryPosition, getDirectionAwayFromBoundary, getNextBoundary, isTrack, Track } from "./track";
 import { TrackSegment } from "./trackSegment";
-import { TrackSpan } from "./trackSpan";
+
 
 export type TrackPosition = {
     track: Track,

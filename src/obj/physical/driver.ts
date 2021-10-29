@@ -1,10 +1,10 @@
 import { clamp, head } from "lodash";
-import { Entity } from "../interfaces/entity";
-import { stoppingDistance } from "../util/physics";
+import { Entity } from "../../interfaces/entity";
+import { stoppingDistance } from "../../util/physics";
 import { Ride } from "./ride";
+import { trainGetAccelleration } from "./train";
 import { ASPECT_PROCEED_SLOW, ASPECT_STOP, Signal } from "./signal";
 import { getDistanceToPosition, TrackPosition } from "./situation";
-import { trainGetAccelleration } from "./train";
 
 const SIGNAL_STOP_AHEAD_DISTANCE = 15// m, for a big "hoofdsein", 10 meter for a small dwarfsignal
 

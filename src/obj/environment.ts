@@ -1,14 +1,14 @@
 import { flatten, zipWith } from "lodash";
 import { Entity, getEntityById, isEntity } from "../interfaces/entity";
 import { Identifier, isIdentifiable } from "../interfaces/id";
-import { Buffer, isBuffer } from "./buffer";
 import { DetectionBlock } from "./detectionBlock";
-import { isRideSave, loadRide, Ride } from "./ride";
-import { isSignalSave, loadSignal, Signal } from "./signal";
-import { isSwitch, loadSwitch, TrackSwitch } from "./switch";
-import { isTrack, isTrackSave, Track, trackLoad, trackRenderLoad } from "./track";
-import { TrackSegment } from "./trackSegment";
-import { isTrain, Train } from "./train";
+import { Buffer, isBuffer } from "./physical/buffer";
+import { isRideSave, loadRide, Ride } from "./physical/ride";
+import { isTrack, isTrackSave, Track, trackLoad, trackRenderLoad } from "./physical/track";
+import { TrackSegment } from "./physical/trackSegment";
+import { isTrain, Train } from "./physical/train";
+import { isSignalSave, loadSignal, Signal } from "./physical/signal";
+import { isSwitch, loadSwitch, TrackSwitch } from "./physical/switch";
 
 
 export type EnvironmentSave = {

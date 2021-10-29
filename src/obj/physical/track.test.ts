@@ -1,4 +1,4 @@
-import { WorldBuilder } from "../util/worldBuilder";
+import { WorldBuilder } from "../../util/worldBuilder";
 import { Buffer } from "./buffer";
 import { TrackBoundary, TrackSwitch } from "./switch";
 import { generateSegments, SWITCH_WELD_OFFSET } from "./track";

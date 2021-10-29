@@ -1,8 +1,8 @@
 import { vec2 } from "gl-matrix";
 import { last } from "lodash";
 import { createSVGElement, SWITCH_RENDER_RADIUS, vec2PathLerp } from "..";
-import { ASPECT_STOP, Signal } from "../../obj/signal";
-import { trackGetRenderPath } from "../../obj/track";
+import { trackGetRenderPath } from "../../obj/physical/track";
+import { ASPECT_STOP, Signal } from "../../obj/physical/signal";
 import { pathAddSwitchMargin } from "../trackRenderer";
 
 const SVG_CONTENT = `<svg viewBox="184.686 41.924 130.627 182.26" width="130.627" height="182.26" xmlns="http://www.w3.org/2000/svg">

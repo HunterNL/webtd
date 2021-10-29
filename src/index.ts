@@ -2,7 +2,7 @@ import { flatten } from "lodash";
 import exampleEnvironment from "./data/map.json";
 import { DynamicEnvironment, loadEnvironment } from "./obj/environment";
 import { createGameLoop } from "./obj/gameloop";
-import { doSegmentsOverlap } from "./obj/trackSegment";
+import { doSegmentsOverlap } from "./obj/physical/trackSegment";
 import { SVGRenderer } from "./render/index";
 
 const LOOP_INTERVAL = 500;//ms

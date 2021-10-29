@@ -1,11 +1,11 @@
 import { clamp, isNumber } from "lodash";
-import { Entity, getEntityById } from "../interfaces/entity";
+import { Entity, getEntityById } from "../../interfaces/entity";
 import { DriverMode, driveTrain, hasDriver, observeSignals } from "./driver";
-import { lookupSignals } from "./signal";
-import { advanceAlongTrack, Direction, isSituationSave, TrackPosition } from "./situation";
+import { lookupSignals } from "../physical/signal";
+import { TrackSpan } from "../trackSpan";
 import { isTrack } from "./track";
-import { TrackSpan } from "./trackSpan";
 import { isTrain, Train, trainGetAccelleration } from "./train";
+import { TrackPosition, Direction, advanceAlongTrack, isSituationSave } from "./situation";
 
 export interface Ride extends Entity{
     direction: number;

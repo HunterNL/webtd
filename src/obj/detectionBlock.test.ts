@@ -1,6 +1,6 @@
 import { vec2ToTuple } from "../util/vec2";
 import { WorldBuilder } from "../util/worldBuilder";
-import { generateSegments, Track, trackRenderLoad } from "./track";
+import { generateSegments, Track, trackRenderLoad } from "./physical/track";
 
 function createBufferWorld(welds: number[]): Track {
     const wb = new WorldBuilder();

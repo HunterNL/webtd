@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { TrackSegment } from "./trackSegment";
+import { TrackSegment } from "./physical/trackSegment";
 
 export type DetectionBlock = {
     segment: TrackSegment,

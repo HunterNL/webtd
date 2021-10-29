@@ -1,7 +1,7 @@
-import { Entity } from "../interfaces/entity";
-import { WorldBuilder } from "../util/worldBuilder";
-import { advanceAlongTrack, TrackPosition } from "./situation";
+import { Entity } from "../../interfaces/entity";
+import { WorldBuilder } from "../../util/worldBuilder";
 import { Track } from "./track";
+import { advanceAlongTrack, TrackPosition } from "./situation";
 import { TrackSegment } from "./trackSegment";
 
 // Simple 1 track

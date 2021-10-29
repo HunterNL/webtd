@@ -1,6 +1,6 @@
-import { Entity } from "../interfaces/entity";
-import { Identifiable, isIdentifiable } from "../interfaces/id";
-import { isLengthable, Lengthable } from "../interfaces/lengthable";
+import { Entity } from "../../interfaces/entity";
+import { Identifiable, isIdentifiable } from "../../interfaces/id";
+import { isLengthable, Lengthable } from "../../interfaces/lengthable";
 
 export type Train = Identifiable & Lengthable & Entity;
 

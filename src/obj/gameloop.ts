@@ -1,5 +1,5 @@
 import { Entity } from "../interfaces/entity";
-import { isRide, updateRide } from "./ride";
+import { isRide, updateRide } from "./physical/ride";
 
 const TIMESCALE = 1;
 

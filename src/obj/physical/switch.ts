@@ -1,12 +1,12 @@
 import { flatten, uniq } from "lodash";
-import { Entity, getEntityById } from "../interfaces/entity";
-import { Identifier, isIdentifiable, isIdentifier } from "../interfaces/id";
+import { Entity, getEntityById } from "../../interfaces/entity";
+import { isIdentifier, Identifier, isIdentifiable } from "../../interfaces/id";
 import { Buffer, isBuffer } from "./buffer";
-import { isJunction, Junction } from "./junction";
+import { Junction, isJunction } from "./junction";
 import { isTrack, Track, trackGetDetectionSegmentAjoiningBoundary, trackGetOtherEnd } from "./track";
 import { TrackSegment } from "./trackSegment";
 
-// const SWITCH_ACTUATION_TIME = 3; //seconds
+// const SWITCH_ACTUATION_TIME = 3; //second
 
 export function eq<T>(a: T) {
     return function(b: T): boolean {

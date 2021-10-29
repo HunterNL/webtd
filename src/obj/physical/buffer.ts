@@ -1,5 +1,5 @@
-import { Entity } from "../interfaces/entity";
-import { isIdentifiable } from "../interfaces/id";
+import { Entity } from "../../interfaces/entity";
+import { isIdentifiable } from "../../interfaces/id";
 
 export interface Buffer extends Entity {
     type: "end";

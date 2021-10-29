@@ -1,5 +1,5 @@
-import { Direction, TrackPosition } from "./situation";
-import { TrackSegment } from "./trackSegment";
+import { Direction, TrackPosition } from "./physical/situation";
+import { TrackSegment } from "./physical/trackSegment";
 
 export type TrackSpan = {
     startPosition: TrackPosition

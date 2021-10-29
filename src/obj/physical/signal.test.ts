@@ -1,5 +1,5 @@
-import { Entity } from "../interfaces/entity";
-import { WorldBuilder } from "../util/worldBuilder"
+import { Entity } from "../../interfaces/entity";
+import { WorldBuilder } from "../../util/worldBuilder";
 import { Ride } from "./ride";
 import { lookupSignals, Signal } from "./signal";
 

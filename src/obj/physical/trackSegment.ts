@@ -1,6 +1,6 @@
 import { sortBy } from "lodash";
-import { Identifier } from "../interfaces/id";
-import { doRangesOverlap } from "../util/rangeOverlap";
+import { Identifier } from "../../interfaces/id";
+import { doRangesOverlap } from "../../util/rangeOverlap";
 import { TrackPosition } from "./situation";
 import { TrackBoundary } from "./switch";
 

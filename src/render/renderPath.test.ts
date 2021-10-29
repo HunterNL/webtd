@@ -1,4 +1,4 @@
-import { Track, TrackFeature, trackGetRenderPath } from "../obj/track";
+import { Track, TrackFeature, trackGetRenderPath } from "../obj/physical/track";
 import { WorldBuilder } from "../util/worldBuilder";
 
 function createWorld() {

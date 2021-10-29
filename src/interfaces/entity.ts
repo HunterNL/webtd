@@ -1,9 +1,9 @@
 import { vec2 } from "gl-matrix";
-import { Ride } from "../obj/ride";
-import { Signal } from "../obj/signal";
-import { TrackSwitch } from "../obj/switch";
-import { Track } from "../obj/track";
-import { Train } from "../obj/train";
+import { Ride } from "../obj/physical/ride";
+import { Track } from "../obj/physical/track";
+import { Train } from "../obj/physical/train";
+import { Signal } from "../obj/physical/signal";
+import { TrackSwitch } from "../obj/physical/switch";
 import { isObject } from "../util/isObject";
 import { Identifiable, Identifier } from "./id";
 

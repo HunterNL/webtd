@@ -1,14 +1,14 @@
 import { Entity } from "../interfaces/entity";
 import { getId } from "../interfaces/id";
-import { Buffer } from "../obj/buffer";
-import { DriverMode } from "../obj/driver";
-import { Junction } from "../obj/junction";
-import { createTrainSpan, Ride } from "../obj/ride";
-import { Aspect, ASPECT_STOP, Signal } from "../obj/signal";
-import { Direction, DIRECTION_FORWARD, TrackPosition } from "../obj/situation";
-import { isSwitch, SwitchState, TrackBoundary, TrackSwitch } from "../obj/switch";
-import { createTrack, isTrack, Track, TrackFeature } from "../obj/track";
-import { Train } from "../obj/train";
+import { DriverMode } from "../obj/physical/driver";
+import { Buffer } from "../obj/physical/buffer";
+import { Junction } from "../obj/physical/junction";
+import { createTrainSpan, Ride } from "../obj/physical/ride";
+import { createTrack, isTrack, Track, TrackFeature } from "../obj/physical/track";
+import { Train } from "../obj/physical/train";
+import { Aspect, ASPECT_STOP, Signal } from "../obj/physical/signal";
+import { TrackPosition, Direction, DIRECTION_FORWARD } from "../obj/physical/situation";
+import { TrackBoundary, TrackSwitch, SwitchState, isSwitch } from "../obj/physical/switch";
 
 type RideArguments = {
     train: Train;

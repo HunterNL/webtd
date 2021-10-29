@@ -2,9 +2,9 @@ import { vec2 } from "gl-matrix";
 import { COLOR_UNOCCUPIED, createSVGElement, getColorForOccupationStatus } from "..";
 import { Entity, getEntityById } from "../../interfaces/entity";
 import { DynamicEnvironment } from "../../obj/environment";
-import { isSwitch, switchGetAjoiningDetectionSegments, switchGetAjoiningTrackIds, switchGetPathForState, SwitchState, TrackSwitch } from "../../obj/switch";
-import { isTooShortForSegment, isTrack, Track, trackGetOtherBoundary } from "../../obj/track";
-import { TrackSegment } from "../../obj/trackSegment";
+import { TrackSwitch, SwitchState, switchGetPathForState, switchGetAjoiningTrackIds, isSwitch, switchGetAjoiningDetectionSegments } from "../../obj/physical/switch";
+import { isTooShortForSegment, isTrack, Track, trackGetOtherBoundary } from "../../obj/physical/track";
+import { TrackSegment } from "../../obj/physical/trackSegment";
 import { getDirection } from "../../util/vec2";
 import { getNearestRenderWaypoint } from "../trackRenderer";
 

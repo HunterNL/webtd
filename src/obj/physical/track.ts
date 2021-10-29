@@ -1,14 +1,14 @@
 import { vec2 } from "gl-matrix";
 import { chain, first, head, isUndefined, last } from "lodash";
-import { Entity, getEntityById } from "../interfaces/entity";
-import { getId, Identifiable, Identifier, isIdentifiable } from "../interfaces/id";
-import { isLengthable, Lengthable } from "../interfaces/lengthable";
-import { vec2PathLerp } from "../render";
-import { requireRenderPosition } from "../render/svg/switchRenderer";
-import { DetectionBlock } from "./detectionBlock";
+import { Entity, getEntityById } from "../../interfaces/entity";
+import { getId, Identifiable, Identifier, isIdentifiable } from "../../interfaces/id";
+import { isLengthable, Lengthable } from "../../interfaces/lengthable";
+import { vec2PathLerp } from "../../render";
+import { requireRenderPosition } from "../../render/svg/switchRenderer";
+import { DetectionBlock } from "../detectionBlock";
 import { Direction, DIRECTION_FORWARD, TrackPosition } from "./situation";
 import { isSwitch, isTrackBoundary, resolveBoundary, TrackBoundary } from "./switch";
-import { splitRangeAtPoints, TrackSegment } from "./trackSegment";
+import { TrackSegment, splitRangeAtPoints } from "./trackSegment";
 
 export const SWITCH_WELD_OFFSET = 10;
 export const MIN_BLOCK_SIZE = 100;
