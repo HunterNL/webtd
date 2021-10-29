@@ -207,6 +207,26 @@ export function trackGetFeatures(track: Track): TrackFeature[] {
     return [];
 }
 
+function interpolateFeaturePositions(renderPath: vec2[], features: TrackFeature[], trackLength: number): TrackFeature[] {
+    return features.map(feature => {
+        let position = feature.position;
+
+        if(!position && isWeld(feature)) {
+            position = vec2PathLerp(renderPath,feature!.offset / trackLength);
+        }
+
+        return {...feature, position} as TrackFeature
+    })
+}
+
+/**
+ * Takes a track and:
+ * - Figures out the position of all features on its renderpath
+ * - Splits up these features at welds into blocks
+ * - Constructs the individual renderPaths for each block
+ * @param track 
+ * @returns DetectionBlock[]
+ */
 export function trackRenderLoad(track: Track): DetectionBlock[] {
     const baseSegments = chain(track.segments.detection).reject(segmentIsSwitchAdjecent).value();
 
@@ -237,18 +257,11 @@ export function trackRenderLoad(track: Track): DetectionBlock[] {
         throw new Error("No endPos");
     }
 
-    const featuresWithRenderPos = features.map((feature: TrackFeature) => {
-        let position = feature.position;
+    const featuresWithRenderPos = interpolateFeaturePositions(renderPath, features, track.length)
 
-        if(!position && isWeld(feature)) {
-            position = vec2PathLerp(renderPath,feature!.offset / track.length);
-        }
 
-        return {...feature, position}
-    }) as TrackFeature[];
-
+    // Loop setup
     const blocks: DetectionBlock[] = [];
-
     let renderPoints = [startPos] as vec2[];
     let segmentCount = 0;
 
@@ -256,17 +269,15 @@ export function trackRenderLoad(track: Track): DetectionBlock[] {
         const feature = featuresWithRenderPos[index];
         if(!feature) {
             throw new Error("No feature");
-            
         }
 
-        const rp = feature.position;
-        if(!rp) {
+        const renderPosition = feature.position; // endpoint of current "leg"
+        if(!renderPosition) {
             throw new Error("Features has no renderPos");
-            
         }
 
-        renderPoints.push(rp);
-        let isFirstBlock = true;
+        renderPoints.push(renderPosition); //Add it for sure to the path
+        let isFirstBlock = true; // Required for for figuring out what block borders a switch
 
         if(isWeld(feature)) {
             const segment = baseSegments[segmentCount];
@@ -283,7 +294,7 @@ export function trackRenderLoad(track: Track): DetectionBlock[] {
                 endsAtSwitch: false
             })
             segmentCount++;
-            renderPoints = [rp]
+            renderPoints = [renderPosition]
             isFirstBlock = false;
         }
     }
@@ -296,8 +307,6 @@ export function trackRenderLoad(track: Track): DetectionBlock[] {
         startsAtSwitch: featuresWithRenderPos.length === 0 && startsAtSwitch,
         endsAtSwitch: endsAtSwitch
     })
-
-    // fixSwitchOffset(blocks, startsAtSwitch,endsAtSwitch))
 
     return blocks;
 }
