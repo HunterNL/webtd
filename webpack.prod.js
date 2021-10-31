@@ -1,10 +1,15 @@
 var path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
+const { DefinePlugin } = require("webpack");
 
 const copyplugin =  new CopyPlugin({
     patterns: [
         { from: "bundle/basecontent" },
     ]
+})
+
+const buildPlugin = new DefinePlugin({
+    __PRODUCTION__: "true"
 })
 
 module.exports = {
@@ -25,5 +30,5 @@ module.exports = {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'bundle/generated/prod'),
     },
-    plugins: [copyplugin]
+    plugins: [copyplugin,buildPlugin]
 };
