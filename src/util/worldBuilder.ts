@@ -87,13 +87,12 @@ export class WorldBuilder {
     addRide({ train, position, direction = DIRECTION_FORWARD, speed = 0, driverMode }: RideArguments): Ride {
         const ride : Ride = {
             id: this.counter++,
-            position,
             span: createTrainSpan(this.entities, position, train.length, direction),
             speed,
             train,
             type: "ride",
-            direction: direction,
-            driverMode
+            driverMode,
+            reversing: false
         }
 
         this.entities.push(ride);

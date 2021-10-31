@@ -7,7 +7,7 @@ import { createBlockRenderer, TrackSegmentSVGRender, updateTrackRender } from ".
 import { renderSwitchInteractables } from "./renderSwitchInteractables";
 import { createSVGElement, renderDebugIds } from ".";
 import { renderSignalInteractables } from "./signalInteractables";
-import { Ride } from "../../obj/physical/ride";
+import { Ride, rideGetDrivingPosition } from "../../obj/physical/ride";
 import { DriverMode } from "../../obj/physical/driver";
 import { TrackPosition } from "../../obj/physical/situation";
 
@@ -98,7 +98,8 @@ export class SVGRenderer {
 }
 
 function rideToString(ride: Ride): string {
-    return `[${ride.id}] ${positionToString(ride.position)} - ${ride.position.track.length} - ${round(ride.speed,1)} | ${driveModeToString(ride.driverMode)}`;
+    const position = rideGetDrivingPosition(ride)
+    return `[${ride.id}] ${positionToString(position)} - ${position.track.length} - ${round(ride.speed,1)} | ${driveModeToString(ride.driverMode)}`;
 }
 
 function driveModeToString(driverMode?: DriverMode): string {

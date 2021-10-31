@@ -1,3 +1,4 @@
+// @ts-nochec
 import { clamp, isNumber } from "lodash";
 import { Entity, getEntityById } from "../../interfaces/entity";
 import { DriverMode, driveTrain, hasDriver, observeSignals } from "./driver";
@@ -5,13 +6,14 @@ import { lookupSignals } from "../physical/signal";
 import { TrackSpan } from "../trackSpan";
 import { isTrack } from "./track";
 import { isTrain, Train, trainGetAccelleration } from "./train";
-import { TrackPosition, Direction, advanceAlongTrack, isSituationSave } from "./situation";
+import { TrackPosition, Direction, advanceAlongTrack, isSituationSave, getDirectionForMovement } from "./situation";
 
 export interface Ride extends Entity{
-    direction: number;
-    position: TrackPosition;
+    // direction: number;
+    reversing: boolean,
+    // position: TrackPosition;
     train: Train,
-    span: TrackSpan;
+    span: TrackSpan; //Contains train positions, start/end by physical carriage position
     speed: number,
     driverMode?: DriverMode
 }
@@ -27,6 +29,8 @@ export function createTrainSpan(entities: Entity[], forwardPosition: TrackPositi
     if(!didComplete) {
         throw new Error("Failed to create train span, train derailed?");
     }
+    
+    span.finalDirection = forwardDirection
 
     return span;
 }
@@ -61,21 +65,23 @@ export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
 }
 
 // Physically move the ride
-function moveRide(entities: Entity[], ride: Ride, movement: number) {
+// Movement is relative to current driving direction
+export function moveRide(entities: Entity[], ride: Ride, movement: number) {
     // Figure out where the front of the train ends up
-    const trainMovement = advanceAlongTrack(entities, ride.position, movement * ride.direction);
+    const oldDrivingPosition = rideGetDrivingPosition(ride)
+    const trainMovement = advanceAlongTrack(entities, oldDrivingPosition, movement * ride.span.finalDirection);
     const newForwardPosition = trainMovement[0].endPosition;
 
     // #TODO MULTI TRACK DRIFTING
     // Could figure out the postion of every bogey and do this check individualy, break connections if track differs
     // Run backwards from the front to figure out where the rest of the train ends up
     // const trainSpan = advanceAlongTrack(entities, newForwardPosition, ride.train.length * trainMovement.finalDirection * -1) // -1, we're looking backwards
-    const trainSpan = createTrainSpan(entities, newForwardPosition, ride.train.length, trainMovement[0].finalDirection);
+    const trainSpan = createTrainSpan(entities, newForwardPosition, ride.train.length, trainMovement[0].finalDirection * getDirectionForMovement(movement) as Direction);
 
 
     // Todo: Simpify into a single span with proper direction
-    ride.position = newForwardPosition;
-    ride.direction = trainMovement[0].finalDirection;
+    // ride.position = newForwardPosition;
+    // ride.direction = trainMovement[0].finalDirection;
     ride.span = trainSpan;
 }
 
@@ -86,8 +92,9 @@ export function rideCreate(train: Train, span: TrackSpan, speed: number,id: numb
         train,
         span,
         speed,
-        direction,
-        position,
+        reversing: false
+        // direction,
+        // position,
     }
 }
 
@@ -106,13 +113,12 @@ export function loadRide(entities: Entity[], rideSave: any): Ride {
 
     return {
         id: rideSave.id,
-        position,
         span: createTrainSpan(entities, position, train.length, rideSave.direction),
         speed: rideSave.speed,
         train,
         type: "ride",
-        direction: rideSave.direction,
-        driverMode: rideSave.driverMode
+        driverMode: rideSave.driverMode,
+        reversing: false
     }
 }
 
@@ -122,4 +128,16 @@ export function isRide(any: any): any is Ride {
 
 export function rideHasDriver(ride: Ride) {
     return typeof ride.driverMode !== "undefined";
+}
+
+export function rideReverse(ride: Ride) {
+
+}
+
+export function rideGetDrivingPosition(ride: Ride): TrackPosition { // Not the physical cab position, but whatever side would be facing the current driving direction
+    if(ride.reversing) {
+        return ride.span.endPosition
+    } else {
+        return ride.span.startPosition
+    }
 }

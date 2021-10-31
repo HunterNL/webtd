@@ -1,7 +1,7 @@
 import { clamp, head } from "lodash";
 import { Entity } from "../../interfaces/entity";
 import { stoppingDistance } from "../../util/physics";
-import { Ride } from "./ride";
+import { Ride, rideGetDrivingPosition } from "./ride";
 import { trainGetAccelleration } from "./train";
 import { ASPECT_PROCEED_SLOW, ASPECT_STOP, Signal } from "./signal";
 import { getDistanceToPosition, TrackPosition } from "./situation";
@@ -83,7 +83,8 @@ export function driveTrain(entities: Entity[], ride: Ride & Driveable, dt: numbe
         const acceleration = trainGetAccelleration() * ACCELERATION_MARGIN;
 
         const trainStoppingDistance = stoppingDistance(speed, acceleration);
-        const remainingDistance = getDistanceToPosition(ride.position,driverMode.stopPosition);
+        const driverPosition = rideGetDrivingPosition(ride)
+        const remainingDistance = getDistanceToPosition(driverPosition,driverMode.stopPosition);
 
         // console.log("Remaining distance:" + remainingDistance + " Speed: " + ride.speed);
 

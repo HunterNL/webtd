@@ -1,5 +1,5 @@
 import { Entity, getEntityById } from "../../interfaces/entity";
-import { Ride } from "./ride";
+import { Ride, rideGetDrivingPosition } from "./ride";
 import { TrackPosition, advanceAlongTrack } from "./situation";
 import { isTrack } from "./track";
 import { segmentContainsPosition } from "./trackSegment";
@@ -46,7 +46,8 @@ export function isSignal(any: any): any is Signal {
 }
 
 export function lookupSignals(entities: Entity[], ride: Ride, distance: number) {
-    const [{segments}] = advanceAlongTrack(entities, ride.position, distance);
+    const driverPosition = rideGetDrivingPosition(ride)
+    const [{segments}] = advanceAlongTrack(entities, driverPosition, distance);
 
     const allSignals = entities.filter(isSignal);
 
