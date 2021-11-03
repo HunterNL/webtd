@@ -1,0 +1,773 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": {
+    },
+    "definitions": {
+        "Aspect": {
+            "enum": [
+                "ASPECT_PROCEED_SLOW",
+                "ASPECT_STOP"
+            ],
+            "type": "string"
+        },
+        "Buffer": {
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "renderData": {
+                    "additionalProperties": {
+                    },
+                    "properties": {
+                        "renderPos": {
+                            "anyOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "patternProperties": {
+                                        "^[0-9]+$": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "items": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "maxItems": 2,
+                                    "minItems": 2,
+                                    "type": "array"
+                                }
+                            ]
+                        }
+                    },
+                    "type": "object"
+                },
+                "type": {
+                    "enum": [
+                        "end"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "EntityType": {
+            "enum": [
+                "end",
+                "ride",
+                "signal",
+                "switch",
+                "track",
+                "train"
+            ],
+            "type": "string"
+        },
+        "SwitchState": {
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "type": "number"
+        },
+        "TrackSwitch": {
+            "properties": {
+                "currentState": {
+                    "$ref": "#/definitions/SwitchState"
+                },
+                "id": {
+                    "type": "number"
+                },
+                "junction": {
+                    "properties": {
+                        "sideConnections": {
+                            "items": {
+                                "items": [
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "number"
+                                    }
+                                ],
+                                "maxItems": 2,
+                                "minItems": 2,
+                                "type": "array"
+                            },
+                            "type": "array"
+                        },
+                        "straightConnections": {
+                            "items": {
+                                "items": [
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "number"
+                                    }
+                                ],
+                                "maxItems": 2,
+                                "minItems": 2,
+                                "type": "array"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                "renderData": {
+                    "additionalProperties": {
+                    },
+                    "properties": {
+                        "renderPos": {
+                            "anyOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "patternProperties": {
+                                        "^[0-9]+$": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "items": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "maxItems": 2,
+                                    "minItems": 2,
+                                    "type": "array"
+                                }
+                            ]
+                        }
+                    },
+                    "type": "object"
+                },
+                "type": {
+                    "enum": [
+                        "switch"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "convertProperties<Buffer>": {
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "renderData": {
+                    "additionalProperties": {
+                    },
+                    "properties": {
+                        "renderPos": {
+                            "anyOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "patternProperties": {
+                                        "^[0-9]+$": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "items": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "maxItems": 2,
+                                    "minItems": 2,
+                                    "type": "array"
+                                }
+                            ]
+                        }
+                    },
+                    "type": "object"
+                },
+                "type": {
+                    "enum": [
+                        "end"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "convertProperties<Junction>": {
+            "properties": {
+                "sideConnections": {
+                    "items": {
+                        "items": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ],
+                        "maxItems": 2,
+                        "minItems": 2,
+                        "type": "array"
+                    },
+                    "type": "array"
+                },
+                "straightConnections": {
+                    "items": {
+                        "items": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ],
+                        "maxItems": 2,
+                        "minItems": 2,
+                        "type": "array"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "convertProperties<Signal>": {
+            "properties": {
+                "currentAspect": {
+                    "$ref": "#/definitions/Aspect"
+                },
+                "id": {
+                    "type": "number"
+                },
+                "position": {
+                    "$ref": "#/definitions/convertProperties<TrackPosition>"
+                },
+                "renderData": {
+                    "allOf": [
+                        {
+                            "additionalProperties": {
+                            },
+                            "properties": {
+                                "renderPos": {
+                                    "anyOf": [
+                                        {
+                                            "additionalProperties": false,
+                                            "patternProperties": {
+                                                "^[0-9]+$": {
+                                                    "type": "number"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "items": [
+                                                {
+                                                    "type": "number"
+                                                },
+                                                {
+                                                    "type": "number"
+                                                }
+                                            ],
+                                            "maxItems": 2,
+                                            "minItems": 2,
+                                            "type": "array"
+                                        }
+                                    ]
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
+                                "label": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ]
+                },
+                "type": {
+                    "enum": [
+                        "signal"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "convertProperties<Track>": {
+            "properties": {
+                "boundries": {
+                    "items": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ],
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "type": "array"
+                },
+                "id": {
+                    "type": "number"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "renderData": {
+                    "allOf": [
+                        {
+                            "additionalProperties": {
+                            },
+                            "properties": {
+                                "renderPos": {
+                                    "anyOf": [
+                                        {
+                                            "additionalProperties": false,
+                                            "patternProperties": {
+                                                "^[0-9]+$": {
+                                                    "type": "number"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "items": [
+                                                {
+                                                    "type": "number"
+                                                },
+                                                {
+                                                    "type": "number"
+                                                }
+                                            ],
+                                            "maxItems": 2,
+                                            "minItems": 2,
+                                            "type": "array"
+                                        }
+                                    ]
+                                }
+                            },
+                            "type": "object"
+                        },
+                        {
+                            "properties": {
+                                "rawFeatures": {
+                                    "items": {
+                                        "anyOf": [
+                                            {
+                                                "properties": {
+                                                    "offset": {
+                                                        "type": "number"
+                                                    },
+                                                    "position": {
+                                                        "items": [
+                                                            {
+                                                                "type": "number"
+                                                            },
+                                                            {
+                                                                "type": "number"
+                                                            }
+                                                        ],
+                                                        "maxItems": 2,
+                                                        "minItems": 2,
+                                                        "type": "array"
+                                                    },
+                                                    "type": {
+                                                        "enum": [
+                                                            "weld"
+                                                        ],
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            },
+                                            {
+                                                "properties": {
+                                                    "position": {
+                                                        "items": [
+                                                            {
+                                                                "type": "number"
+                                                            },
+                                                            {
+                                                                "type": "number"
+                                                            }
+                                                        ],
+                                                        "maxItems": 2,
+                                                        "minItems": 2,
+                                                        "type": "array"
+                                                    },
+                                                    "type": {
+                                                        "enum": [
+                                                            "renderPoint"
+                                                        ],
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        ]
+                                    },
+                                    "type": "array"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ]
+                },
+                "segments": {
+                    "$ref": "#/definitions/convertProperties<{detection:TrackSegment[];}>"
+                },
+                "type": {
+                    "enum": [
+                        "track"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "convertProperties<TrackPosition>": {
+            "properties": {
+                "offset": {
+                    "type": "number"
+                },
+                "track": {
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "convertProperties<TrackRenderPoint>": {
+            "properties": {
+                "position": {
+                    "items": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ],
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "type": "array"
+                },
+                "type": {
+                    "enum": [
+                        "renderPoint"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "convertProperties<TrackSegment>": {
+            "properties": {
+                "end": {
+                    "type": "number"
+                },
+                "endBoundary": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Buffer"
+                        },
+                        {
+                            "$ref": "#/definitions/TrackSwitch"
+                        }
+                    ]
+                },
+                "start": {
+                    "type": "number"
+                },
+                "startBoundary": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Buffer"
+                        },
+                        {
+                            "$ref": "#/definitions/TrackSwitch"
+                        }
+                    ]
+                },
+                "trackId": {
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "convertProperties<TrackSwitch>": {
+            "properties": {
+                "currentState": {
+                    "$ref": "#/definitions/SwitchState"
+                },
+                "id": {
+                    "type": "number"
+                },
+                "junction": {
+                    "$ref": "#/definitions/convertProperties<Junction>"
+                },
+                "renderData": {
+                    "additionalProperties": {
+                    },
+                    "properties": {
+                        "renderPos": {
+                            "anyOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "patternProperties": {
+                                        "^[0-9]+$": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "items": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "maxItems": 2,
+                                    "minItems": 2,
+                                    "type": "array"
+                                }
+                            ]
+                        }
+                    },
+                    "type": "object"
+                },
+                "type": {
+                    "enum": [
+                        "switch"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "convertProperties<TrackWeld>": {
+            "properties": {
+                "offset": {
+                    "type": "number"
+                },
+                "position": {
+                    "items": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ],
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "type": "array"
+                },
+                "type": {
+                    "enum": [
+                        "weld"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "convertProperties<Train>": {
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "renderData": {
+                    "additionalProperties": {
+                    },
+                    "properties": {
+                        "renderPos": {
+                            "anyOf": [
+                                {
+                                    "additionalProperties": false,
+                                    "patternProperties": {
+                                        "^[0-9]+$": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                {
+                                    "items": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "maxItems": 2,
+                                    "minItems": 2,
+                                    "type": "array"
+                                }
+                            ]
+                        }
+                    },
+                    "type": "object"
+                },
+                "type": {
+                    "enum": [
+                        "train"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "convertProperties<{detection:TrackSegment[];}>": {
+            "properties": {
+                "detection": {
+                    "items": {
+                        "$ref": "#/definitions/convertProperties<TrackSegment>"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "properties": {
+        "entities": {
+            "items": {
+                "anyOf": [
+                    {
+                        "$ref": "#/definitions/convertProperties<Buffer>"
+                    },
+                    {
+                        "$ref": "#/definitions/convertProperties<Signal>"
+                    },
+                    {
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/convertProperties<Track>"
+                            },
+                            {
+                                "properties": {
+                                    "features": {
+                                        "items": {
+                                            "anyOf": [
+                                                {
+                                                    "$ref": "#/definitions/convertProperties<TrackWeld>"
+                                                },
+                                                {
+                                                    "$ref": "#/definitions/convertProperties<TrackRenderPoint>"
+                                                }
+                                            ]
+                                        },
+                                        "type": "array"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        ]
+                    },
+                    {
+                        "$ref": "#/definitions/convertProperties<TrackSwitch>"
+                    },
+                    {
+                        "allOf": [
+                            {
+                                "properties": {
+                                    "id": {
+                                        "type": "number"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            {
+                                "properties": {
+                                    "renderData": {
+                                        "additionalProperties": {
+                                        },
+                                        "properties": {
+                                            "renderPos": {
+                                                "anyOf": [
+                                                    {
+                                                        "additionalProperties": false,
+                                                        "patternProperties": {
+                                                            "^[0-9]+$": {
+                                                                "type": "number"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "items": [
+                                                            {
+                                                                "type": "number"
+                                                            },
+                                                            {
+                                                                "type": "number"
+                                                            }
+                                                        ],
+                                                        "maxItems": 2,
+                                                        "minItems": 2,
+                                                        "type": "array"
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "type": {
+                                        "$ref": "#/definitions/EntityType"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            {
+                                "properties": {
+                                    "speed": {
+                                        "type": "number"
+                                    },
+                                    "trainId": {
+                                        "type": "number"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        ]
+                    },
+                    {
+                        "$ref": "#/definitions/convertProperties<Train>"
+                    }
+                ]
+            },
+            "type": "array"
+        }
+    },
+    "type": "object"
+}
+

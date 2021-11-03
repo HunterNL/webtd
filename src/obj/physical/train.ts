@@ -1,8 +1,13 @@
 import { Entity } from "../../interfaces/entity";
 import { Identifiable, isIdentifiable } from "../../interfaces/id";
 import { isLengthable, Lengthable } from "../../interfaces/lengthable";
+import { Saveable } from "../save";
 
-export type Train = Identifiable & Lengthable & Entity;
+export type Train = Identifiable & Lengthable & Entity & {
+    type: "train",
+};
+
+export type TrainSave = Saveable<Train>
 
 export function createTrain(id: number, length: number): Train {
     return {

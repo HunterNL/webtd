@@ -2,6 +2,7 @@ import { vec2 } from "gl-matrix";
 import { add, first, head, initial, last, tail } from "lodash";
 import { TrackSegment } from "../obj/physical/trackSegment";
 import { joinWith } from "../util/joinWith";
+import { vec2ToTuple } from "../util/vec2";
 
 // const LABEL_OFFSET = 10;
 
@@ -127,7 +128,7 @@ export function vec2pathLength(positions:vec2[]): number {
     return joinWith(positions, vec2.distance).reduce(add,0);
 }
 
-export function vec2PathLerp(positions: vec2[], lerp: number): vec2 {
+export function vec2PathLerp(positions: vec2[], lerp: number): [number,number] {
     if(positions.length < 2) {
         throw new Error("Path too short, needs at least 2 positions");
     }
@@ -138,14 +139,14 @@ export function vec2PathLerp(positions: vec2[], lerp: number): vec2 {
 
     // Common case
     if(positions.length === 2) {
-        return vec2.lerp(vec2.create(), positions[0], positions[1], lerp);
+        return vec2.lerp(vec2.create(), positions[0], positions[1], lerp) as [number,number];
     }
 
     //Handle 0 and 1 manually to avoid some possible floating point issues
     if(lerp === 0) {
-        return first(positions) as vec2
+        return vec2ToTuple(first(positions) as vec2) // Length is guarenteed above, safe cast
     } else if (lerp === 1) {
-        return last(positions) as vec2
+        return vec2ToTuple(last(positions) as vec2) 
     }
 
     const positionOnTrack = vec2pathLength(positions) * lerp;
@@ -161,7 +162,7 @@ export function vec2PathLerp(positions: vec2[], lerp: number): vec2 {
 
         if(totalDistance === positionOnTrack) {
             // We're exactly at a waypoint 
-            return currentPosition
+            return [currentPosition[0],currentPosition[1]]
         }
         
         if(totalDistance > positionOnTrack) {
@@ -170,7 +171,7 @@ export function vec2PathLerp(positions: vec2[], lerp: number): vec2 {
             const positionOnLeg = totalDistance - positionOnTrack;
             const positionFraction = positionOnLeg / legDistance;
 
-            return vec2.lerp(vec2.create(), currentPosition, lastPos, positionFraction);
+            return vec2ToTuple(vec2.lerp(vec2.create(), currentPosition, lastPos, positionFraction));
         }
 
         lastPos = currentPosition;

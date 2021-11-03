@@ -1,8 +1,9 @@
 import { flatten, uniq } from "lodash";
 import { Entity, getEntityById } from "../../interfaces/entity";
-import { isIdentifier, Identifier, isIdentifiable } from "../../interfaces/id";
+import { Identifier, isIdentifiable, isIdentifier } from "../../interfaces/id";
+import { Saveable } from "../save";
 import { Buffer, isBuffer } from "./buffer";
-import { Junction, isJunction } from "./junction";
+import { isJunction, Junction } from "./junction";
 import { isTrack, Track, trackGetDetectionSegmentAjoiningBoundary, trackGetOtherEnd } from "./track";
 import { TrackSegment } from "./trackSegment";
 
@@ -16,6 +17,10 @@ export function eq<T>(a: T) {
 
 export type TrackBoundary = TrackSwitch | Buffer;
 
+export type TrackBoundaryRenderData = {
+    position: [number,number]
+}
+
 export enum SwitchState {
     Straight,
     Side,
@@ -23,6 +28,8 @@ export enum SwitchState {
     TransitToSide,
     Faulty
 }
+
+export type TrackSwitchSave = Saveable<TrackSwitch>
 
 export function isTrackBoundary(any: Entity): any is TrackBoundary {
     return any.type === "switch" || any.type === "end";

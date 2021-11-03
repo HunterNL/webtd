@@ -3,21 +3,18 @@ import { head, isUndefined, last } from "lodash";
 import { Entity, getEntityById } from "../../interfaces/entity";
 import { getId, Identifiable, Identifier, isIdentifiable } from "../../interfaces/id";
 import { isLengthable, Lengthable } from "../../interfaces/lengthable";
-import { vec2PathLerp } from "../../render";
 import { requireRenderPosition } from "../../render/svg/switchRenderer";
+import { Saveable } from "../save";
 import { Direction, DIRECTION_FORWARD, TrackPosition } from "./situation";
 import { isSwitch, isTrackBoundary, resolveBoundary, TrackBoundary } from "./switch";
-import { TrackSegment, splitRangeAtPoints } from "./trackSegment";
+import { splitRangeAtPoints, TrackSegment } from "./trackSegment";
 
 export const SWITCH_WELD_OFFSET = 10;
 export const MIN_BLOCK_SIZE = 100;
 
-
-
 // A track is the full lenght of track between two of either a switch or endpoint
 export type Track = Identifiable & Lengthable & Entity & {
     boundries: [TrackBoundary, TrackBoundary],
-    length: number,
     renderData?: {
         rawFeatures: TrackFeature[],
     },
@@ -25,13 +22,12 @@ export type Track = Identifiable & Lengthable & Entity & {
     segments: {
         detection: TrackSegment[]
     }
-
 }
 
 type TrackWeld = {
     type:"weld",
     offset: number,
-    position?: vec2
+    position?: [number,number]
 }
 
 export function isWeld(feature: TrackFeature): feature is TrackWeld {
@@ -40,7 +36,7 @@ export function isWeld(feature: TrackFeature): feature is TrackWeld {
 
 type TrackRenderPoint = {
     type: "renderPoint",
-    position: vec2
+    position: [number,number]
 }
 
 export type TrackFeature = TrackWeld | TrackRenderPoint
@@ -69,11 +65,9 @@ export function getBoundaryPosition(track: Track, boundaryId: number): number {
     throw new Error("Unknown boundaryId");
 }
 
-export interface TrackSave extends Identifiable, Lengthable, Entity {
-    boundries: [number, number],
-    renderData: any,
-    features: TrackFeature[]
-}
+export type TrackSave = Saveable<Track> & {
+    features: Saveable<TrackFeature[]>
+};
 
 
 export function isTrackSave(any: any): any is TrackSave {

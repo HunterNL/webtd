@@ -14,12 +14,12 @@ describe("render Utils", () => {
         const path = [[0,0],[0,100],[100,100]] as vec2[];
 
         test("Returns first and last postions exactly", () => {
-            expect(vec2PathLerp(path,0)).toBe(path[0]);
-            expect(vec2PathLerp(path,1)).toBe(path[2]);
+            expect(vec2PathLerp(path,0)).toStrictEqual(path[0]);
+            expect(vec2PathLerp(path,1)).toStrictEqual(path[2]);
         })
 
         test("Returns perfect waypoint exactly", () => {
-            expect(vec2PathLerp(path,0.5)).toBe(path[1]);
+            expect(vec2PathLerp(path,0.5)).toStrictEqual(path[1]);
         })
 
         test("Lerps between points", () => {

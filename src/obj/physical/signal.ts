@@ -1,4 +1,5 @@
 import { Entity, getEntityById } from "../../interfaces/entity";
+import { Saveable } from "../save";
 import { Ride, rideGetDrivingPosition } from "./ride";
 import { TrackPosition, advanceAlongTrack } from "./situation";
 import { isTrack } from "./track";
@@ -18,6 +19,8 @@ export type Signal = Entity & {
     }
     currentAspect: Aspect
 }
+
+export type SignalSave = Saveable<Signal>
 
 export function loadSignal(entities: Entity[], signalSave: any): Signal {
     const track = getEntityById(entities, signalSave.position.trackId, isTrack);
