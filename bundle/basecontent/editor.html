@@ -6,14 +6,13 @@
     <title>Web Train Dispatch</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
     <%= htmlWebpackPlugin.tags.headTags %>
 </head>
 <body>
     <svg viewbox="0 0 800 300">
         <rect width="100%" height="100%" fill="#000"/>
-        <g fill="white" stroke-width="5" id="gamecontainer"></g>
+        <g fill="white" stroke-width="5" id="buffercontainer"></g>
     </svg>
-    <div id="ridecontainer"></div>
-    
 </body>
 </html>

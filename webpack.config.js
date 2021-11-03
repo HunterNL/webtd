@@ -1,28 +1,15 @@
-var path = require("path");
-const CopyPlugin = require("copy-webpack-plugin");
 const { DefinePlugin } = require("webpack");
+var path = require("path");
+const {settings,plugins} = require("./webpack.common");
+const {CSSPlugin,editorHTML,gameHTML} = plugins
 
-const copyplugin =  new CopyPlugin({
-    patterns: [
-        { from: "bundle/basecontent"}
-    ]
-})
-
-const buildPlugin = new DefinePlugin({
+const envDefines = new DefinePlugin({
     __PRODUCTION__: "false"
 })
 
-module.exports = {
+module.exports = {...settings,
     mode: "development",
-    entry: './src/index.ts',
     devtool: 'eval-source-map',
-    module: {
-        rules: [{
-            test: /\.tsx?$/,
-            use: 'ts-loader',
-            exclude: /node_modules/
-        }]
-    },
     devServer: {
         static: {
             directory: path.join(__dirname,"bundle/generated/dev"),
@@ -33,12 +20,9 @@ module.exports = {
         port: 8080
 
     },
-    resolve: {
-        extensions: ['.tsx', '.ts', '.js']
-    },
     output: {
-        filename: 'bundle.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'bundle/generated/dev')
     },
-    plugins: [copyplugin, buildPlugin]
-};
+    plugins: [CSSPlugin,editorHTML,gameHTML,envDefines]
+}

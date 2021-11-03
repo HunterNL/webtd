@@ -18,34 +18,6 @@
                 "renderData": {
                     "additionalProperties": {
                     },
-                    "properties": {
-                        "renderPos": {
-                            "anyOf": [
-                                {
-                                    "additionalProperties": false,
-                                    "patternProperties": {
-                                        "^[0-9]+$": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "type": "object"
-                                },
-                                {
-                                    "items": [
-                                        {
-                                            "type": "number"
-                                        },
-                                        {
-                                            "type": "number"
-                                        }
-                                    ],
-                                    "maxItems": 2,
-                                    "minItems": 2,
-                                    "type": "array"
-                                }
-                            ]
-                        }
-                    },
                     "type": "object"
                 },
                 "type": {
@@ -126,34 +98,6 @@
                 "renderData": {
                     "additionalProperties": {
                     },
-                    "properties": {
-                        "renderPos": {
-                            "anyOf": [
-                                {
-                                    "additionalProperties": false,
-                                    "patternProperties": {
-                                        "^[0-9]+$": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "type": "object"
-                                },
-                                {
-                                    "items": [
-                                        {
-                                            "type": "number"
-                                        },
-                                        {
-                                            "type": "number"
-                                        }
-                                    ],
-                                    "maxItems": 2,
-                                    "minItems": 2,
-                                    "type": "array"
-                                }
-                            ]
-                        }
-                    },
                     "type": "object"
                 },
                 "type": {
@@ -172,34 +116,6 @@
                 },
                 "renderData": {
                     "additionalProperties": {
-                    },
-                    "properties": {
-                        "renderPos": {
-                            "anyOf": [
-                                {
-                                    "additionalProperties": false,
-                                    "patternProperties": {
-                                        "^[0-9]+$": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "type": "object"
-                                },
-                                {
-                                    "items": [
-                                        {
-                                            "type": "number"
-                                        },
-                                        {
-                                            "type": "number"
-                                        }
-                                    ],
-                                    "maxItems": 2,
-                                    "minItems": 2,
-                                    "type": "array"
-                                }
-                            ]
-                        }
                     },
                     "type": "object"
                 },
@@ -265,34 +181,6 @@
                         {
                             "additionalProperties": {
                             },
-                            "properties": {
-                                "renderPos": {
-                                    "anyOf": [
-                                        {
-                                            "additionalProperties": false,
-                                            "patternProperties": {
-                                                "^[0-9]+$": {
-                                                    "type": "number"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        {
-                                            "items": [
-                                                {
-                                                    "type": "number"
-                                                },
-                                                {
-                                                    "type": "number"
-                                                }
-                                            ],
-                                            "maxItems": 2,
-                                            "minItems": 2,
-                                            "type": "array"
-                                        }
-                                    ]
-                                }
-                            },
                             "type": "object"
                         },
                         {
@@ -339,34 +227,6 @@
                     "allOf": [
                         {
                             "additionalProperties": {
-                            },
-                            "properties": {
-                                "renderPos": {
-                                    "anyOf": [
-                                        {
-                                            "additionalProperties": false,
-                                            "patternProperties": {
-                                                "^[0-9]+$": {
-                                                    "type": "number"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        {
-                                            "items": [
-                                                {
-                                                    "type": "number"
-                                                },
-                                                {
-                                                    "type": "number"
-                                                }
-                                            ],
-                                            "maxItems": 2,
-                                            "minItems": 2,
-                                            "type": "array"
-                                        }
-                                    ]
-                                }
                             },
                             "type": "object"
                         },
@@ -530,34 +390,6 @@
                 "renderData": {
                     "additionalProperties": {
                     },
-                    "properties": {
-                        "renderPos": {
-                            "anyOf": [
-                                {
-                                    "additionalProperties": false,
-                                    "patternProperties": {
-                                        "^[0-9]+$": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "type": "object"
-                                },
-                                {
-                                    "items": [
-                                        {
-                                            "type": "number"
-                                        },
-                                        {
-                                            "type": "number"
-                                        }
-                                    ],
-                                    "maxItems": 2,
-                                    "minItems": 2,
-                                    "type": "array"
-                                }
-                            ]
-                        }
-                    },
                     "type": "object"
                 },
                 "type": {
@@ -607,34 +439,6 @@
                 "renderData": {
                     "additionalProperties": {
                     },
-                    "properties": {
-                        "renderPos": {
-                            "anyOf": [
-                                {
-                                    "additionalProperties": false,
-                                    "patternProperties": {
-                                        "^[0-9]+$": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "type": "object"
-                                },
-                                {
-                                    "items": [
-                                        {
-                                            "type": "number"
-                                        },
-                                        {
-                                            "type": "number"
-                                        }
-                                    ],
-                                    "maxItems": 2,
-                                    "minItems": 2,
-                                    "type": "array"
-                                }
-                            ]
-                        }
-                    },
                     "type": "object"
                 },
                 "type": {
@@ -666,9 +470,6 @@
                         "$ref": "#/definitions/convertProperties<Buffer>"
                     },
                     {
-                        "$ref": "#/definitions/convertProperties<Signal>"
-                    },
-                    {
                         "allOf": [
                             {
                                 "$ref": "#/definitions/convertProperties<Track>"
@@ -697,6 +498,9 @@
                         "$ref": "#/definitions/convertProperties<TrackSwitch>"
                     },
                     {
+                        "$ref": "#/definitions/convertProperties<Signal>"
+                    },
+                    {
                         "allOf": [
                             {
                                 "properties": {
@@ -710,34 +514,6 @@
                                 "properties": {
                                     "renderData": {
                                         "additionalProperties": {
-                                        },
-                                        "properties": {
-                                            "renderPos": {
-                                                "anyOf": [
-                                                    {
-                                                        "additionalProperties": false,
-                                                        "patternProperties": {
-                                                            "^[0-9]+$": {
-                                                                "type": "number"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    },
-                                                    {
-                                                        "items": [
-                                                            {
-                                                                "type": "number"
-                                                            },
-                                                            {
-                                                                "type": "number"
-                                                            }
-                                                        ],
-                                                        "maxItems": 2,
-                                                        "minItems": 2,
-                                                        "type": "array"
-                                                    }
-                                                ]
-                                            }
                                         },
                                         "type": "object"
                                     },

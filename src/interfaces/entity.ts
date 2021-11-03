@@ -23,7 +23,6 @@ export type EntityType = keyof EntityTypeMap;
 export type Entity = Identifiable & {
     type: EntityType;
     renderData?: {
-        renderPos?: vec2,
         [key: string]: any
     }
 }

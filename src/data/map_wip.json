@@ -1,0 +1,49 @@
+{
+    "entities": [
+        {
+            "type": "end",
+            "comment": "Top depot buffer",
+            "id": 0,
+            "renderData": {
+                "position:": [
+                    300,
+                    300
+                ]
+            }
+        },
+        {
+            "type": "end",
+            "comment": "Lower depot buffer",
+            "id": 1,
+            "renderData": {
+                "position:": [
+                    300,
+                    250
+                ]
+            }
+        },
+        {
+            "type": "end",
+            "comment": "Upper Left buffer",
+            "id": 2,
+            "renderData": {
+                "position:": [
+                    50,
+                    250
+                ]
+            }
+        },
+        {
+            "type": "end",
+            "comment": "Lower depot buffer",
+            "id": 1,
+            "renderData": {
+                "position:": [
+                    300,
+                    250
+                ]
+            }
+        }
+        
+    ]
+}
