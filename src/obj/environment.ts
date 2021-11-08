@@ -31,6 +31,7 @@ export type PhysicalEnvironment=  {
 export type DynamicEnvironment = {
     occupiedTrackSegments: TrackSegment[],
     switchPositions: TrackSwitch[], // For now just the entire object
+    occupationMap: Map<TrackSegment,Ride> // temp till we simulate TVT / TROTS
 }
 
 export function loadEnvironment(map: unknown): PhysicalEnvironment {

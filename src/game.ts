@@ -10,7 +10,8 @@ const LOOP_INTERVAL = 500;//ms
 const env = loadEnvironment(exampleEnvironment);
 const dynamicEnvironment: DynamicEnvironment = {
     occupiedTrackSegments: [],
-    switchPositions: env.switches
+    switchPositions: env.switches,
+    occupationMap: new Map()
 }
 
 console.log(env, dynamicEnvironment);
@@ -61,10 +62,27 @@ function onDomReady() {
         const tracks = env.tracks;
         const rides = env.rides;
 
+        dynamicEnvironment.occupationMap.clear();
+
         const allSegments = flatten(tracks.map(track => track.segments.detection));
 
-        const rideSegments = flatten(rides.map(ride => ride.span.segments));
+        rides.forEach(ride => {
+            const {span} = ride
+            const rideSegment = span.segments;
 
+            rideSegment.forEach(rideSegment => {
+                allSegments.forEach(trackSegment => {
+                    if(doSegmentsOverlap(rideSegment, trackSegment)) {
+                        dynamicEnvironment.occupationMap.set(trackSegment, ride);
+                    }
+                })
+            })
+        })
+
+
+
+        // TODO deduplicate, remove code below
+        const rideSegments = flatten(rides.map(ride => ride.span.segments));
         const newOccupiedTrackSegments = allSegments.filter(segmentA => rideSegments.some(segmentB => doSegmentsOverlap(segmentA, segmentB)))
 
         dynamicEnvironment.occupiedTrackSegments.length = 0;

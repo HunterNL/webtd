@@ -1,19 +1,27 @@
 import { vec2 } from "gl-matrix";
 import { createPathString, getColorForOccupationStatus, shortenEnd, shortenStart, SWITCH_RENDER_RADIUS } from ".";
 import { DetectionBlock } from "../obj/detectionBlock";
-import { Track, trackGetRenderPath } from "../obj/physical/track";
+import { DynamicEnvironment } from "../obj/environment";
 import { isSwitch, TrackSwitch } from "../obj/physical/switch";
-import { TrackSegment } from "../obj/physical/trackSegment";
+import { Track, trackGetRenderPath } from "../obj/physical/track";
+import { getLongestSpan } from "../util/vec2";
 import { createSVGElement } from "./svg";
+import { getHalfwaypoint } from "./svg/switchRenderer";
 
 
 export type TrackSegmentSVGRender = {
     element: SVGElement,
-    detectionSegment: TrackSegment,
+    textElement: SVGTextElement,
+    detectionBlock: DetectionBlock,
+    textBackground: SVGRectElement
 }
 
 export type TrackRenderSegment = {
 
+}
+
+export function getLabel(labelAble: {label?: string}): string {
+    return labelAble.label || "";
 }
 
 // export function trackSegmentRenderPath(trackSegment: TrackSegment): vec2[] {
@@ -86,7 +94,7 @@ export function shortenPath(path: vec2[], shortStart: boolean, shortEnd: boolean
     return path;
 }
 
-export function createBlockRenderer(detectionBlock: DetectionBlock, parentElement: SVGElement): TrackSegmentSVGRender  {
+export function createBlockRenderer(detectionBlock: DetectionBlock, parentElement: SVGElement, labelGroup: SVGElement): TrackSegmentSVGRender  {
     // const renderLines: [vec2, vec2][] = joinWith(renderPath, toTuple);
 
     // Filter out track segments handled by switchrenderers
@@ -100,24 +108,57 @@ export function createBlockRenderer(detectionBlock: DetectionBlock, parentElemen
     renderPoints = shortenStart(renderPoints, startOffset);
     renderPoints = shortenEnd(renderPoints, endOffset)
 
+    const textPos = getHalfwaypoint(...getLongestSpan(renderPoints))
+
 
     const element = createSVGElement("path");
+    const textElement = createSVGElement("text")
+    const textBg = createSVGElement("rect");
+
+    textBg.setAttribute("fill", "#bbb");
+    textBg.setAttribute("cursor", "pointer");
+    
+    textElement.setAttribute("font-family", "sans-serif");
+    textElement.setAttribute("font-size", "12px")
+    textElement.setAttribute("dominant-baseline", "middle")
+    textElement.setAttribute("x", textPos[0]+"");
+    textElement.setAttribute("y", textPos[1]+"");
+    textElement.setAttribute("pointer-events","none");
+
+    labelGroup.appendChild(textBg);
+    labelGroup.appendChild(textElement);
+
+
     element.setAttribute("d", createPathString(renderPoints));
     element.setAttribute("fill", "none")
     parentElement.appendChild(element);
     
     return {
         element,
-        detectionSegment: detectionBlock.segment,
+        textElement,
+        detectionBlock,
+        textBackground: textBg
     }
 }
 
-export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, occupiedSegments: TrackSegment[]) {
+export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, dynEnv: DynamicEnvironment) {
     // TODO switch offsets
-    const {element} = trackRenderData;
+    const {element, detectionBlock,textElement, textBackground} = trackRenderData;
+    const ride = dynEnv.occupationMap.get(detectionBlock.segment);
+    const label = ride ? getLabel(ride) : "";
 
+
+    textElement.textContent = label;
+
+    const bb = textElement.getBBox();
+
+    textBackground.setAttribute("x", bb.x+"")
+    textBackground.setAttribute("y", bb.y+"")
+    textBackground.setAttribute("width", bb.width+"")
+    textBackground.setAttribute("height", bb.height+"")
+    
     // Set stroke color to train detection status
-    element.setAttribute("stroke", getColorForOccupationStatus(occupiedSegments.includes(trackRenderData.detectionSegment)));
+    element.setAttribute("stroke", getColorForOccupationStatus(!!ride));
 }
 
 function toTuple<T,U>(a:T, b:U) : [T,U] {

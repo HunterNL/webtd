@@ -33,6 +33,7 @@ export class SVGRenderer {
     htmlElement: HTMLDivElement;
     debugGroup: SVGGElement;
     debugRenderers: RideDebugRenderer[];
+    labelGroup: SVGGElement;
 
     constructor(env: PhysicalEnvironment, renderTarget: Rendertarget) {
         this.env = env;
@@ -44,6 +45,7 @@ export class SVGRenderer {
         this.interactableGroup = createSVGElement("g");
         this.signalGroup = createSVGElement("g");
         this.debugGroup = createSVGElement("g");
+        this.labelGroup = createSVGElement("g");
 
         this.signRenderers = this.env.signals.map(signal => {
             return createSignalRenderer(signal, this.signalGroup);
@@ -51,7 +53,7 @@ export class SVGRenderer {
 
         const blocks = flatten(this.env.tracks.map(trackCreateRenderBlocks));
 
-        this.blocks = blocks.map(block => createBlockRenderer(block, this.trackGroup));
+        this.blocks = blocks.map(block => createBlockRenderer(block, this.trackGroup, this.labelGroup));
 
         this.switchRenderers = this.env.switches.map(trackSwitch => {
             return createSwitchRenderer(trackSwitch, this.env.tracks, this.trackGroup);
@@ -67,6 +69,7 @@ export class SVGRenderer {
         this.svgElement.appendChild(this.interactableGroup);
         this.svgElement.appendChild(this.signalGroup);
         this.svgElement.appendChild(this.debugGroup);
+        this.svgElement.appendChild(this.labelGroup);
 
         if(!isProduction()) {
             this.addDebugDisplay();
@@ -84,7 +87,7 @@ export class SVGRenderer {
 
     render(dynamicEnvironment: DynamicEnvironment): void {
         this.blocks.forEach(block => {
-            updateTrackRender(block, dynamicEnvironment.occupiedTrackSegments);
+            updateTrackRender(block, dynamicEnvironment);
         });
 
         this.signRenderers.forEach(signRenderer => {

@@ -16,6 +16,7 @@ export interface Ride extends Entity{
     span: TrackSpan; //Contains train positions, start/end by physical carriage position
     speed: number,
     driverMode?: DriverMode
+    label?: string
 }
 
 export type RideSave = Entity & {
@@ -118,7 +119,8 @@ export function loadRide(entities: Entity[], rideSave: any): Ride {
         train,
         type: "ride",
         driverMode: rideSave.driverMode,
-        reversing: false
+        reversing: false,
+        label: rideSave.label
     }
 }
 

@@ -122,7 +122,8 @@
                 "type": "maintain_speed",
                 "targetSpeed": 13
 
-            }
+            },
+            "label": "4042"
         },{
             "type": "train",
             "id": 7,
