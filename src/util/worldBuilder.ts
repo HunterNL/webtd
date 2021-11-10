@@ -10,6 +10,7 @@ import { Aspect, ASPECT_STOP, Signal } from "../obj/physical/signal";
 import { TrackPosition, Direction, DIRECTION_FORWARD } from "../obj/physical/situation";
 import { TrackBoundary, TrackSwitch, SwitchState, isSwitch } from "../obj/physical/switch";
 import { times } from "lodash";
+import { finalizeEntities } from "../obj/environment";
 
 type RideArguments = {
     train: Train;
@@ -106,7 +107,7 @@ export class WorldBuilder {
         return ride;
     }
 
-    addSignal(track: Track, offset: number, aspect: Aspect = ASPECT_STOP) {
+    addSignal(track: Track, offset: number, direction: Direction = DIRECTION_FORWARD, aspect: Aspect = ASPECT_STOP) {
         const signal : Signal = {
             id: this.counter++,
             position: {
@@ -114,7 +115,10 @@ export class WorldBuilder {
                 track
             },
             type: "signal",
-            currentAspect: aspect
+            currentAspect: aspect,
+            direction,
+            routeable: true,
+            possiblePaths: []
         }
 
         this.entities.push(signal);
@@ -139,6 +143,7 @@ export class WorldBuilder {
     }
 
     getEntities(): Entity[] {
+        finalizeEntities(this.entities)
         return this.entities;
     }
 

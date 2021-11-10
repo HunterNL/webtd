@@ -1,7 +1,9 @@
 import { Entity, getEntityById } from "../../interfaces/entity";
+import { Identifier } from "../../interfaces/id";
+import { Path } from "../interlocking/path";
 import { Saveable } from "../save";
 import { Ride, rideGetDrivingPosition } from "./ride";
-import { TrackPosition, advanceAlongTrack } from "./situation";
+import { advanceAlongTrack, Direction, TrackPosition } from "./situation";
 import { isTrack } from "./track";
 import { segmentContainsPosition } from "./trackSegment";
 
@@ -17,30 +19,35 @@ export type Signal = Entity & {
     renderData?: {
         label?: string
     }
-    currentAspect: Aspect
+    currentAspect: Aspect,
+    direction: Direction,
+    possiblePaths: Path[],
+    routeable: true
 }
 
 export type SignalSave = Saveable<Signal>
 
-export function loadSignal(entities: Entity[], signalSave: any): Signal {
-    const track = getEntityById(entities, signalSave.position.trackId, isTrack);
+export function loadSignal(entities: Entity[], signalSave: SignalSave): Signal {
+    const track = getEntityById(entities, signalSave.position.track, isTrack);
+    const position = {
+        track, offset: signalSave.position.offset
+    }
 
-    const signal =  {
+    const signal : Signal =  {
         id: signalSave.id,
-        position: {
-            track,
-            offset: signalSave.position.offset
-        },
+        position,
         type: signalSave.type,
         renderData: signalSave.renderData,
-        currentAspect: signalSave.currentAspect || ASPECT_STOP
+        currentAspect: signalSave.currentAspect || ASPECT_STOP,
+        possiblePaths: [],
+        direction: signalSave.direction,
+        routeable: true
     }
 
     return signal
-
 }
 
-export function isSignalSave(any: any) {
+export function isSignalSave(any: any): any is SignalSave {
     return any.type === "signal";
 }
 
@@ -68,4 +75,8 @@ export function toggleSignal(signal: Signal) {
     } else {
         signal.currentAspect = ASPECT_STOP
     }
+}
+
+export function searchPathToTrack(signal: Signal, trackId: Identifier): Path | undefined {
+    return signal.possiblePaths.find(path => path.toTrack.id === trackId)
 }

@@ -1,11 +1,11 @@
 import { flatten } from "lodash";
-import { Entity, getEntityById } from "../interfaces/entity";
-import { isBuffer } from "./physical/buffer";
-import { Direction, TrackPosition } from "./physical/situation";
-import { switchGetPossiblePaths } from "./physical/switch";
-import { isTrack, trackGetBoundaryInDirection, trackGetBoundaryOffset, trackGetDirectionAwayFromBoundary, trackGetDirectionTowardsBoundary } from "./physical/track";
-import { segmentCreate } from "./physical/trackSegment";
-import { TrackSpan } from "./trackSpan";
+import { Entity, getEntityById } from "../../interfaces/entity";
+import { isBuffer } from "../physical/buffer";
+import { Direction, TrackPosition } from "../physical/situation";
+import { switchGetPossiblePaths } from "../physical/switch";
+import { isTrack, trackGetBoundaryInDirection, trackGetBoundaryOffset, trackGetDirectionAwayFromBoundary, trackGetDirectionTowardsBoundary } from "../physical/track";
+import { segmentCreate } from "../physical/trackSegment";
+import { TrackSpan } from "../trackSpan";
 
 export function findRoutes(entities: Entity[], trackPosition: TrackPosition, direction: Direction, currentSpan?: Partial<TrackSpan>): TrackSpan[] {
     const span: Partial<TrackSpan> = currentSpan || {

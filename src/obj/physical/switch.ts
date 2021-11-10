@@ -1,4 +1,4 @@
-import { flatten, uniq } from "lodash";
+import { flatten, uniq, xor } from "lodash";
 import { Entity, getEntityById } from "../../interfaces/entity";
 import { Identifier, isIdentifiable, isIdentifier } from "../../interfaces/id";
 import { Saveable } from "../save";
@@ -118,6 +118,10 @@ export function throwSwitch(trackSwitch: TrackSwitch) {
     throw new Error("Tried to throw switch in unknown state");
 }
 
+export function switchSetState(trackSwitch: TrackSwitch, switchState: SwitchState) {
+    trackSwitch.currentState = switchState
+}
+
 export function getPathTroughSwitch(swi: TrackSwitch, trackId: Identifier): Identifier | undefined {
     const paths = switchGetActivePaths(swi);
     const pathForTrack = paths.find(set => set.includes(trackId));
@@ -146,4 +150,17 @@ export function switchGetPossiblePaths(junction: Junction, trackId: Identifier):
     },[] as Identifier[])
 
 
+}
+
+export function switchGetStateForPath(swi: TrackSwitch, trackConnection: [number,number]): SwitchState {
+    if(swi.junction.straightConnections.some(connection => xor(connection, trackConnection).length === 0)) {
+        return SwitchState.Straight
+    }
+    if(swi.junction.sideConnections.some(connection => xor(connection, trackConnection).length === 0)) {
+        return SwitchState.Side
+    }
+
+
+    throw new Error("No state found");
+    
 }

@@ -147,9 +147,10 @@
                 "label" : "🚦"
             },
             "position": {
-                "trackId": 1,
+                "track": 1,
                 "offset": 395
-            }
+            },
+            "direction" : 1
         },{
             "type": "signal",
             "comment" : "Top track signal",
@@ -158,9 +159,10 @@
                 "label" : "🚦"
             },
             "position": {
-                "trackId": 3,
+                "track": 3,
                 "offset": 495
-            }
+            },
+            "direction" : 1
         },{
             "type": "signal",
             "comment" : "Top buffer",
@@ -169,9 +171,11 @@
                 "label" : "🚦"
             },
             "position": {
-                "trackId": 4,
+                "track": 4,
                 "offset": 500
             }
+            ,
+            "direction" : 1
         },{
             "type": "signal",
             "comment" : "Lower buffer",
@@ -180,9 +184,11 @@
                 "label" : "🚦"
             },
             "position": {
-                "trackId": 2,
+                "track": 2,
                 "offset": 500
             }
+            ,
+            "direction" : 1
         }
     ]
 }

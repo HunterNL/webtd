@@ -7,8 +7,9 @@ import { isRideSave, loadRide, Ride } from "./physical/ride";
 import { isTrack, isTrackSave, Track, trackLoad } from "./physical/track";
 import { TrackSegment } from "./physical/trackSegment";
 import { isTrain, Train } from "./physical/train";
-import { isSignalSave, loadSignal, Signal } from "./physical/signal";
+import { isSignal, isSignalSave, loadSignal, Signal } from "./physical/signal";
 import { isSwitch, loadSwitch, TrackSwitch } from "./physical/switch";
+import { pathsfromLocation } from "./interlocking/path";
 
 
 export type EnvironmentSave = {
@@ -32,6 +33,10 @@ export type DynamicEnvironment = {
     occupiedTrackSegments: TrackSegment[],
     switchPositions: TrackSwitch[], // For now just the entire object
     occupationMap: Map<TrackSegment,Ride> // temp till we simulate TVT / TROTS
+}
+
+export function finalizeEntities(entities: Entity[]) {
+    entities.filter(isSignal).forEach(signal => signal.possiblePaths = pathsfromLocation(entities, signal.position, signal.direction))
 }
 
 export function loadEnvironment(map: unknown): PhysicalEnvironment {
@@ -58,6 +63,9 @@ export function loadEnvironment(map: unknown): PhysicalEnvironment {
     const signals: Signal[] = entitiesSaves.filter(isSignalSave).map(signalSave => loadSignal(tracks, signalSave))
 
     const entities: Entity[] = ([] as Entity[]).concat(tracks,rides,switches,buffers, signals);
+
+    finalizeEntities(entities)
+    
 
     return {
         tracks,
