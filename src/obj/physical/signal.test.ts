@@ -5,7 +5,7 @@ import { lookupSignals, Signal } from "./signal";
 
 function createWorld(): [Entity[],Signal, Ride] {
     const wb = new WorldBuilder();
-    const [startBuffer,endBuffer] = [wb.addBuffer(),wb.addBuffer()];
+    const [startBuffer,endBuffer] = wb.addBuffer(2);
 
     const track = wb.addTrack(startBuffer, endBuffer, 1000);
     const signal = wb.addSignal(track, 300);

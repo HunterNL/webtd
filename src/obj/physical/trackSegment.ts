@@ -3,6 +3,7 @@ import { Identifier } from "../../interfaces/id";
 import { doRangesOverlap } from "../../util/rangeOverlap";
 import { TrackPosition } from "./situation";
 import { TrackBoundary } from "./switch";
+import { Track } from "./track";
 
 // type world = "world"
 // type hello<T extends String> = `hello ${T}`;
@@ -38,6 +39,19 @@ export type TrackSegment = {
     end: number,
 }
 // } & SegmentStart
+
+export function segmentCreate(track: Track, offset1: number, offset2: number) {
+    const start = offset1 < offset2 ? offset1 : offset2;
+    const end = offset1 > offset2 ? offset1 : offset2;
+
+    return {
+        start,
+        end,
+        trackId: track.id,
+        startBoundary: start === 0 ? track.boundries[0] : undefined,
+        endBoundary: end === track.length ? track.boundries[1] : undefined
+    }
+}
 
 export function segmentGetOrdered(segment: TrackSegment): [number,number] {
     if(segment.end > segment.start) {

@@ -5,7 +5,7 @@ import { getId, Identifiable, Identifier, isIdentifiable } from "../../interface
 import { isLengthable, Lengthable } from "../../interfaces/lengthable";
 import { requireRenderPosition } from "../../render/svg/switchRenderer";
 import { Saveable } from "../save";
-import { Direction, DIRECTION_FORWARD, TrackPosition } from "./situation";
+import { Direction, DIRECTION_BACKWARD, DIRECTION_FORWARD, TrackPosition } from "./situation";
 import { isSwitch, isTrackBoundary, resolveBoundary, TrackBoundary } from "./switch";
 import { splitRangeAtPoints, TrackSegment } from "./trackSegment";
 
@@ -246,7 +246,7 @@ export function trackGetOtherEnd(track: Track, boundaryId: number): TrackBoundar
     return start;
 }
 
-export function getNextBoundary(track: Track, direction: Direction): TrackBoundary {
+export function trackGetBoundaryInDirection(track: Track, direction: Direction): TrackBoundary {
     return (direction === DIRECTION_FORWARD ? track.boundries[1] : track.boundries[0]); //Forward = towards the last/second boundary
 }
 
@@ -310,6 +310,41 @@ export function trackGetOtherBoundary(track: Track, boundaryId: number): TrackBo
     }
 }
 
+export function trackGetBoundaryOffset(track: Track, boundaryId: number): number {
+    if(track.boundries[0].id === boundaryId) {
+        return 0
+    } 
+    if(track.boundries[1].id === boundaryId) {
+        return track.length
+    }
+
+    throw new Error("Unexpected boundary");
+}
+
+export function isStartBoundary(track: Track, boundaryId: Identifier): boolean {
+    return track.boundries[0].id === boundaryId
+}
+export function isEndBoundary(track: Track, boundaryId: Identifier): boolean {
+    return track.boundries[1].id === boundaryId
+}
+    
+export function trackGetDirectionAwayFromBoundary(track: Track, boundaryId: Identifier): Direction {
+    if(isStartBoundary(track, boundaryId)) {
+        return DIRECTION_FORWARD
+    }
+
+    if(isEndBoundary(track, boundaryId)) {
+        return DIRECTION_BACKWARD
+    }
+
+    throw new Error("Unknown boundaryId");
+    
+}
+
+export function trackGetDirectionTowardsBoundary(track: Track, boundaryId: Identifier): Direction {
+    return trackGetDirectionAwayFromBoundary(track, boundaryId) * -1 as Direction;
+    
+}
 // function fixSwitchOffset(blocks: DetectionBlock[], startsWithSwitch: boolean, endsWithSwitch: boolean) {
 
 

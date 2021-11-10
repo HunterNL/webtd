@@ -9,6 +9,7 @@ import { Train } from "../obj/physical/train";
 import { Aspect, ASPECT_STOP, Signal } from "../obj/physical/signal";
 import { TrackPosition, Direction, DIRECTION_FORWARD } from "../obj/physical/situation";
 import { TrackBoundary, TrackSwitch, SwitchState, isSwitch } from "../obj/physical/switch";
+import { times } from "lodash";
 
 type RideArguments = {
     train: Train;
@@ -31,15 +32,20 @@ export class WorldBuilder {
         this.entities = [];
     }
 
-    addBuffer(): Buffer {
-        const buffer: Buffer = {
-            id: this.counter++,
-            type: "end",
-        }
+    addBuffer(n:number): Buffer[] {
+        const ret: Buffer[] = [];
+        times(n, () => {
+            const buffer: Buffer = {
+                id: this.counter++,
+                type: "end",
+            }
+    
+            this.entities.push(buffer);
+            ret.push(buffer);
+        })
+        
 
-        this.entities.push(buffer);
-
-        return buffer
+        return ret
     }
 
     requireIdPresent(id: number): void {

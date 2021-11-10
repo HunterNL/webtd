@@ -132,3 +132,18 @@ export function resolveBoundary(track: Track, boundary: TrackBoundary): number |
 
     return getPathTroughSwitch(boundary, track.id);
 }
+
+// Given a trackId and switch, return all possible destination tracks
+export function switchGetPossiblePaths(junction: Junction, trackId: Identifier): Identifier[] {
+    const allConnections = ([] as [Identifier,Identifier][]).concat(junction.straightConnections,junction.sideConnections);
+
+    return allConnections.reduce((acc,cur) => {
+        if(cur.includes(trackId)) {
+            acc.push(cur.filter(id => id !== trackId)[0])
+        }
+
+        return acc
+    },[] as Identifier[])
+
+
+}

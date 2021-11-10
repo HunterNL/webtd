@@ -7,7 +7,7 @@ import { Track } from "./track";
 
 function createSimpleWorld(postition: number, length: number, forwardDirection: Direction): [Entity[], Ride] {
     const wb = new WorldBuilder();
-    const [sb, eb] = [wb.addBuffer(), wb.addBuffer()];
+    const [sb, eb] = wb.addBuffer(2)
     const track = wb.addTrack(sb, eb, 500);
     const train = wb.addTrain(length);
     const ride = wb.addRide({
@@ -24,7 +24,7 @@ function createSimpleWorld(postition: number, length: number, forwardDirection: 
 
 function createDriverWorld(): [Entity[], Ride] {
     const wb = new WorldBuilder();
-    const [ba, bb] = [wb.addBuffer(), wb.addBuffer()];
+    const [ba, bb] = wb.addBuffer(2);
 
     const track = wb.addTrack(ba, bb, 5000);
 
@@ -37,7 +37,7 @@ function createDriverWorld(): [Entity[], Ride] {
 
 function createSwitchWorld(direction: Direction): [Entity[], Ride] {
     const wb = new WorldBuilder();
-    const [sb, eb] = [wb.addBuffer(), wb.addBuffer()];
+    const [sb, eb] = wb.addBuffer(2)
     const trackSwitch = wb.addSwitch();
 
     // Worldborder method order determines id, sensitive for testing!

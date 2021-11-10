@@ -5,7 +5,7 @@ import { trackCreateRenderBlocks } from "./trackCreateRenderBlocks";
 
 function createBufferWorld(welds: number[]): Track {
     const wb = new WorldBuilder();
-    const [sb,eb] = [wb.addBuffer(),wb.addBuffer()];
+    const [sb,eb] = wb.addBuffer(2)
     const track = wb.addTrack(sb, eb, 400);
 
     track.segments.detection = generateSegments(track.id, [sb,eb], 400, welds)

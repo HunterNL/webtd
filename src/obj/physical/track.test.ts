@@ -6,13 +6,14 @@ import { generateSegments, SWITCH_WELD_OFFSET } from "./track";
 function generateSimpleWorld(): [TrackBoundary, TrackBoundary] {
     const wb = new WorldBuilder();
 
-    return [wb.addBuffer(), wb.addBuffer()];
+    return wb.addBuffer(2) as [Buffer,Buffer]
 }
 
 function generateSwitchWorld(): [Buffer, TrackSwitch] {
     const wb = new WorldBuilder();
+    const [buffer] = wb.addBuffer(1);
 
-    return [wb.addBuffer(),wb.addSwitch()]
+    return [buffer,wb.addSwitch()]
 
 }
 function generateDualSwitchWorld(): [TrackSwitch, TrackSwitch] {

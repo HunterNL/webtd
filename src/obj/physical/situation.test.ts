@@ -17,7 +17,7 @@ import { TrackSegment } from "./trackSegment";
 function createSimpleWorld(): Track {
     const wb = new WorldBuilder();
 
-    const [start, end] = [wb.addBuffer(), wb.addBuffer()];
+    const [start, end] = wb.addBuffer(2);
 
     const track = wb.addTrack(start, end, 10);
 
@@ -40,11 +40,7 @@ function createSimpleWorld(): Track {
 function createSwitchWorld(): [Entity[], Track, Track, Track] {
     const wb = new WorldBuilder();
 
-    const [start, endTop, endBottom] = [
-        wb.addBuffer(),
-        wb.addBuffer(),
-        wb.addBuffer(),
-    ];
+    const [start, endTop, endBottom] = wb.addBuffer(3);
     const trackSwitch = wb.addSwitch();
 
     const entryTrack = wb.addTrack(start, trackSwitch, 10);
@@ -76,11 +72,7 @@ function createSwitchWorld(): [Entity[], Track, Track, Track] {
 function createReverseSwitchWorld(): [Entity[], Track, Track, Track] {
     const wb = new WorldBuilder();
 
-    const [start, endTop, endBottom] = [
-        wb.addBuffer(),
-        wb.addBuffer(),
-        wb.addBuffer(),
-    ];
+    const [start, endTop, endBottom] = wb.addBuffer(3);
     const trackSwitch = wb.addSwitch();
 
     const entryTrack = wb.addTrack(start, trackSwitch, 10);

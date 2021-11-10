@@ -3,7 +3,7 @@ import { WorldBuilder } from "../util/worldBuilder";
 
 function createWorld() {
     const wb = new WorldBuilder();
-    const [sb,eb] = [wb.addBuffer(),wb.addBuffer()];
+    const [sb,eb] = wb.addBuffer(2);
     const track = wb.addTrack(sb, eb, 512);
 
     sb.renderData = {

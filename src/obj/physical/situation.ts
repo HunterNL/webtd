@@ -2,7 +2,7 @@ import { isNumber } from "lodash";
 import { Entity, getEntityById } from "../../interfaces/entity";
 import { TrackSpan } from "../trackSpan";
 import { resolveBoundary } from "./switch";
-import { getBoundaryPosition, getDirectionAwayFromBoundary, getNextBoundary, isTrack, Track } from "./track";
+import { getBoundaryPosition, getDirectionAwayFromBoundary, trackGetBoundaryInDirection, isTrack, Track } from "./track";
 import { TrackSegment } from "./trackSegment";
 
 
@@ -27,6 +27,10 @@ export type DirectionalSitationSave = SituationSave & {
 export const DIRECTION_FORWARD = 1;
 export const DIRECTION_BACKWARD = -1;
 export type Direction = typeof DIRECTION_FORWARD | typeof DIRECTION_BACKWARD;
+
+export function isTrackPos(any: any): any is TrackPosition {
+    return typeof any.offset === "number" && isTrack(any.track);
+}
 
 export function getDirectionForMovement(movement: number): Direction {
     if(movement > 0) {
@@ -91,7 +95,7 @@ export function advanceAlongTrack(entities: Entity[], situation: TrackPosition, 
         // Figure out the next boundary we're gonna hit
 
         const direction = getDirectionForMovement(movementLeft)
-        const nextBoundary = getNextBoundary(currentPosition.track, direction);
+        const nextBoundary = trackGetBoundaryInDirection(currentPosition.track, direction);
         const distanceToBoundary = getDistanceToBoundary(currentPosition, nextBoundary.id);
     
         // Save the segment we "traveled"
