@@ -1,17 +1,17 @@
 import { flatten, round } from "lodash";
+import { createSVGElement, renderDebugIds } from ".";
 import { DynamicEnvironment, PhysicalEnvironment } from "../../obj/environment";
-import { createSignalRenderer, SignalSVGRenderer, updateSignalRender } from "./signalRenderer";
-import { createSwitchRenderer, SwitchSVGRenderer, updateSwitchRenderer } from "./switchRenderer";
+import { DriverMode } from "../../obj/physical/driver";
+import { Ride, rideGetDrivingPosition } from "../../obj/physical/ride";
+import { TrackPosition } from "../../obj/physical/situation";
+import { isProduction } from "../../util/env";
 import { trackCreateRenderBlocks } from "../trackCreateRenderBlocks";
 import { createBlockRenderer, TrackSegmentSVGRender, updateTrackRender } from "../trackRenderer";
 import { renderSwitchInteractables } from "./renderSwitchInteractables";
-import { createSVGElement, renderDebugIds } from ".";
-import { renderSignalInteractables } from "./signalInteractables";
-import { Ride, rideGetDrivingPosition } from "../../obj/physical/ride";
-import { DriverMode } from "../../obj/physical/driver";
-import { TrackPosition } from "../../obj/physical/situation";
 import { createRideDebugRenderer, RideDebugRenderer, updateRideDebugRenderer } from "./rideDebugRenderer";
-import { isProduction } from "../../util/env";
+import { renderSignalInteractables } from "./signalInteractables";
+import { createSignalRenderer, SignalSVGRenderer, updateSignalRender } from "./signalRenderer";
+import { createSwitchRenderer, SwitchSVGRenderer, updateSwitchRenderer } from "./switchRenderer";
 
 type Rendertarget = {
     svgElement: SVGElement,
@@ -34,6 +34,7 @@ export class SVGRenderer {
     debugGroup: SVGGElement;
     debugRenderers: RideDebugRenderer[];
     labelGroup: SVGGElement;
+    debugDisplayEnabled: boolean;
 
     constructor(env: PhysicalEnvironment, renderTarget: Rendertarget) {
         this.env = env;
@@ -70,6 +71,8 @@ export class SVGRenderer {
         this.svgElement.appendChild(this.signalGroup);
         this.svgElement.appendChild(this.debugGroup);
         this.svgElement.appendChild(this.labelGroup);
+        
+        this.debugDisplayEnabled = false;
 
         if(!isProduction()) {
             this.addDebugDisplay();
@@ -78,6 +81,7 @@ export class SVGRenderer {
 
 
     addDebugDisplay() {
+        this.debugDisplayEnabled = true;
         renderDebugIds(this.env.entities, this.textGroup);
 
         this.debugRenderers = this.env.rides.map(ride => {

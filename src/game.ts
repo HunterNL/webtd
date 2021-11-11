@@ -46,15 +46,24 @@ function onDomReady() {
     }
 
     if(!(rideList instanceof HTMLDivElement)) {
-        throw new Error("RideList not a Div");
-        
+        throw new Error("RideList not a Div");  
     }
+
 
     const renderer = new SVGRenderer(env, {
         svgElement: renderElement,
         html: rideList
     })
     renderer.render(dynamicEnvironment);
+
+    
+    document.addEventListener("keydown", e => {
+        if(e.code === "Space") {
+            if(!renderer.debugDisplayEnabled) {
+                renderer.addDebugDisplay()
+            }
+        }
+    })
 
     const raf = createRafFunction(renderer);
 
