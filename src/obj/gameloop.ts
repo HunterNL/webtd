@@ -1,25 +1,15 @@
-import { Entity } from "../interfaces/entity";
-import { isRide, updateRide } from "./physical/ride";
 
-const TIMESCALE = 1;
 
-export function createGameLoop(entities: Entity[],updateInterval:number,postUpdate: (dt:number,entities:Entity[]) => any) {
+export function createGameLoop(updateInterval:number, loop: (dt:number) => any) {
     let lastLoopTime: number
     let intervalHandle: number;
-
-
-    function loop(dt: number) {
-        entities.filter(isRide).forEach(ride => updateRide(entities,ride,dt*TIMESCALE))
-    }
 
     function loopWrapper() {
         const currentDate = Date.now();
         const dt = currentDate - lastLoopTime;
         lastLoopTime = currentDate;
         loop(dt/1000) //ms -> s
-        postUpdate(dt,entities);
     }
-
 
     function start() {
         lastLoopTime = Date.now();

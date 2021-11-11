@@ -2,10 +2,13 @@ import { flatten } from "lodash";
 import exampleEnvironment from "./data/map.json";
 import { DynamicEnvironment, loadEnvironment } from "./obj/environment";
 import { createGameLoop } from "./obj/gameloop";
+import { updateRide } from "./obj/physical/ride";
 import { doSegmentsOverlap } from "./obj/physical/trackSegment";
 import { SVGRenderer } from "./render/svg/SVGRenderer";
 
 const LOOP_INTERVAL = 500;//ms
+
+const TIMESCALE = 1;
 
 const env = loadEnvironment(exampleEnvironment);
 const dynamicEnvironment: DynamicEnvironment = {
@@ -58,9 +61,11 @@ function onDomReady() {
     window.requestAnimationFrame(raf);
 
 
-    const {start} = createGameLoop(env.entities, LOOP_INTERVAL, () => {
+    const {start} = createGameLoop(LOOP_INTERVAL, (dt) => {
         const tracks = env.tracks;
         const rides = env.rides;
+
+        rides.forEach(ride => updateRide(env.entities,ride,dt*TIMESCALE))
 
         dynamicEnvironment.occupationMap.clear();
 
