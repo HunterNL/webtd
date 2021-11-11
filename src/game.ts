@@ -2,8 +2,10 @@ import { flatten } from "lodash";
 import exampleEnvironment from "./data/map.json";
 import { DynamicEnvironment, loadEnvironment } from "./obj/environment";
 import { createGameLoop } from "./obj/gameloop";
+import { Interlocking } from "./obj/interlocking/interlocking";
 import { updateRide } from "./obj/physical/ride";
 import { doSegmentsOverlap } from "./obj/physical/trackSegment";
+import { UserInput } from "./obj/userinput";
 import { SVGRenderer } from "./render/svg/SVGRenderer";
 
 const LOOP_INTERVAL = 500;//ms
@@ -14,7 +16,8 @@ const env = loadEnvironment(exampleEnvironment);
 const dynamicEnvironment: DynamicEnvironment = {
     occupiedTrackSegments: [],
     switchPositions: env.switches,
-    occupationMap: new Map()
+    occupationMap: new Map(),
+    interLocking: new Interlocking(env.entities)
 }
 
 console.log(env, dynamicEnvironment);
@@ -49,11 +52,11 @@ function onDomReady() {
         throw new Error("RideList not a Div");  
     }
 
-
+    const input = new UserInput(env,dynamicEnvironment)
     const renderer = new SVGRenderer(env, {
         svgElement: renderElement,
-        html: rideList
-    })
+        html: rideList,
+    },input)
     renderer.render(dynamicEnvironment);
 
     

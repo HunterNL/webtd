@@ -1,5 +1,6 @@
 import { vec2 } from "gl-matrix";
 import { createPathString, getColorForOccupationStatus, shortenEnd, shortenStart, SWITCH_RENDER_RADIUS } from ".";
+import { HandleTrackClick } from "../interfaces/eventHandlers";
 import { DetectionBlock } from "../obj/detectionBlock";
 import { DynamicEnvironment } from "../obj/environment";
 import { isSwitch, TrackSwitch } from "../obj/physical/switch";
@@ -94,7 +95,7 @@ export function shortenPath(path: vec2[], shortStart: boolean, shortEnd: boolean
     return path;
 }
 
-export function createBlockRenderer(detectionBlock: DetectionBlock, parentElement: SVGElement, labelGroup: SVGElement): TrackSegmentSVGRender  {
+export function createBlockRenderer(detectionBlock: DetectionBlock, parentElement: SVGElement, labelGroup: SVGElement, inputHandler?: HandleTrackClick): TrackSegmentSVGRender  {
     // const renderLines: [vec2, vec2][] = joinWith(renderPath, toTuple);
 
     // Filter out track segments handled by switchrenderers
@@ -131,6 +132,10 @@ export function createBlockRenderer(detectionBlock: DetectionBlock, parentElemen
 
     element.setAttribute("d", createPathString(renderPoints));
     element.setAttribute("fill", "none")
+    element.addEventListener("click", (e) => {
+        inputHandler?.onBlockClick(detectionBlock)
+    })
+
     parentElement.appendChild(element);
     
     return {

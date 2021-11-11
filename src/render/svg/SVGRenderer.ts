@@ -4,6 +4,7 @@ import { DynamicEnvironment, PhysicalEnvironment } from "../../obj/environment";
 import { DriverMode } from "../../obj/physical/driver";
 import { Ride, rideGetDrivingPosition } from "../../obj/physical/ride";
 import { TrackPosition } from "../../obj/physical/situation";
+import { UserInput } from "../../obj/userinput";
 import { isProduction } from "../../util/env";
 import { trackCreateRenderBlocks } from "../trackCreateRenderBlocks";
 import { createBlockRenderer, TrackSegmentSVGRender, updateTrackRender } from "../trackRenderer";
@@ -36,7 +37,7 @@ export class SVGRenderer {
     labelGroup: SVGGElement;
     debugDisplayEnabled: boolean;
 
-    constructor(env: PhysicalEnvironment, renderTarget: Rendertarget) {
+    constructor(env: PhysicalEnvironment, renderTarget: Rendertarget, inputHandler?: UserInput) {
         this.env = env;
         this.svgElement = renderTarget.svgElement;
         this.htmlElement = renderTarget.html;
@@ -54,7 +55,7 @@ export class SVGRenderer {
 
         const blocks = flatten(this.env.tracks.map(trackCreateRenderBlocks));
 
-        this.blocks = blocks.map(block => createBlockRenderer(block, this.trackGroup, this.labelGroup));
+        this.blocks = blocks.map(block => createBlockRenderer(block, this.trackGroup, this.labelGroup ,inputHandler));
 
         this.switchRenderers = this.env.switches.map(trackSwitch => {
             return createSwitchRenderer(trackSwitch, this.env.tracks, this.trackGroup);
@@ -63,7 +64,7 @@ export class SVGRenderer {
         this.debugRenderers = [];
 
         renderSwitchInteractables(this.env.switches, this.interactableGroup);
-        renderSignalInteractables(this.signRenderers, this.interactableGroup);
+        renderSignalInteractables(this.signRenderers, this.interactableGroup, inputHandler);
         
         this.svgElement.appendChild(this.trackGroup);
         this.svgElement.appendChild(this.textGroup);

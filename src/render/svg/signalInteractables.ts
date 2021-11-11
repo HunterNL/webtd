@@ -1,5 +1,5 @@
 import { createSVGElement } from ".";
-import { toggleSignal } from "../../obj/physical/signal";
+import { HandleSignalClick } from "../../interfaces/eventHandlers";
 import { COLOR_UNOCCUPIED } from "../index";
 import { SignalSVGRenderer } from "./signalRenderer";
 
@@ -69,7 +69,7 @@ import { SignalSVGRenderer } from "./signalRenderer";
 // function renderTrack(trackRenderer: TrackSegmentSVGRender) {
 // }
 
-export function renderSignalInteractables(signal: SignalSVGRenderer[], interactableGroup: SVGGElement) {
+export function renderSignalInteractables(signal: SignalSVGRenderer[], interactableGroup: SVGGElement, inputHandler?: HandleSignalClick) {
     signal.forEach(signal => {
         const circle = createSVGElement("circle");
         circle.setAttribute("cx", signal.position[0] + "");
@@ -81,7 +81,8 @@ export function renderSignalInteractables(signal: SignalSVGRenderer[], interacta
         circle.setAttribute("pointer-events", "bounding-box");
 
         circle.addEventListener("click", () => {
-            toggleSignal(signal.signal);
+            // toggleSignal(signal.signal);
+            inputHandler?.onSignalClick(signal.signal)
         });
 
 
