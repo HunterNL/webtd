@@ -15,7 +15,8 @@ export type SignalSVGRenderer = {
     signal: Signal,
     position: vec2,
     renderLabel?: string,
-    svgElement: SVGElement
+    svgElement: SVGElement,
+    highlighted: boolean
 }
 
 export function getSignalFractionalLocation(signal: Signal): number {
@@ -52,12 +53,14 @@ export function createSignalRenderer(signal: Signal, parentElement: SVGElement):
         throw new Error("Line lacks final waypoint")
     }
     
-    vec2.add(signalRenderLocation, signalRenderLocation, vec2.fromValues(0, 10));
+    // vec2.add(signalRenderLocation, signalRenderLocation, vec2.fromValues(0, 3));
 
     // svgText.setAttribute("x", ""+ signalRenderLocation[0] );
     // svgText.setAttribute("y", ""+ (signalRenderLocation[1]+10) );
-    svgGroup.setAttribute("text-anchor", "middle"); //Centering horizontally
-    svgGroup.setAttribute("transform", "translate(" + signalRenderLocation[0] + "," + (signalRenderLocation[1] + 10) + ") scale(.1) rotate(90)")
+    // svgGroup.setAttribute("text-anchor", "middle"); //Centering horizontally
+    // svgGroup.setAttribute("transform-box", "fill-box");
+    // svgGroup.setAttribute("transform-origin", "50% 50%")
+    svgGroup.setAttribute("transform", "translate(" + signalRenderLocation[0] + "," + (signalRenderLocation[1] + 2) + ") scale(.1) rotate(90 50 50)")
 
     parentElement.appendChild(svgGroup);
 
@@ -65,12 +68,21 @@ export function createSignalRenderer(signal: Signal, parentElement: SVGElement):
         position: signalRenderLocation,
         signal: signal,
         renderLabel: "blah",
-        svgElement: svgGroup
+        svgElement: svgGroup,
+        highlighted: false
     }
 }
 
+function getSignalColor(signal: SignalSVGRenderer): string {
+    if(signal.highlighted) {
+        return "#fff"
+    }
+
+    return (signal.signal.currentAspect === ASPECT_STOP ? "#f00" : "#0f0")
+}
+
 export function updateSignalRender(signal: SignalSVGRenderer) {
-    const color = (signal.signal.currentAspect === ASPECT_STOP ? "#f00" : "#0f0")
+    const color = getSignalColor(signal)
 
     signal.svgElement.setAttribute("stroke", color);
     signal.svgElement.setAttribute("fill", color);

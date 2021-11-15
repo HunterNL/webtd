@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { createPathString, getColorForOccupationStatus, shortenEnd, shortenStart, SWITCH_RENDER_RADIUS } from ".";
+import { createPathString, getColor, shortenEnd, shortenStart, SWITCH_RENDER_RADIUS } from ".";
 import { HandleTrackClick } from "../interfaces/eventHandlers";
 import { DetectionBlock } from "../obj/detectionBlock";
 import { DynamicEnvironment } from "../obj/environment";
@@ -152,6 +152,7 @@ export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, dynEnv
     const ride = dynEnv.occupationMap.get(detectionBlock.segment);
     const label = ride ? getLabel(ride) : "";
 
+    const path = dynEnv.interLocking.segmentMap.get(detectionBlock.segment);    
 
     textElement.textContent = label;
 
@@ -163,7 +164,7 @@ export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, dynEnv
     textBackground.setAttribute("height", bb.height+"")
     
     // Set stroke color to train detection status
-    element.setAttribute("stroke", getColorForOccupationStatus(!!ride));
+    element.setAttribute("stroke", getColor(ride, path));
 }
 
 function toTuple<T,U>(a:T, b:U) : [T,U] {

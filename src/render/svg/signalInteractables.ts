@@ -82,7 +82,7 @@ export function renderSignalInteractables(signal: SignalSVGRenderer[], interacta
 
         circle.addEventListener("click", () => {
             // toggleSignal(signal.signal);
-            inputHandler?.onSignalClick(signal.signal)
+            inputHandler?.onSignalClick(signal)
         });
 
 
