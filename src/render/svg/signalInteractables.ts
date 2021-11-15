@@ -78,7 +78,7 @@ export function renderSignalInteractables(signal: SignalSVGRenderer[], interacta
         circle.setAttribute("fill", "none");
         circle.setAttribute("stroke-width", "1");
         circle.setAttribute("stroke", COLOR_UNOCCUPIED);
-        circle.setAttribute("pointer-events", "bounding-box");
+        circle.setAttribute("pointer-events", "fill");
 
         circle.addEventListener("click", () => {
             // toggleSignal(signal.signal);
