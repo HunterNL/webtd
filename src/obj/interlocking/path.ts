@@ -1,5 +1,6 @@
 import { Entity } from "../../interfaces/entity";
 import { joinWith } from "../../util/joinWith";
+import { Signal } from "../physical/signal";
 import { Direction, TrackPosition } from "../physical/situation";
 import { isSwitch, switchGetStateForPath, SwitchState, TrackBoundary, TrackSwitch } from "../physical/switch";
 import { Track } from "../physical/track";
@@ -13,6 +14,7 @@ type PathSwitch = {
 };
 
 export type Path = {
+    signal: Signal,
     toTrack: Track,
     switchStates: PathSwitch[],
     _span: TrackSpan
@@ -42,7 +44,7 @@ function findCommonBoundary(leftSegment: TrackSegment, rightSegment: TrackSegmen
     throw new Error("No connection found");
 }
 
-function pathFromSpan(entities: Entity[], span: TrackSpan): Path {  
+function pathFromSpan(entities: Entity[], span: TrackSpan, signal: Signal): Path {  
     let switches : PathSwitch[] = [] as any[];
 
     if(span.segments.length > 1) {
@@ -64,14 +66,15 @@ function pathFromSpan(entities: Entity[], span: TrackSpan): Path {
     }
 
     return {
+        signal,
         switchStates: switches,
         _span: span,
         toTrack: span.endPosition.track
     }
 }
 
-export function pathsfromLocation(entities: Entity[], position: TrackPosition ,direction: Direction): Path[] {
+export function pathsfromLocation(entities: Entity[], position: TrackPosition ,direction: Direction, signal: Signal): Path[] {
     return findRoutes(entities, position, direction).map(span => {
-        return pathFromSpan(entities, span)
+        return pathFromSpan(entities, span, signal)
     })
 }

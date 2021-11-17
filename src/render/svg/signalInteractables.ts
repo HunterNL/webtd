@@ -80,9 +80,13 @@ export function renderSignalInteractables(signal: SignalSVGRenderer[], interacta
         circle.setAttribute("stroke", COLOR_UNOCCUPIED);
         circle.setAttribute("pointer-events", "fill");
 
-        circle.addEventListener("click", () => {
-            // toggleSignal(signal.signal);
-            inputHandler?.onSignalClick(signal)
+        circle.addEventListener("click", (e) => {
+            inputHandler?.onSignalClickPrimary(signal)
+        });
+
+        circle.addEventListener("contextmenu", (e) => {
+            e.preventDefault()
+            inputHandler?.onSignalClickSecondary(signal)
         });
 
 

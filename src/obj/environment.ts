@@ -36,7 +36,7 @@ export type DynamicEnvironment = {
 }
 
 export function finalizeEntities(entities: Entity[]) {
-    entities.filter(isSignal).forEach(signal => signal.possiblePaths = pathsfromLocation(entities, signal.position, signal.direction))
+    entities.filter(isSignal).forEach(signal => signal.possiblePaths = pathsfromLocation(entities, signal.position, signal.direction, signal))
 }
 
 export function loadEnvironment(map: unknown): PhysicalEnvironment {

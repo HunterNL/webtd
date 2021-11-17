@@ -15,11 +15,15 @@ export class UserInput implements HandleTrackClick, HandleSignalClick {
         this.interlocking = dynenv.interLocking;
     }
 
-    onSignalClick(signal: SignalSVGRenderer) {
+    onSignalClickPrimary(signal: SignalSVGRenderer) {
         this.deSelectSignal()
         this.selectSignal(signal)
     }
 
+    onSignalClickSecondary(signal: SignalSVGRenderer) {
+        this.interlocking.recallSignal(signal.signal)
+    }
+    
     onBlockClick(detectionBlock: DetectionBlock) {
         const trackId = detectionBlock.segment.trackId;
         const track = getEntityById(this.env.tracks, trackId, isTrack)

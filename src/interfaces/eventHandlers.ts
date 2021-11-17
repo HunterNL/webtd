@@ -5,6 +5,8 @@ import { SignalSVGRenderer } from "../render/svg/signalRenderer";
 export interface HandleTrackClick {
     onBlockClick: (detectionBlock: DetectionBlock) => any;
 }
+
 export interface HandleSignalClick {
-    onSignalClick: (signal: SignalSVGRenderer) => any;
+    onSignalClickPrimary: (signal: SignalSVGRenderer) => any;
+    onSignalClickSecondary: (signal: SignalSVGRenderer) => any;
 }
