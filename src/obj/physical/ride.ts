@@ -70,14 +70,21 @@ export function updateRide(entities: Entity[],ride: Ride, dt:number): void {
 export function moveRide(entities: Entity[], ride: Ride, movement: number) {
     // Figure out where the front of the train ends up
     const oldDrivingPosition = rideGetDrivingPosition(ride)
-    const trainMovement = advanceAlongTrack(entities, oldDrivingPosition, movement * ride.span.finalDirection);
-    const newForwardPosition = trainMovement[0].endPosition;
+    const [trainMovement, didComplete] = advanceAlongTrack(entities, oldDrivingPosition, movement * ride.span.finalDirection);
+    const newForwardPosition = trainMovement.endPosition;
+
+    if(!didComplete) {
+        ride.label = "derailed";
+        return;
+    }
 
     // #TODO MULTI TRACK DRIFTING
     // Could figure out the postion of every bogey and do this check individualy, break connections if track differs
     // Run backwards from the front to figure out where the rest of the train ends up
     // const trainSpan = advanceAlongTrack(entities, newForwardPosition, ride.train.length * trainMovement.finalDirection * -1) // -1, we're looking backwards
-    const trainSpan = createTrainSpan(entities, newForwardPosition, ride.train.length, trainMovement[0].finalDirection * getDirectionForMovement(movement) as Direction);
+    const trainSpan = createTrainSpan(entities, newForwardPosition, ride.train.length, trainMovement.finalDirection * getDirectionForMovement(movement) as Direction);
+
+
 
 
     // Todo: Simpify into a single span with proper direction
