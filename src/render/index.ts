@@ -1,7 +1,5 @@
 import { vec2 } from "gl-matrix";
 import { add, first, head, initial, last, tail } from "lodash";
-import { Path } from "../obj/interlocking/path";
-import { Ride } from "../obj/physical/ride";
 import { TrackSegment } from "../obj/physical/trackSegment";
 import { joinWith } from "../util/joinWith";
 import { vec2ToTuple } from "../util/vec2";
@@ -55,8 +53,8 @@ export function getLineVector(veca:vec2,vecb:vec2): vec2 {
 //     }
 // }
 
-export function getColor(ride?: Ride, path?: Path): string {
-    if(ride) {
+export function getColor(occupied: boolean, path?: boolean): string {
+    if(occupied) {
         return COLOR_OCCUPIED;
     }
 

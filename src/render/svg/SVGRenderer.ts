@@ -42,12 +42,12 @@ export class SVGRenderer {
         this.svgElement = renderTarget.svgElement;
         this.htmlElement = renderTarget.html;
 
-        this.trackGroup = createSVGElement("g");
-        this.textGroup = createSVGElement("g");
-        this.interactableGroup = createSVGElement("g");
-        this.signalGroup = createSVGElement("g");
-        this.debugGroup = createSVGElement("g");
-        this.labelGroup = createSVGElement("g");
+        this.trackGroup = createSVGElement("g","tracks");
+        this.textGroup = createSVGElement("g","text");
+        this.interactableGroup = createSVGElement("g","interactables");
+        this.signalGroup = createSVGElement("g","signals");
+        this.debugGroup = createSVGElement("g","debug");
+        this.labelGroup = createSVGElement("g","label");
 
         this.signRenderers = this.env.signals.map(signal => {
             return createSignalRenderer(signal, this.signalGroup);

@@ -1,9 +1,9 @@
 import { vec2 } from "gl-matrix";
 import { createSVGElement } from ".";
-import { COLOR_UNOCCUPIED, getColorForOccupationStatus } from "..";
+import { COLOR_UNOCCUPIED, getColor } from "..";
 import { Entity, getEntityById } from "../../interfaces/entity";
 import { DynamicEnvironment } from "../../obj/environment";
-import { TrackSwitch, SwitchState, switchGetPathForState, switchGetAjoiningTrackIds, isSwitch, switchGetAjoiningDetectionSegments } from "../../obj/physical/switch";
+import { isSwitch, switchGetAjoiningDetectionSegments, switchGetAjoiningTrackIds, switchGetPathForState, SwitchState, TrackSwitch } from "../../obj/physical/switch";
 import { isTooShortForSegment, isTrack, Track, trackGetOtherBoundary } from "../../obj/physical/track";
 import { TrackSegment } from "../../obj/physical/trackSegment";
 import { getDirection } from "../../util/vec2";
@@ -127,13 +127,14 @@ export function createSwitchRenderer(trackSwitch: TrackSwitch, entities: Entity[
 export function updateSwitchRenderer(r: SwitchSVGRenderer, dynamicEnvironment: DynamicEnvironment) {
     // If any ajoining segment is occupied...
     const hasOccupiedSegments = r.detectionSegments.some(segment => dynamicEnvironment.occupiedTrackSegments.includes(segment));
+    const path = r.detectionSegments.find(segment => dynamicEnvironment.interLocking.segmentMap.get(segment))
     const pathString = r.junctionRenderPath.get(r.trackSwitch.currentState);
 
     if (!pathString) {
         throw new Error("Pathstring not found");
     }
 
-    const color = getColorForOccupationStatus(hasOccupiedSegments);
+    const color = getColor(hasOccupiedSegments, !!path);
 
     r.junctionElement.setAttribute("d", pathString)
     r.junctionElement.setAttribute("stroke", color);

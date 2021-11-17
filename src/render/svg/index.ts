@@ -1,24 +1,37 @@
 import { vec2 } from "gl-matrix";
 import { Entity } from "../../interfaces/entity";
+import { isTrack, trackGetRenderPath } from "../../obj/physical/track";
+import { pathGetTextPos } from "../trackRenderer";
 
-export function createSVGElement<K extends keyof SVGElementTagNameMap>(elementName: K): SVGElementTagNameMap[K] {
-    return document.createElementNS("http://www.w3.org/2000/svg", elementName);
+export function createSVGElement<K extends keyof SVGElementTagNameMap>(elementName: K, id?: string): SVGElementTagNameMap[K] {
+    const el = document.createElementNS("http://www.w3.org/2000/svg", elementName);
+    if(id) el.setAttribute("id", id);
+    return el
+}
+
+function getDebugIdPos(ent: Entity): vec2 | undefined {
+    if(isTrack(ent)) {
+        return pathGetTextPos(trackGetRenderPath(ent));
+    }
+
+    const position = vec2.create();
+
+    if(ent?.renderData?.start && ent.renderData.end) {
+        return vec2.lerp(position,ent.renderData.start,ent.renderData.end,0.5);
+    } else if (ent?.renderData?.position) {
+        return vec2.copy(position, ent.renderData.position);
+    } else {
+        return undefined;
+    }
 }
 
 export function renderDebugIds(entities: Entity[], containingElement: SVGGElement) {
-    entities.forEach(ent => {
-        if(!ent.renderData) return;
-
-        const position = vec2.create();
-        
-        if(ent.renderData.start && ent.renderData.end) {
-            vec2.lerp(position,ent.renderData.start,ent.renderData.end,0.5);
-        } else if (ent.renderData.position) {
-            vec2.copy(position, ent.renderData.position);
-        } else {
+    entities.forEach(ent => {        
+        const position = getDebugIdPos(ent)
+        if(typeof position === "undefined"){
             return;
         }
-
+        
         if(typeof ent.id === "undefined") {
             return;
         }

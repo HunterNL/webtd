@@ -95,6 +95,10 @@ export function shortenPath(path: vec2[], shortStart: boolean, shortEnd: boolean
     return path;
 }
 
+export function pathGetTextPos(renderPath: vec2[]): vec2 {
+    return getHalfwaypoint(...getLongestSpan(renderPath));
+}
+
 export function createBlockRenderer(detectionBlock: DetectionBlock, parentElement: SVGElement, labelGroup: SVGElement, inputHandler?: HandleTrackClick): TrackSegmentSVGRender  {
     // const renderLines: [vec2, vec2][] = joinWith(renderPath, toTuple);
 
@@ -164,7 +168,7 @@ export function updateTrackRender(trackRenderData: TrackSegmentSVGRender, dynEnv
     textBackground.setAttribute("height", bb.height+"")
     
     // Set stroke color to train detection status
-    element.setAttribute("stroke", getColor(ride, path));
+    element.setAttribute("stroke", getColor(!!ride, !!path));
 }
 
 function toTuple<T,U>(a:T, b:U) : [T,U] {
