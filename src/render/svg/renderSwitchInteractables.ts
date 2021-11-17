@@ -17,7 +17,7 @@ export function renderSwitchInteractables(switches: TrackSwitch[], interactableG
         circle.setAttribute("stroke-width", "1");
         circle.setAttribute("stroke", COLOR_UNOCCUPIED);
         circle.setAttribute("opacity", ".3");
-        circle.setAttribute("pointer-events", "bounding-box");
+        circle.setAttribute("pointer-events", "fill");
 
         circle.addEventListener("click", () => {
             throwSwitch(trackSwitch);
