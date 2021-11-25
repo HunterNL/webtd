@@ -3,7 +3,7 @@ import { chain, first, last } from "lodash";
 import { vec2PathLerp } from ".";
 import { DetectionBlock } from "../obj/detectionBlock";
 import { isSwitch } from "../obj/physical/switch";
-import { isWeld, segmentIsSwitchAdjecent, Track, TrackFeature, trackGetFeatures, trackGetRenderPath } from "../obj/physical/track";
+import { isWeld, segmentIsSwitchAdjecent, Track, TrackFeature, trackGetRenderPath } from "../obj/physical/track";
 
 /**
  * Takes a track and:
@@ -21,7 +21,7 @@ export function trackCreateRenderBlocks(track: Track): DetectionBlock[] {
         return [];
     }
 
-    const features = trackGetFeatures(track);
+    const features = track.features;
     const weldCount = features.filter(isWeld).length;
 
     if (baseSegments.length !== weldCount + 1) {
@@ -58,7 +58,7 @@ export function trackCreateRenderBlocks(track: Track): DetectionBlock[] {
             throw new Error("No feature");
         }
 
-        const renderPosition = feature.position; // endpoint of current "leg"
+        const renderPosition = feature.renderPosition; // endpoint of current "leg"
         if (!renderPosition) {
             throw new Error("Features has no renderPos");
         }
@@ -100,12 +100,12 @@ export function trackCreateRenderBlocks(track: Track): DetectionBlock[] {
 
 export function interpolateFeaturePositions(renderPath: vec2[], features: TrackFeature[], trackLength: number): TrackFeature[] {
     return features.map(feature => {
-        let position = feature.position;
+        let renderPosition = feature.renderPosition;
 
-        if(!position && isWeld(feature)) {
-            position = vec2PathLerp(renderPath,feature!.offset / trackLength);
+        if(!renderPosition && isWeld(feature)) {
+            renderPosition = vec2PathLerp(renderPath,feature!.position / trackLength);
         }
 
-        return {...feature, position} as TrackFeature
+        return {...feature, renderPosition} as TrackFeature
     })
 }

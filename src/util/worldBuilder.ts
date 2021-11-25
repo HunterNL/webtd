@@ -1,16 +1,16 @@
+import { times } from "lodash";
 import { Entity } from "../interfaces/entity";
 import { getId } from "../interfaces/id";
-import { DriverMode } from "../obj/physical/driver";
+import { finalizeEntities } from "../obj/environment";
 import { Buffer } from "../obj/physical/buffer";
+import { DriverMode } from "../obj/physical/driver";
 import { Junction } from "../obj/physical/junction";
 import { createTrainSpan, Ride } from "../obj/physical/ride";
-import { createTrack, isTrack, Track, TrackFeature } from "../obj/physical/track";
-import { Train } from "../obj/physical/train";
 import { Aspect, ASPECT_STOP, Signal } from "../obj/physical/signal";
-import { TrackPosition, Direction, DIRECTION_FORWARD } from "../obj/physical/situation";
-import { TrackBoundary, TrackSwitch, SwitchState, isSwitch } from "../obj/physical/switch";
-import { times } from "lodash";
-import { finalizeEntities } from "../obj/environment";
+import { Direction, DIRECTION_FORWARD, TrackPosition } from "../obj/physical/situation";
+import { isSwitch, SwitchState, TrackBoundary, TrackSwitch } from "../obj/physical/switch";
+import { createTrack, isTrack, Track, trackWeldArgument } from "../obj/physical/track";
+import { Train } from "../obj/physical/train";
 
 type RideArguments = {
     train: Train;
@@ -55,11 +55,11 @@ export class WorldBuilder {
         }
     }
 
-    addTrack(startBoundary: TrackBoundary, endBoundary: TrackBoundary, length: number): Track {
+    addTrack(startBoundary: TrackBoundary, endBoundary: TrackBoundary, length: number, features?: trackWeldArgument): Track {
         this.requireIdPresent(startBoundary.id);
         this.requireIdPresent(endBoundary.id);
 
-        const track = createTrack(this.counter++, startBoundary, endBoundary, length);
+        const track = createTrack(this.counter++, startBoundary, endBoundary, length, features);
 
         this.entities.push(track);
 
@@ -160,13 +160,4 @@ export class WorldBuilder {
         junction.sideConnections.forEach(connection => connection.forEach(requireValidTrack));
     }
     
-}
-
-
-export class TrackBuilder {
-    constructor(public readonly track: Track) {}
-
-    addFeature(trackFeature: TrackFeature) {
-        this.track.renderData?.rawFeatures.push(trackFeature);
-    }
 }

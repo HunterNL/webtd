@@ -3,7 +3,6 @@ import { WorldBuilder } from "../../util/worldBuilder";
 import { Driveable } from "./driver";
 import { moveRide, Ride, updateRide } from "./ride";
 import { Direction, DIRECTION_BACKWARD, DIRECTION_FORWARD } from "./situation";
-import { Track } from "./track";
 
 function createSimpleWorld(postition: number, length: number, forwardDirection: Direction): [Entity[], Ride] {
     const wb = new WorldBuilder();

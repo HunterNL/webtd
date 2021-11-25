@@ -1,5 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { Entity } from "../../interfaces/entity";
+import { isBuffer } from "../../obj/physical/buffer";
+import { isSwitch } from "../../obj/physical/switch";
 import { isTrack, trackGetRenderPath } from "../../obj/physical/track";
 import { pathGetTextPos } from "../trackRenderer";
 
@@ -14,15 +16,13 @@ function getDebugIdPos(ent: Entity): vec2 | undefined {
         return pathGetTextPos(trackGetRenderPath(ent));
     }
 
-    const position = vec2.create();
-
-    if(ent?.renderData?.start && ent.renderData.end) {
-        return vec2.lerp(position,ent.renderData.start,ent.renderData.end,0.5);
-    } else if (ent?.renderData?.position) {
-        return vec2.copy(position, ent.renderData.position);
-    } else {
-        return undefined;
+    if(isBuffer(ent) || isSwitch(ent)) {
+        if(ent.renderData?.position) {
+            return ent.renderData.position
+        }
     }
+
+    return undefined;
 }
 
 export function renderDebugIds(entities: Entity[], containingElement: SVGGElement) {

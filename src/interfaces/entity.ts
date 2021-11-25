@@ -22,9 +22,9 @@ export type EntityType = keyof EntityTypeMap;
 
 export type Entity = Identifiable & {
     type: EntityType;
-    renderData?: {
-        [key: string]: any
-    }
+    // renderData?: {
+    //     [key: string]: any
+    // }
 }
 
 export function isEntity(a: any): a is Entity {

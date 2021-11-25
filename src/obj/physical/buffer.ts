@@ -4,6 +4,9 @@ import { Saveable } from "../save";
 
 export interface Buffer extends Entity {
     type: "end";
+    renderData?: {
+        position: [number,number]
+    }
 }
 
 export type BufferSave = Saveable<Buffer>

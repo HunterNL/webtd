@@ -1,30 +1,23 @@
 import { vec2ToTuple } from "../util/vec2";
 import { WorldBuilder } from "../util/worldBuilder";
-import { generateSegments, Track } from "../obj/physical/track";
+import { generateSegments, Track, trackWeldArgument } from "../obj/physical/track";
 import { trackCreateRenderBlocks } from "./trackCreateRenderBlocks";
 
-function createBufferWorld(welds: number[]): Track {
+function createBufferWorld(welds: trackWeldArgument): Track {
     const wb = new WorldBuilder();
     const [sb,eb] = wb.addBuffer(2)
-    const track = wb.addTrack(sb, eb, 400);
-
-    track.segments.detection = generateSegments(track.id, [sb,eb], 400, welds)
+    const track = wb.addTrack(sb, eb, 400, welds);
 
     sb.renderData = {position:[0,0]}
-    eb.renderData = {position:[0,100]}
+    eb.renderData = {position:[0,100]}    
 
     return track;
 }
 
-function createSwitchWorld(welds: number[]): Track {
+function createSwitchWorld(welds: trackWeldArgument): Track {
     const wb = new WorldBuilder();
     const [sb,eb] = [wb.addSwitch(),wb.addSwitch()];
-    const track = wb.addTrack(sb, eb, 400);
-
-    track.segments.detection = generateSegments(track.id, [sb,eb], 400, welds)
-    track.renderData = {
-        rawFeatures: welds.map(w => {return {type:"weld",offset: w}})
-    }
+    const track = wb.addTrack(sb, eb, 400, welds);
 
     sb.renderData = {position:[0,0]}
     eb.renderData = {position:[0,100]}
@@ -83,9 +76,11 @@ describe('detectionBlock',() => {
             test("with renderPoints", () => {
                 const track = createBufferWorld([])
                 
-                track.renderData = {
-                    rawFeatures:[{type:"renderPoint",position:[50,50]}]
-                }
+                track.features.push({
+                    type:"renderPoint",
+                    renderPosition: [50,50],
+                    position: "NONE"
+                })
 
                 const blocks = trackCreateRenderBlocks(track);
 
@@ -98,12 +93,11 @@ describe('detectionBlock',() => {
         describe('interpolates weld positions',() => {
             const track = createBufferWorld([300])
                 
-                track.renderData = {
-                    rawFeatures:[
-                        {type:"renderPoint",position:[50,50]},
-                        {type:"weld", offset: 300}
+                track.features = [
+                        {type:"renderPoint",renderPosition:[50,50],position: "NONE"},
+                        {type:"weld", position: 300,signalIds:[]}
                     ]
-                }
+                
 
                 const blocks = trackCreateRenderBlocks(track);
 

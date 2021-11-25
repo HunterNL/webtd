@@ -19,9 +19,6 @@ function createWorld() {
     return track;
 }
 
-function addFeature(track:Track, feature: TrackFeature) {
-    track.renderData?.rawFeatures.push(feature)
-}
 
 describe("renderPath",() => {
     describe("fromTrack", () => {
@@ -32,9 +29,10 @@ describe("renderPath",() => {
 
         test("Create path with waypoints", () => {
             const track = createWorld();
-            addFeature(track,{
+            track.features.push({
                 type: "renderPoint",
-                position: [0,100]
+                renderPosition: [0,100],
+                position: "NONE",
             })
             expect(trackGetRenderPath(track)).toEqual([[0,0],[0,100],[100,100]]);
         })

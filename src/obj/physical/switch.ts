@@ -40,7 +40,10 @@ export interface TrackSwitch extends Entity {
     //targetState: SwitchState.Straight | SwitchState.Side,
     currentState: SwitchState,
     //actuationStartTime: Date,
-    junction: Junction
+    junction: Junction,
+    renderData?: {
+        position: [number, number]
+    }
 }
 
 export function loadSwitch({id,junction, renderData} : {id:any,junction:any, renderData?: any}): TrackSwitch {

@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { head, isUndefined, last } from "lodash";
+import { head, isNumber, last } from "lodash";
 import { Entity, getEntityById } from "../../interfaces/entity";
 import { getId, Identifiable, Identifier, isIdentifiable } from "../../interfaces/id";
 import { isLengthable, Lengthable } from "../../interfaces/lengthable";
@@ -15,41 +15,67 @@ export const MIN_BLOCK_SIZE = 100;
 // A track is the full lenght of track between two of either a switch or endpoint
 export type Track = Identifiable & Lengthable & Entity & {
     boundries: [TrackBoundary, TrackBoundary],
-    renderData?: {
-        rawFeatures: TrackFeature[],
-    },
     type: "track",
     segments: {
         detection: TrackSegment[]
-    }
+    },
+    features: TrackFeature[]
 }
 
-type TrackWeld = {
+export type TrackWeld = FeaturePosition & {
     type:"weld",
-    offset: number,
-    position?: [number,number]
+    position: number,
+    renderPosition?: [number,number],
+    signalIds: Identifier[]
 }
 
 export function isWeld(feature: TrackFeature): feature is TrackWeld {
     return feature.type === "weld";
 }
 
-type TrackRenderPoint = {
+type TrackRenderPoint = FeaturePosition & {
     type: "renderPoint",
-    position: [number,number]
+    renderPosition: [number,number]
 }
 
+type FeaturePosition = {
+    position: number | "START" | "END" | "NONE"
+}
 export type TrackFeature = TrackWeld | TrackRenderPoint
 
-export function createTrack(id: number, startBoundary: TrackBoundary, endBoundary: TrackBoundary, length: number): Track {
+function isNumberArray(r: any[]): r is number[] {
+    return r.every(isNumber);
+}
+
+function helpGetFeaturesAndWelds(features?: TrackFeature[] | number[]): TrackFeature[] {
+    if(typeof features === "undefined" ) {
+        return []
+    }
+
+    if(isNumberArray(features)) {
+        return features.map(weldFromOffset);
+    }
+
+    return features;
+}
+
+
+export function createTrack(id: number, startBoundary: TrackBoundary, endBoundary: TrackBoundary, length: number, features?: TrackFeature[] | number[] | undefined): Track {
+    const realFeatures = helpGetFeaturesAndWelds(features);
+    const weldPoints = featuresGetWeldOffsets(realFeatures);
+    const detectionSegments = generateSegments(id, [startBoundary,endBoundary], length, weldPoints);
+
     return {
         boundries: [startBoundary, endBoundary],
         id,
         length,
-        segments: { detection: [] },
-        type: "track"
+        segments: { detection: detectionSegments },
+        type: "track",
+        features: realFeatures
     }
 }
+
+export type trackWeldArgument = Parameters<typeof createTrack>[4]
 
 export function getBoundaryPosition(track: Track, boundaryId: number): number {
     const [entryBoundaryId, exitBoundaryId] = track.boundries.map(getId);
@@ -68,6 +94,14 @@ export function getBoundaryPosition(track: Track, boundaryId: number): number {
 export type TrackSave = Saveable<Track> & {
     features: Saveable<TrackFeature[]>
 };
+
+export function weldFromOffset(position: number): TrackWeld {
+    return { 
+        type:"weld",
+        position,
+        signalIds: []
+    }
+}
 
 
 export function isTrackSave(any: any): any is TrackSave {
@@ -143,30 +177,31 @@ export function segmentIsSwitchAdjecent(trackSegment: TrackSegment): boolean {
     return isSwitch(trackSegment.endBoundary) || isSwitch(trackSegment.startBoundary);
 }
 
-export function trackGetWeldOffsets(trackSave: TrackSave): number[] {
-    if(!Array.isArray(trackSave.features)) {
+export function featuresGetWeldOffsets(features: TrackFeature[]): number[] {
+    if(!Array.isArray(features)) {
         return []
     }
 
-    return trackSave.features.filter(isWeld).map(w => w.offset);
+    return features.filter(isWeld).map(w => w.position);
 }
 
 export function trackLoad(entities: Entity[], trackSave: TrackSave): Track {
     const trackId = trackSave.id;
     const boundaries = resolveBoundries(entities, trackSave.boundries);
-    const forcedWelds = trackGetWeldOffsets(trackSave)
+    const forcedWelds = featuresGetWeldOffsets(trackSave.features)
+    const detectionSegments = generateSegments(trackId, boundaries, trackSave.length, forcedWelds);
+
+    const {length} = trackSave;
 
     return {
         id: trackId,
         boundries: boundaries,
-        length: trackSave.length,
+        length,
         type: "track",
         segments: {
-            detection: generateSegments(trackId, boundaries, trackSave.length, forcedWelds)
+            detection: detectionSegments
         },
-        renderData: {
-            rawFeatures: trackSave.features
-        }
+        features: (Array.isArray(trackSave.features) ? trackSave.features : [])
     }
 }
 
@@ -174,30 +209,15 @@ export function trackGetRenderPath(track: Track): vec2[] {
     const startPos = requireRenderPosition(track.boundries[0]);
     const endPos = requireRenderPosition(track.boundries[1]);
 
-    if(!track.renderData) {
+    const {features} = track;
+
+    // Simple case, no features altering rendering
+    if(!features.find(feature => feature.renderPosition)) {
         return [startPos,endPos]
     }
 
-    const features = track.renderData.rawFeatures;
-
-    if(!Array.isArray(features)) {
-        return [startPos,endPos]
-    }
-
-    const waypoints = features.filter(feature => typeof feature.position !== "undefined").map(feature => feature.position) as vec2[];
+    const waypoints = features.filter(feature => typeof feature.renderPosition !== "undefined").map(feature => feature.renderPosition) as vec2[];
     return [startPos,...waypoints,endPos];   
-}
-
-export function trackGetFeatures(track: Track): TrackFeature[] {
-    if(isUndefined(track.renderData)) {
-        return []
-    }
-
-    if(Array.isArray(track.renderData.rawFeatures)) {
-        return track.renderData.rawFeatures
-    }
-
-    return [];
 }
 
 export function trackGetDetectionSegmentAjoiningBoundary(track: Track, boundaryId: Identifier): TrackSegment {

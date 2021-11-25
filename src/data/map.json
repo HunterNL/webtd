@@ -74,7 +74,7 @@
             "boundries" : [21,23],
             "features":[{
                 "type": "weld",
-                "offset": 400
+                "position": 400
             }]
         },
         {
@@ -91,10 +91,10 @@
             "boundries" : [21,22],
             "features": [{
                 "type" : "renderPoint",
-                "position": [220,50]
+                "renderPosition": [220,50]
             },{
                 "type": "weld",
-                "offset": 300
+                "position": 300
             }]
         },
         {
