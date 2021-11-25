@@ -6,7 +6,7 @@ import { Buffer } from "../obj/physical/buffer";
 import { DriverMode } from "../obj/physical/driver";
 import { Junction } from "../obj/physical/junction";
 import { createTrainSpan, Ride } from "../obj/physical/ride";
-import { Aspect, ASPECT_STOP, Signal } from "../obj/physical/signal";
+import { Aspect, ASPECT_STOP, signalCreate } from "../obj/physical/signal";
 import { Direction, DIRECTION_FORWARD, TrackPosition } from "../obj/physical/situation";
 import { isSwitch, SwitchState, TrackBoundary, TrackSwitch } from "../obj/physical/switch";
 import { createTrack, isTrack, Track, trackWeldArgument } from "../obj/physical/track";
@@ -107,19 +107,10 @@ export class WorldBuilder {
         return ride;
     }
 
-    addSignal(track: Track, offset: number, direction: Direction = DIRECTION_FORWARD, aspect: Aspect = ASPECT_STOP) {
-        const signal : Signal = {
-            id: this.counter++,
-            position: {
-                offset,
-                track
-            },
-            type: "signal",
-            currentAspect: aspect,
-            direction,
-            routeable: true,
-            possiblePaths: []
-        }
+    addSignal(track: Track, offset?: number, direction: Direction = DIRECTION_FORWARD, aspect: Aspect = ASPECT_STOP) {
+        const id = this.counter++
+
+        const signal = signalCreate(id, track, direction, typeof offset === "undefined",offset)
 
         this.entities.push(signal);
 

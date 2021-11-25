@@ -39,7 +39,7 @@ type TrackRenderPoint = FeaturePosition & {
 }
 
 type FeaturePosition = {
-    position: number | "START" | "END" | "NONE"
+    position?: number
 }
 export type TrackFeature = TrackWeld | TrackRenderPoint
 
@@ -375,3 +375,14 @@ export function trackGetDirectionTowardsBoundary(track: Track, boundaryId: Ident
 
     
 // }
+
+
+export function trackGetSignalFeature(track: Track, signalId: Identifier): TrackWeld {
+    const feature = track.features.find(f => isWeld(f) && f.signalIds.includes(signalId));
+
+    if(!feature) {
+        throw new Error("Feature not found");
+    }
+
+    return feature as TrackWeld; // The above `find` will filter to welds but ts doesn't get it
+}

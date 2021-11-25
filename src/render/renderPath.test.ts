@@ -32,7 +32,6 @@ describe("renderPath",() => {
             track.features.push({
                 type: "renderPoint",
                 renderPosition: [0,100],
-                position: "NONE",
             })
             expect(trackGetRenderPath(track)).toEqual([[0,0],[0,100],[100,100]]);
         })

@@ -78,8 +78,7 @@ describe('detectionBlock',() => {
                 
                 track.features.push({
                     type:"renderPoint",
-                    renderPosition: [50,50],
-                    position: "NONE"
+                    renderPosition: [50,50]
                 })
 
                 const blocks = trackCreateRenderBlocks(track);
@@ -94,7 +93,7 @@ describe('detectionBlock',() => {
             const track = createBufferWorld([300])
                 
                 track.features = [
-                        {type:"renderPoint",renderPosition:[50,50],position: "NONE"},
+                        {type:"renderPoint",renderPosition:[50,50]},
                         {type:"weld", position: 300,signalIds:[]}
                     ]
                 

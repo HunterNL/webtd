@@ -4,7 +4,7 @@ import { Path } from "../interlocking/path";
 import { Saveable } from "../save";
 import { Ride, rideGetDrivingPosition } from "./ride";
 import { advanceAlongTrack, Direction, TrackPosition } from "./situation";
-import { isTrack } from "./track";
+import { isTrack, Track, trackGetSignalFeature } from "./track";
 import { segmentContainsPosition } from "./trackSegment";
 
 export const ASPECT_STOP = "ASPECT_STOP" as const;
@@ -12,9 +12,9 @@ export const ASPECT_PROCEED_SLOW = "ASPECT_PROCEED_SLOW" as const;
 
 export type Aspect = typeof ASPECT_STOP | typeof ASPECT_PROCEED_SLOW;
 
-
 export type Signal = Entity & {
     position: TrackPosition,
+    snappedToWeld: boolean
     type: "signal",
     renderData?: {
         label?: string
@@ -41,10 +41,38 @@ export function loadSignal(entities: Entity[], signalSave: SignalSave): Signal {
         currentAspect: signalSave.currentAspect || ASPECT_STOP,
         possiblePaths: [],
         direction: signalSave.direction,
-        routeable: true
+        routeable: true,
+        snappedToWeld: false
     }
 
     return signal
+}
+
+export function signalCreate(id: Identifier, track: Track, direction: Direction, snap: boolean, offset?: number): Signal {
+    let realoffset = -1;
+
+    if(!snap) {
+        if(typeof offset !== "number") {
+            throw new Error("Signals not snapped need an offset supplied");
+        }
+        realoffset = offset
+    } else {
+        realoffset = trackGetSignalFeature(track, id).position;
+    }
+
+    return {
+        id,
+        currentAspect: "ASPECT_STOP",
+        direction,
+        position: {
+            offset: realoffset,
+            track
+        },
+        routeable: true,
+        snappedToWeld: snap,
+        type: "signal",
+        possiblePaths: []
+    }
 }
 
 export function isSignalSave(any: any): any is SignalSave {
