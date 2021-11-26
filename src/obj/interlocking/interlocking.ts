@@ -23,13 +23,11 @@ export class Interlocking {
 
         const switches = path.switchStates;
 
-        switches.forEach(swi => {
-            switchSetState(swi.switch,swi.state);
-        })
+        switches.forEach((state,swi) => switchSetState(swi,state));
 
         const tracks = this.entities.filter(isTrack);
 
-        path._span.segments.forEach((pathSegment) => {
+        path.segments.forEach((pathSegment) => {
             flatten(tracks.map(track => track.segments.detection)).forEach(detectionSegment => {
                 if (doSegmentsOverlap(detectionSegment, pathSegment)) {
                     this.segmentMap.set(detectionSegment,path)
@@ -50,7 +48,7 @@ export class Interlocking {
 
         const tracks = this.entities.filter(isTrack);
 
-        path._span.segments.forEach((pathSegment) => {
+        path.segments.forEach((pathSegment) => {
             flatten(tracks.map(track => track.segments.detection)).forEach(detectionSegment => {
                 if (doSegmentsOverlap(detectionSegment, pathSegment)) {
                     this.segmentMap.delete(detectionSegment)

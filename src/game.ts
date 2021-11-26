@@ -57,6 +57,9 @@ function onDomReady() {
         svgElement: renderElement,
         html: rideList,
     },input)
+
+    console.log(renderer);
+
     renderer.render(dynamicEnvironment);
 
     

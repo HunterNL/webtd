@@ -74,7 +74,8 @@
             "boundries" : [21,23],
             "features":[{
                 "type": "weld",
-                "position": 400
+                "position": 400,
+                "signalIds": [7]
             }]
         },
         {
@@ -94,8 +95,10 @@
                 "renderPosition": [220,50]
             },{
                 "type": "weld",
-                "position": 300
-            }]
+                "position": 300,
+                "signalIds": []
+            }],
+            "backWeldSignals": [8]
         },
         {
             "type" : "track",
@@ -150,7 +153,8 @@
                 "track": 1,
                 "offset": 395
             },
-            "direction" : 1
+            "direction" : 1,
+            "snapToWeld": true
         },{
             "type": "signal",
             "comment" : "Top track signal",
@@ -162,6 +166,7 @@
                 "track": 3,
                 "offset": 495
             },
+            "snapToWeld": true,
             "direction" : 1
         },{
             "type": "signal",

@@ -1,10 +1,11 @@
 import { Entity } from "../../interfaces/entity";
 import { WorldBuilder } from "../../util/worldBuilder";
 import { Ride } from "./ride";
-import { lookupSignals, Signal } from "./signal";
-import { TrackWeld } from "./track";
+import { lookupSignals, Signal, signalGetSegmentAhead } from "./signal";
+import { DIRECTION_BACKWARD } from "./situation";
+import { Track, TrackWeld } from "./track";
 
-function createWorld(signalOffset?: number): [Entity[],Signal, Ride] {
+function createWorld(signalOffset?: number): [Entity[],Signal, Ride, Track] {
     const wb = new WorldBuilder();
     const [startBuffer,endBuffer] = wb.addBuffer(2);
 
@@ -28,7 +29,7 @@ function createWorld(signalOffset?: number): [Entity[],Signal, Ride] {
         targetSpeed: 0,
     })
 
-    return [wb.getEntities(),signal,ride]
+    return [wb.getEntities(),signal,ride, track]
 }
 
 
@@ -38,7 +39,6 @@ describe('Rail way signal',() => {
     describe('Detection',() => {
         test("Can be spotted by a ride",function() {
             const [entities, signal, ride] = createWorld(250);
-            debugger
             const signals = lookupSignals(entities, ride, 200)
     
             expect(signals).toHaveLength(1)
@@ -66,6 +66,25 @@ describe('Rail way signal',() => {
             expect(signal.position.offset).toBe(700)
 
             expect(signal.snappedToWeld).toBe(true);
+        })
+    })
+
+    describe("Segment interaction", () => {
+        test("Gets next segment facing forward",() => {
+            const [entities, signal, ride, track] = createWorld();
+
+            const segment = signalGetSegmentAhead(signal);
+
+            expect(segment).toBe(track.segments.detection[1]);
+        })
+        test("Gets next segment facing backward",() => {
+            const [entities, signal, ride, track] = createWorld();
+
+            signal.direction = DIRECTION_BACKWARD
+
+            const segment = signalGetSegmentAhead(signal);
+
+            expect(segment).toBe(track.segments.detection[0]);
         })
     })
 })

@@ -1,7 +1,7 @@
 import { Entity, getEntityById, isEntity } from "../interfaces/entity";
 import { Identifier, isIdentifiable } from "../interfaces/id";
 import { Interlocking } from "./interlocking/interlocking";
-import { pathsfromLocation } from "./interlocking/path";
+import { pathsFromSignal } from "./interlocking/path";
 import { Buffer, isBuffer } from "./physical/buffer";
 import { isRideSave, loadRide, Ride } from "./physical/ride";
 import { isSignal, isSignalSave, loadSignal, Signal } from "./physical/signal";
@@ -36,7 +36,13 @@ export type DynamicEnvironment = {
 }
 
 export function finalizeEntities(entities: Entity[]) {
-    entities.filter(isSignal).forEach(signal => signal.possiblePaths = pathsfromLocation(entities, signal.position, signal.direction, signal))
+    const signals = entities.filter(isSignal);
+
+    signals.forEach(signal => {
+        if(signal.snappedToWeld) {
+            signal.possiblePaths = pathsFromSignal(entities, signal)
+        }
+    });
 }
 
 export function loadEnvironment(map: unknown): PhysicalEnvironment {

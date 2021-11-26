@@ -1,9 +1,9 @@
 import { vec2 } from "gl-matrix";
-import { chain, first, last } from "lodash";
+import { chain, first, last, reject } from "lodash";
 import { vec2PathLerp } from ".";
 import { DetectionBlock } from "../obj/detectionBlock";
 import { isSwitch } from "../obj/physical/switch";
-import { isWeld, segmentIsSwitchAdjecent, Track, TrackFeature, trackGetRenderPath } from "../obj/physical/track";
+import { isWeld, segmentIsSwitchAdjecent, Track, TrackFeature, trackGetRenderPath, weldIsSwitchAdjecent } from "../obj/physical/track";
 
 /**
  * Takes a track and:
@@ -21,8 +21,10 @@ export function trackCreateRenderBlocks(track: Track): DetectionBlock[] {
         return [];
     }
 
-    const features = track.features;
-    const weldCount = features.filter(isWeld).length;
+    // Disregard welds adjecent to switches
+    const features = reject(track.features,feature => feature.type === "weld" && weldIsSwitchAdjecent(track,feature));
+
+    const weldCount = chain(features).filter(isWeld).reject(weld => weldIsSwitchAdjecent(track,weld)).value().length;
 
     if (baseSegments.length !== weldCount + 1) {
         throw new Error("Segment size mismatch " + baseSegments.length + " <> " + (weldCount + 1));

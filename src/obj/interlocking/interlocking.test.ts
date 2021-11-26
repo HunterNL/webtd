@@ -1,13 +1,13 @@
+import _, { last } from "lodash";
 import { Entity } from "../../interfaces/entity";
 import { WorldBuilder } from "../../util/worldBuilder";
-import { findRoutes } from "./findRoutes";
 import { Buffer } from "../physical/buffer";
-import { DIRECTION_FORWARD, TrackPosition } from "../physical/situation";
-import { Track } from "../physical/track";
-import { TrackSegment } from "../physical/trackSegment";
-import { Interlocking } from "./interlocking";
-import { SwitchState, TrackSwitch } from "../physical/switch";
 import { searchPathToTrack, Signal } from "../physical/signal";
+import { DIRECTION_FORWARD } from "../physical/situation";
+import { SwitchState, TrackSwitch } from "../physical/switch";
+import { isWeld, Track, TrackWeld } from "../physical/track";
+import { findRoutes } from "./findRoutes";
+import { Interlocking } from "./interlocking";
 import { Path } from "./path";
 
 function createSingleTrack(): [Entity[],Track, Buffer] {
@@ -28,10 +28,11 @@ function createSwitchWorld(): [Entity[], Track, Track, Track, TrackSwitch, Signa
     const mainTrack = wb.addTrack(swi, main, 100);
     const branchTrack = wb.addTrack(swi, branch, 100);
 
-    wb.setJunction(swi.id, {
-        straightConnections: [[startTrack.id,mainTrack.id]],
-        sideConnections: [[startTrack.id,branchTrack.id]],
-    })
+    wb.setSimpleJunction(swi.id, startTrack.id, mainTrack.id, branchTrack.id);
+
+    const lastWeld = _.chain(startTrack.features).filter(isWeld).last().value();
+
+    lastWeld.signalIds.push(9)
 
     const train = wb.addTrain(50);
 
@@ -43,7 +44,7 @@ function createSwitchWorld(): [Entity[], Track, Track, Track, TrackSwitch, Signa
         train,
     })
 
-    const signal = wb.addSignal(startTrack, 90)
+    const signal = wb.addSignal(startTrack)
 
     return [wb.getEntities(), startTrack,mainTrack,branchTrack, swi, signal]
 }
@@ -58,7 +59,7 @@ describe("Routesetting", () => {
             expect(trackSwitch.currentState).toEqual(SwitchState.Straight);
             const path = searchPathToTrack(signal, branchTrack.id)
 
-            expect(path?.toTrack.id).toEqual(branchTrack.id)
+            expect(last(path?.segments)!.trackId).toEqual(branchTrack.id)
         })
     })
 
@@ -78,99 +79,94 @@ describe("Routesetting", () => {
 })
 
 describe('findRoutes',() => {
-    describe("on single buffer track", () => {
-        test("returns starting position",() => {
-            const [entities,track, endBuffer] = createSingleTrack();
-            const trackPos :TrackPosition = {
-                offset: 70,
-                track
-            }
-            const [trackSpan] = findRoutes(entities,trackPos,DIRECTION_FORWARD)
+    describe("over switch", () => {
+        test("Each path returns initial segment",() => {
+            const [entities, startTrack, mainTrack, branchTrack, trackSwitch, signal] = createSwitchWorld();
+            const weld = startTrack.features[0] as TrackWeld;
+            const routes = findRoutes(entities,startTrack, weld,DIRECTION_FORWARD)
 
-            expect(trackSpan.startPosition).toEqual(trackPos);
+            expect(routes).toHaveLength(2) // main & branch
+
+            expect(routes[0][0]).toBe(startTrack.segments.detection[1]);
+            expect(routes[1][0]).toBe(startTrack.segments.detection[1]);
         })
 
         test("Returns end position position",() => {
-            const [entities,track, endBuffer] = createSingleTrack();
-            const trackPos :TrackPosition = {
-                offset: 70,
-                track
-            }
-            const [trackSpan] = findRoutes(entities,trackPos,DIRECTION_FORWARD)
+            const [entities, startTrack, mainTrack, branchTrack, trackSwitch, signal] = createSwitchWorld();
+            const weld = startTrack.features[0] as TrackWeld;
+            const routes = findRoutes(entities,startTrack, weld, DIRECTION_FORWARD)
 
-            expect(trackSpan.endPosition).toEqual({
-                offset: 100,
-                track
-            })
-        })
-        test("Returns segments",() => {
-            const [entities,track, endBuffer] = createSingleTrack();
-            const trackPos :TrackPosition = {
-                offset: 70,
-                track
-            }
-            const [trackSpan] = findRoutes(entities,trackPos,DIRECTION_FORWARD)
+            expect(routes).toHaveLength(2) // main & branch
 
-            expect(trackSpan.segments).toEqual([{
-                trackId: track.id,
-                start: 70,
-                end: 100,
-                endBoundary: endBuffer
-            }])
+            expect(last(routes[0])).toBe(mainTrack.segments.detection[1]);
+            expect(last(routes[1])).toBe(branchTrack.segments.detection[1]);
         })
+
+        // test("Returns all segments",() => {
+        //     const [entities, startTrack, mainTrack, branchTrack, trackSwitch, signal] = createSwitchWorld();
+        //     const weld = startTrack.features[0] as TrackWeld;            
+        //     const [trackSpan] = findRoutes(entities,startTrack, weld, DIRECTION_FORWARD)
+
+        //     expect(trackSpan.segments).toEqual([{
+        //         trackId: track.id,
+        //         start: 70,
+        //         end: 100,
+        //         endBoundary: endBuffer
+        //     }])
+        // })
     })
 
-    describe('on simple switch',() => {
-        test("Returns end position positions",() => {
-            const [entities,startTrack, mainTrack, branchTrack] = createSwitchWorld();
-            const trackPos :TrackPosition = {
-                offset: 70,
-                track: startTrack
-            }
-            const spans = findRoutes(entities,trackPos,DIRECTION_FORWARD)
+    // describe.skip('on simple switch',() => {
+    //     test("Returns end position positions",() => {
+    //         const [entities,startTrack, mainTrack, branchTrack] = createSwitchWorld();
+    //         const trackPos :TrackPosition = {
+    //             offset: 70,
+    //             track: startTrack
+    //         }
+    //         const spans = findRoutes(entities,trackPos,DIRECTION_FORWARD)
 
-            expect(spans).toHaveLength(2);
+    //         expect(spans).toHaveLength(2);
 
-            expect(spans).toContainEqual(expect.objectContaining({
-                endPosition: {track: mainTrack, offset:100}
-            }))
+    //         expect(spans).toContainEqual(expect.objectContaining({
+    //             endPosition: {track: mainTrack, offset:100}
+    //         }))
 
-            expect(spans).toContainEqual(expect.objectContaining({
-                endPosition: {track: branchTrack, offset:100}
-            }))
-        })
+    //         expect(spans).toContainEqual(expect.objectContaining({
+    //             endPosition: {track: branchTrack, offset:100}
+    //         }))
+    //     })
 
-        test("returns track segments",() => {
-            const [entities,startTrack, mainTrack, branchTrack] = createSwitchWorld();
-            const trackPos :TrackPosition = {
-                offset: 70,
-                track: startTrack
-            }
-            const spans = findRoutes(entities,trackPos,DIRECTION_FORWARD)
+    //     test("returns track segments",() => {
+    //         const [entities,startTrack, mainTrack, branchTrack] = createSwitchWorld();
+    //         const trackPos :TrackPosition = {
+    //             offset: 70,
+    //             track: startTrack
+    //         }
+    //         const spans = findRoutes(entities,trackPos,DIRECTION_FORWARD)
 
-            const expectedStartSegment : TrackSegment = expect.objectContaining({
-                start: 70,
-                end: 100,
-                trackId: startTrack.id
-            })
-            const expectedMainSegment : TrackSegment = expect.objectContaining({
-                start: 0,
-                end: 100,
-                trackId: mainTrack.id
-            })
-            const expectedBranchSegment : TrackSegment = expect.objectContaining({
-                start: 0,
-                end: 100,
-                trackId: branchTrack.id
-            })
+    //         const expectedStartSegment : TrackSegment = expect.objectContaining({
+    //             start: 70,
+    //             end: 100,
+    //             trackId: startTrack.id
+    //         })
+    //         const expectedMainSegment : TrackSegment = expect.objectContaining({
+    //             start: 0,
+    //             end: 100,
+    //             trackId: mainTrack.id
+    //         })
+    //         const expectedBranchSegment : TrackSegment = expect.objectContaining({
+    //             start: 0,
+    //             end: 100,
+    //             trackId: branchTrack.id
+    //         })
 
-            expect(spans).toHaveLength(2)
+    //         expect(spans).toHaveLength(2)
 
-            const segments = spans.map(span => span.segments);
+    //         const segments = spans.map(span => span.segments);
 
-            expect(segments).toContainEqual([expectedStartSegment, expectedMainSegment])
-            expect(segments).toContainEqual([expectedStartSegment, expectedBranchSegment])
-        })
+    //         expect(segments).toContainEqual([expectedStartSegment, expectedMainSegment])
+    //         expect(segments).toContainEqual([expectedStartSegment, expectedBranchSegment])
+    //     })
         
-    })
+    // })
 })

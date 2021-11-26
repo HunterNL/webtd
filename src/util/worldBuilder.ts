@@ -1,6 +1,6 @@
 import { times } from "lodash";
 import { Entity } from "../interfaces/entity";
-import { getId } from "../interfaces/id";
+import { getId, Identifier } from "../interfaces/id";
 import { finalizeEntities } from "../obj/environment";
 import { Buffer } from "../obj/physical/buffer";
 import { DriverMode } from "../obj/physical/driver";
@@ -131,6 +131,15 @@ export class WorldBuilder {
         }
 
         trackSwitch.junction = junction;
+    }
+
+    setSimpleJunction(swiId: Identifier, entryTrackId: Identifier, normalTrackId: Identifier, branchTrackId: Identifier) {
+        const junction : Junction = {
+            straightConnections:[[entryTrackId,normalTrackId]],
+            sideConnections: [[entryTrackId,branchTrackId]]
+        }
+
+        this.setJunction(swiId, junction)
     }
 
     getEntities(): Entity[] {

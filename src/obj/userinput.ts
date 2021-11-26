@@ -1,3 +1,4 @@
+import { last } from "lodash";
 import { Entity, getEntityById } from "../interfaces/entity";
 import { HandleSignalClick, HandleTrackClick } from "../interfaces/eventHandlers";
 import { SignalSVGRenderer } from "../render/svg/signalRenderer";
@@ -29,7 +30,7 @@ export class UserInput implements HandleTrackClick, HandleSignalClick {
         const track = getEntityById(this.env.tracks, trackId, isTrack)
 
         if(this.currentSignal) {
-            const path = this.currentSignal.signal.possiblePaths.find(path => path.toTrack.id === detectionBlock.segment.trackId)
+            const path = this.currentSignal.signal.possiblePaths.find(path => last(path.segments) === detectionBlock.segment)
 
             if(path) {
                 this.interlocking.setPath(path)            

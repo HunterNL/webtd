@@ -9,7 +9,7 @@ const envDefines = new DefinePlugin({
 
 module.exports = {...settings,
     mode: "development",
-    devtool: 'eval-source-map',
+    devtool: 'source-map',
     devServer: {
         static: {
             directory: path.join(__dirname,"bundle/generated/dev"),
